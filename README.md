@@ -106,9 +106,9 @@ or rebuild Reactionary for the new system with `sh install.sh --build`.
   look from before the first theme, customisations included.
 - **The Gonx theme** (`data/themes/Gonx`): the look of
   [Gonx](https://github.com/idumych/gonx), with its colours, desktop colour
-  and fonts over Haiku's defaults, and Haiku's icons. It needs Gonx's
-  window decorator and control look installed; Themes shows what is
-  missing and leaves those parts out.
+  and fonts over Haiku's defaults, and Haiku's icons. Gonx's control look
+  comes with Reactionary, and Themes builds its window decorator (below);
+  the sources are in `src/third_party/gonx`.
 - **The Flat themes** (`data/themes/DarkFlat`, `LightFlat`, `MoonFlat`,
   `OrangeFlat`), from unarix's
   [haiku_darkstyle](https://github.com/unarix/haiku_darkstyle): flat
@@ -148,9 +148,23 @@ or rebuild Reactionary for the new system with `sh install.sh --build`.
     such and left out.
   - Saves your look and icons the first time, so **Revert** always gets
     back to them, whatever was applied in between.
+  - **Build window borders…** compiles the window decorators (Reactionary,
+    Smoke, Gonx, and Haiku's Flat one if the system lacks it) on the system
+    they will run on, with a progress bar and a log. Decorators run inside
+    app_server and use its private classes, so one built for another system
+    build can fail there. The headers that come with Themes are from one
+    system revision (`build-headers/REVISION`); on any other, it finds the
+    system's revision (`hrev60072+339`, from its haiku package) and fetches
+    that revision's headers from RenkuOS/Source, or haiku/haiku, with git:
+    the commits back to the hrev tag only, the commit as many past it as
+    the revision says, then just the 42 header files. If the compiler isn't
+    installed, it offers to install it (gcc and haiku_devel). A decorator in
+    use is switched to its new build, and set aside if app_server doesn't
+    take it. The same from a Terminal: `Themes --build-decorators
+    [--install-tools]` (`src/themes/build-decorators.sh`).
   - `Themes --list`, `--apply=NAME [--parts=…]`, `--icons=ID|haiku`,
-    `--revert`, `--status`, `--show=NAME`, `--restart-tracker` do the same
-    from a Terminal.
+    `--revert`, `--status`, `--show=NAME`, `--restart-tracker` and
+    `--build-decorators` do the same from a Terminal.
 - **Theme Manager themes**: themes made for
   [Theme Manager](https://github.com/HaikuArchives/HaikuThemeManager)
   (and BeOS and ZETA before it), such as the
@@ -235,6 +249,8 @@ renders the ClassicOS 2000 icons (needs `rsvg-convert`), and
   drawn from scratch after screenshots; nothing from ZETA is included.
 - [nanosvg](https://github.com/memononen/nanosvg) by Mikko Mononen (zlib
   licence), in `src/themes/third_party`.
+- Gonx's window decorator and control look (`src/third_party/gonx`), MIT
+  licence, from [Gonx](https://github.com/idumych/gonx) 0.2.
 - Project layout, scripts and the start of the theme tool from
   [Gonx](https://github.com/idumych/gonx).
 

@@ -63,9 +63,45 @@ FLAT := src/third_party/haiku-flat
 
 SMOKE_DECOR := $(BUILD)/Smoke
 SMOKE_LOOK := $(BUILD)/control_look/Smoke
+GONX := src/third_party/gonx
+GONX_LOOK := $(BUILD)/control_look/Gonx
+
+# What Themes needs to build the window decorators on a user's system, laid
+# out as build-decorators.sh expects it in a data folder's "Themes".
+DECOR_SOURCE := $(BUILD)/data/Themes
 
 all: $(DECOR) $(LOOK) $(THEMES) $(FLAT_DECOR) $(FLAT_LOOK) $(SMOKE_DECOR) \
-	$(SMOKE_LOOK)
+	$(SMOKE_LOOK) $(GONX_LOOK) decorator-source
+
+decorator-source:
+	rm -rf $(DECOR_SOURCE)
+	mkdir -p $(DECOR_SOURCE)/source/decorators/Reactionary \
+		$(DECOR_SOURCE)/source/decorators/Smoke \
+		$(DECOR_SOURCE)/source/decorators/Gonx \
+		$(DECOR_SOURCE)/source/decorators/FlatDecorator
+	cp src/themes/build-decorators.sh $(DECOR_SOURCE)/
+	cp -R build-headers $(DECOR_SOURCE)/source/
+	cp src/decorator/ReactionaryDecorator.* src/decorator/resources.rdef \
+		$(DECOR_SOURCE)/source/decorators/Reactionary/
+	cp src/smoke/SmokeDecorator.* src/smoke/resources.rdef \
+		$(DECOR_SOURCE)/source/decorators/Smoke/
+	cp $(GONX)/decorator/* $(GONX)/LICENSE \
+		$(DECOR_SOURCE)/source/decorators/Gonx/
+	cp $(FLAT)/decorator/* $(DECOR_SOURCE)/source/decorators/FlatDecorator/
+	cp LICENSE $(DECOR_SOURCE)/source/
+
+# Gonx's control look, for the Gonx theme (its decorator is built by Themes).
+$(BUILD)/GonxControlLook.o: $(GONX)/controllook/GonxControlLook.cpp $(GONX)/controllook/GonxControlLook.h
+	@mkdir -p $(BUILD)
+	$(CXX) $(CXXFLAGS) -I$(PRIVATE)/interface -c $< -o $@
+
+$(BUILD)/GonxControlLook.rsrc: $(GONX)/controllook/GonxControlLook.rdef
+
+$(GONX_LOOK): $(BUILD)/GonxControlLook.o $(BUILD)/GonxControlLook.rsrc
+	@mkdir -p $(dir $@)
+	$(CXX) $(SYSROOT_FLAGS) -shared -s -o $@ $(BUILD)/GonxControlLook.o \
+		-lbe -lstdc++
+	$(XRES) -o $@ $(BUILD)/GonxControlLook.rsrc
 
 # Smoke, a decorator in the style of ZETA's, for Theme Manager themes that
 # ask for it.
@@ -186,6 +222,7 @@ $(BUILD)/icon-test: tools/icon-test.cpp src/themes/HVIFEncoder.cpp src/themes/HV
 clean:
 	rm -rf $(BUILD)/*.o $(BUILD)/*.rsrc $(BUILD)/themes $(DECOR) $(LOOK) \
 		$(THEMES) $(BUILD)/icon-test $(FLAT_DECOR) $(FLAT_LOOK) \
-		$(SMOKE_DECOR) $(SMOKE_LOOK)
+		$(SMOKE_DECOR) $(SMOKE_LOOK) $(GONX_LOOK)
+	rm -rf $(DECOR_SOURCE)
 
-.PHONY: all clean demo icon-test
+.PHONY: all clean demo icon-test decorator-source

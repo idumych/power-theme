@@ -1,0 +1,5 @@
+Gonx's window decorator and control look, from github.com/idumych/gonx
+(version 0.2, commit 876eaeb), MIT licence (LICENSE). Bundled so that the
+Gonx theme works without installing Gonx: Themes builds the decorator on
+the system it runs on (build-decorators.sh), and the control look ships
+prebuilt.

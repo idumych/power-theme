@@ -18,7 +18,8 @@ out=$root/dist/$name
 
 for f in build/Reactionary build/control_look/Reactionary build/Themes \
 		build/FlatDecorator build/control_look/FlatControlLook \
-		build/Smoke build/control_look/Smoke \
+		build/Smoke build/control_look/Smoke build/control_look/Gonx \
+		build/data/Themes/build-decorators.sh \
 		build/icons/ClassicOS2000/index.theme; do
 	[ -f "$root/$f" ] || { echo "missing $f" >&2; exit 1; }
 done
@@ -36,11 +37,13 @@ cp "$root/build/Reactionary" "$root/build/Themes" "$root/build/FlatDecorator" \
 	"$root/build/Smoke" "$out/prebuilt/"
 cp "$root/build/control_look/Reactionary" \
 	"$root/build/control_look/FlatControlLook" \
-	"$root/build/control_look/Smoke" "$out/prebuilt/control_look/"
+	"$root/build/control_look/Smoke" "$root/build/control_look/Gonx" \
+	"$out/prebuilt/control_look/"
 cp "$root/build/BUILT_FOR" "$out/prebuilt/BUILT_FOR"
 
 cp -R "$root/data/themes/." "$out/data/themes/"
 cp "$root/data/Themes/icon-map" "$out/data/Themes/"
+cp -R "$root/build/data/Themes/." "$out/data/Themes/"
 # keeps the icon theme's aliases as symbolic links
 cp -R "$root/build/icons/ClassicOS2000" "$out/data/icons/"
 

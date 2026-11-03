@@ -9,6 +9,7 @@
 #define THEMES_WINDOW_H
 
 
+#include <Messenger.h>
 #include <Window.h>
 
 #include "IconTheme.h"
@@ -67,6 +68,8 @@ private:
 			BStatusBar*			fProgress;
 			BStringView*		fStatus;
 			BButton*			fRestartTracker;
+			BButton*			fBuildDecorators;
+			BMessenger			fBuildWindow;
 			BButton*			fRevert;
 			BButton*			fApply;
 };

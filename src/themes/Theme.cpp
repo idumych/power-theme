@@ -17,6 +17,7 @@
 #include <strings.h>
 #include <unistd.h>
 
+#include <Application.h>
 #include <Deskbar.h>
 #include <Directory.h>
 #include <Entry.h>
@@ -232,6 +233,40 @@ get_current(BString& theme, BString& icons)
 	load_message(kCurrentName, current);
 	theme = current.GetString("theme", "");
 	icons = current.GetString("icons", "");
+}
+
+
+status_t
+find_build_script(BString& path)
+{
+	BStringList directories;
+	data_directories(directories);
+	for (int32 i = 0; i < directories.CountStrings(); i++) {
+		BPath script(directories.StringAt(i), "Themes/build-decorators.sh");
+		if (BEntry(script.Path()).Exists()) {
+			path = script.Path();
+			return B_OK;
+		}
+	}
+
+	// beside the application, as in a source tree's build folder
+	app_info info;
+	if (be_app != NULL && be_app->GetAppInfo(&info) == B_OK) {
+		BPath folder(&info.ref);
+		if (folder.GetParent(&folder) == B_OK) {
+			const char* candidates[] = { "build-decorators.sh",
+				"../src/themes/build-decorators.sh" };
+			for (size_t i = 0; i < sizeof(candidates) / sizeof(candidates[0]);
+					i++) {
+				BPath script(folder.Path(), candidates[i], true);
+				if (BEntry(script.Path()).Exists()) {
+					path = script.Path();
+					return B_OK;
+				}
+			}
+		}
+	}
+	return B_ENTRY_NOT_FOUND;
 }
 
 

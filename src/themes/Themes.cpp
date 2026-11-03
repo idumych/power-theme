@@ -15,9 +15,11 @@
  */
 
 
+#include <errno.h>
 #include <getopt.h>
 #include <stdio.h>
 #include <string.h>
+#include <unistd.h>
 
 #include <AboutWindow.h>
 #include <Application.h>
@@ -94,6 +96,11 @@ usage(FILE* out)
 		"  -w, --show=NAME       show what applying the theme NAME would do\n"
 		"  -t, --restart-tracker restart Tracker, which shows some new icons\n"
 		"                        (folders') only after a restart\n"
+		"  -b, --build-decorators build the window decorators for this system\n"
+		"                        (they run inside app_server, so they must be\n"
+		"                        built for the exact system build)\n"
+		"      --install-tools   with --build-decorators, install the compiler\n"
+		"                        first if it is missing\n"
 		"  -h, --help            show this help\n");
 }
 
@@ -180,6 +187,8 @@ command_line(int argc, char** argv)
 		{ "status", no_argument, NULL, 's' },
 		{ "show", required_argument, NULL, 'w' },
 		{ "restart-tracker", no_argument, NULL, 't' },
+		{ "build-decorators", no_argument, NULL, 'b' },
+		{ "install-tools", no_argument, NULL, 'T' },
 		{ "help", no_argument, NULL, 'h' },
 		{ NULL, 0, NULL, 0 }
 	};
@@ -188,10 +197,11 @@ command_line(int argc, char** argv)
 	const char* icons = NULL;
 	uint32 parts = THEME_ALL;
 	bool list = false, revert = false, status = false, restart = false;
+	bool build = false, installTools = false;
 	const char* show = NULL;
 
 	int option;
-	while ((option = getopt_long(argc, argv, "la:p:i:rstw:h", kOptions, NULL))
+	while ((option = getopt_long(argc, argv, "la:p:i:rstw:bh", kOptions, NULL))
 			!= -1) {
 		switch (option) {
 			case 'l': list = true; break;
@@ -206,19 +216,37 @@ command_line(int argc, char** argv)
 			case 's': status = true; break;
 			case 't': restart = true; break;
 			case 'w': show = optarg; break;
+			case 'b': build = true; break;
+			case 'T': installTools = true; break;
 			case 'h': usage(stdout); return 0;
 			default: usage(stderr); return 2;
 		}
 	}
 	if (optind < argc
 		|| (!list && !apply && !icons && !revert && !status && !restart
-			&& !show)) {
+			&& !show && !build)) {
 		usage(stderr);
 		return 2;
 	}
 
 	// colours, fonts and bitmaps need a connection to app_server
 	BApplication app(kSignature);
+
+	if (build) {
+		BString script;
+		if (find_build_script(script) != B_OK) {
+			fprintf(stderr, "Themes: build-decorators.sh isn't installed\n");
+			return 1;
+		}
+		// the script's progress lines are for the window; here they are
+		// left as they are, which reads well enough
+		fflush(stdout);
+		execl("/bin/sh", "sh", script.String(),
+			installTools ? "--install-tools" : (char*)NULL, (char*)NULL);
+		fprintf(stderr, "Themes: can't run %s: %s\n", script.String(),
+			strerror(errno));
+		return 1;
+	}
 
 	if (restart) {
 		status_t result = restart_tracker();

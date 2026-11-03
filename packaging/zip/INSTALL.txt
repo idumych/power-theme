@@ -43,8 +43,8 @@ puts your previous look back. From a Terminal:
     Themes --help
 
 The "Haiku" theme switches back to stock Haiku: its window borders,
-controls, colors, fonts, wallpaper and icons. The "Gonx" theme needs Gonx
-(github.com/idumych/gonx) installed for its window borders and controls.
+controls, colors, fonts, wallpaper and icons. The "Gonx" theme comes with
+Gonx's controls; its window borders are built by Themes (below).
 The "Renku" theme puts Smoke window borders and flat controls in the
 Renku OS website's colours, night blue with fire orange.
 DarkFlat, LightFlat, MoonFlat and OrangeFlat come from haiku_darkstyle by
@@ -52,6 +52,13 @@ unarix (github.com/unarix/haiku_darkstyle), with Haiku's Flat window
 decorator and control look, which install.sh installs if your system
 doesn't have them. "Themes --revert" goes back to your own
 look from before the first theme, customizations included.
+
+Window borders run inside app_server, so they must be built for the exact
+system they run on. In Themes, "Build window borders..." compiles them
+(Reactionary, Smoke, Gonx, Flat) for the running system, fetching its
+headers if they differ from the bundled ones, and offers to install the
+compiler if it is missing. From a Terminal: Themes --build-decorators.
+Do this again after every system update.
 
 Themes made for Theme Manager are listed too: put them in
 ~/config/settings/UIThemes, as Theme Manager expects. Those that ask for

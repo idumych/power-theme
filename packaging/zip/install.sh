@@ -130,6 +130,11 @@ if [ ! -e "$systemAddons/control_look/FlatControlLook" ]; then
 	place "$files/control_look/FlatControlLook" \
 		"$addons/control_look/FlatControlLook"
 fi
+# Gonx's control look, for the Gonx theme, unless Gonx is installed
+if [ ! -e "$addons/control_look/Gonx" ] \
+	&& [ ! -e "$systemAddons/control_look/Gonx" ]; then
+	place "$files/control_look/Gonx" "$addons/control_look/Gonx"
+fi
 place "$files/Themes" "$apps/Themes"
 # its type, signature and icon, from its resources
 mimeset -f "$apps/Themes" 2>/dev/null || true
@@ -149,6 +154,11 @@ done
 rm -rf "$data/icons/ClassicOS2000"
 cp -R "$here/data/icons/ClassicOS2000" "$data/icons/"
 cp "$here/data/Themes/icon-map" "$data/Themes/icon-map"
+# what Themes' "Build window borders" needs: the script, the decorators'
+# source and the app_server headers
+rm -rf "$data/Themes/source"
+cp -R "$here/data/Themes/source" "$data/Themes/"
+cp "$here/data/Themes/build-decorators.sh" "$data/Themes/"
 
 appServer() {
 	ps | awk '$1 ~ /\/app_server$/ { print $(NF-3); exit }'

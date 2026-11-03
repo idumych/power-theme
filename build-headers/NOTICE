@@ -1,5 +1,7 @@
-These headers are bundled only so that Gonx can be built on the system it
-runs on, without a source tree.
+These headers are bundled so that the window decorators can be built on
+the system they run on, without a source tree. REVISION names the system
+revision they are from; for any other revision, Themes' build-decorators.sh
+fetches that revision's own headers.
 
 renku/      Private headers of Renku OS (github.com/RenkuOS/Source), a fork
             of Haiku: app_server and interface kit headers, MIT licence

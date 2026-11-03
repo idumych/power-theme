@@ -37,6 +37,7 @@
 #include <TextView.h>
 #include <TranslationUtils.h>
 
+#include "BuildWindow.h"
 #include "IconInstaller.h"
 
 
@@ -48,7 +49,8 @@ enum {
 	kMsgProgress		= 'prog',
 	kMsgDone			= 'done',
 	kMsgPartChanged		= 'part',
-	kMsgRestartTracker	= 'rstr'
+	kMsgRestartTracker	= 'rstr',
+	kMsgBuildDecorators	= 'bdec'
 };
 
 // the icons menu's first two choices
@@ -457,6 +459,11 @@ ThemesWindow::ThemesWindow(BRect frame, const char* selected)
 
 	fRestartTracker = new BButton("restart", "Restart Tracker",
 		new BMessage(kMsgRestartTracker));
+	fBuildDecorators = new BButton("build", "Build window borders"
+		B_UTF8_ELLIPSIS, new BMessage(kMsgBuildDecorators));
+	fBuildDecorators->SetToolTip("Compile the window borders for this "
+		"system. They run inside app_server, so they must match the exact "
+		"system build.");
 	fRevert = new BButton("revert", "Revert", new BMessage(kMsgRevert));
 	fApply = new BButton("apply", "Apply", new BMessage(kMsgApply));
 
@@ -491,6 +498,7 @@ ThemesWindow::ThemesWindow(BRect frame, const char* selected)
 		.AddGroup(B_HORIZONTAL)
 			.Add(fStatus, 1)
 			.Add(fRestartTracker)
+			.Add(fBuildDecorators)
 			.Add(fRevert)
 			.Add(fApply)
 		.End()
@@ -596,6 +604,40 @@ ThemesWindow::MessageReceived(BMessage* message)
 				resume_thread(thread);
 			if (!fRestartTracker->IsHidden())
 				fRestartTracker->Hide();
+			break;
+		}
+
+		case kMsgBuildDecorators:
+		{
+			// one build window
+			if (fBuildWindow.IsValid()) {
+				BLooper* looper = NULL;
+				fBuildWindow.Target(&looper);
+				BWindow* window = dynamic_cast<BWindow*>(looper);
+				if (window != NULL && window->LockLooper()) {
+					window->Activate();
+					window->UnlockLooper();
+				}
+				break;
+			}
+			BuildWindow* window = new BuildWindow(BMessenger(this));
+			fBuildWindow = BMessenger(window);
+			window->Show();
+			break;
+		}
+
+		case kMsgDecoratorsBuilt:
+		{
+			// window borders that weren't installed may be now
+			Theme* theme = fThemes.ItemAt(fThemeList->CurrentSelection());
+			BString name = theme != NULL ? theme->Name() : BString();
+			fThemes.MakeEmpty();
+			for (int32 i = fThemeList->CountItems() - 1; i >= 0; i--)
+				delete fThemeList->RemoveItem(i);
+			fIconThemes.MakeEmpty();
+			fIconsField->Menu()->RemoveItems(0,
+				fIconsField->Menu()->CountItems(), true);
+			_LoadThemes(name.IsEmpty() ? NULL : name.String());
 			break;
 		}
 
@@ -802,6 +844,9 @@ ThemesWindow::_SelectTheme(int32 index)
 		} else {
 			BString text("Not installed: ");
 			text << missingParts.Join(", ") << ".";
+			if ((missing & THEME_DECORATOR) != 0)
+				text << " Build window borders" B_UTF8_ELLIPSIS " can make "
+					"Reactionary, Smoke, Gonx and Flat ones.";
 			fStatus->SetText(text);
 			fStatus->SetToolTip(text);
 		}

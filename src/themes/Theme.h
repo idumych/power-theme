@@ -180,6 +180,10 @@ void		get_current(BString& theme, BString& icons);
 // Quits and restarts Tracker, which keeps some icons (folders') until then.
 status_t	restart_tracker();
 
+// The script that builds the window decorators for the running system
+// (build-decorators.sh): in a data folder's "Themes", or next to Themes.
+status_t	find_build_script(BString& path);
+
 // whether a theme's "control look" or "icons" value means Haiku's own
 bool		is_haiku(const char* value);
 
