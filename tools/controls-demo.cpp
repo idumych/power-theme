@@ -162,7 +162,7 @@ class DemoWindow : public BWindow {
 public:
 	DemoWindow()
 		:
-		BWindow(BRect(80, 80, 620, 560), "Reactionary controls",
+		BWindow(BRect(80, 80, 620, 560), "Controls",
 			B_DOCUMENT_WINDOW, B_AUTO_UPDATE_SIZE_LIMITS | B_QUIT_ON_WINDOW_CLOSE)
 	{
 		BTabView* tabs = new BTabView("tabs");

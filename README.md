@@ -16,6 +16,25 @@ Plus or the themes they build on, or the ClassicOS project. It is a new implemen
 the KDE theme. Colours and the title bar button glyphs come from the
 theme's files; the code shares nothing with them.
 
+## Screenshots
+
+All on Renku OS, with the same two windows: a window of controls and a
+Tracker window.
+
+| | |
+|---|---|
+| ![Reactionary ME](docs/screenshots/reactionary-me.png) | ![Renku](docs/screenshots/renku.png) |
+| **Reactionary ME**: Windows ME window borders and controls, the ClassicOS 2000 icons | **Renku**: Smoke window borders and flat controls in the Renku OS website's colours |
+| ![Smoke](docs/screenshots/smoke.png) | ![Gonx](docs/screenshots/gonx.png) |
+| **Smoke** window borders and controls, in the style of ZETA's, with the colours of the "smoke" Theme Manager theme | **Gonx**: Gonx's window borders and controls |
+| ![DarkFlat](docs/screenshots/darkflat.png) | ![The Themes window](docs/screenshots/themes-window.png) |
+| **DarkFlat**, from haiku_darkstyle, with Haiku's Flat window borders and controls | **Themes**: the theme list with a preview, the icon theme, and the parts to apply |
+
+![Build add-ons](docs/screenshots/build-add-ons.png)
+
+**Build add-ons…** compiles the window borders and controls for the running
+system, here with the bundled headers, which match this Renku build.
+
 ## Install
 
 Unpack `reactionary-0.2.zip`, open a Terminal in the `reactionary-0.2`

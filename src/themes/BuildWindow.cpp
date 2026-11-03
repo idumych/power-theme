@@ -311,24 +311,26 @@ BuildWindow::_Finished(int status)
 	fClose->SetEnabled(true);
 
 	if (fStopping) {
-		fStatus->SetText("Stopped. Nothing was installed unless the log "
-			"says so.");
+		fStatus->SetText("Stopped.");
+		_AddToLog("Stopped. Nothing was installed unless the lines above "
+			"say so.\n");
 		fStopping = false;
 		return;
 	}
 
 	if (status == 0) {
 		fProgress->Update(100.0f - fProgress->CurrentValue());
-		fStatus->SetText("Built. Themes with these window borders and "
-			"controls can be applied now; restart applications to see new "
-			"controls in them.");
+		fStatus->SetText("Built. Apply a theme to use them.");
+		_AddToLog("Themes with these window borders and controls can be "
+			"applied now. Restart applications to see new controls in "
+			"them.\n");
 		fTarget.SendMessage(kMsgDecoratorsBuilt);
 		return;
 	}
 
 	if (status == kNeedTools) {
 		BString packages(fNeedTools.IsEmpty() ? "gcc haiku_devel" : fNeedTools);
-		fStatus->SetText(BString("Not installed: ") << packages << ".");
+		fStatus->SetText("Needs packages that aren't installed.");
 		BString text("Building the add-ons needs these packages, which "
 			"aren't installed: ");
 		text << packages << ". Install them now with pkgman? This needs a "
@@ -341,10 +343,16 @@ BuildWindow::_Finished(int status)
 		return;
 	}
 
+	// a short status; the error is in the log in full
 	BString text("Failed");
-	if (!fError.IsEmpty())
-		text << ": " << fError;
-	text << ". See the log.";
+	if (!fError.IsEmpty()) {
+		BString error(fError);
+		if (error.CountChars() > 48) {
+			error.TruncateChars(47);
+			error << B_UTF8_ELLIPSIS;
+		}
+		text << ": " << error;
+	}
 	fStatus->SetText(text);
 }
 
