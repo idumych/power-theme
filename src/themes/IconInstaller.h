@@ -3,12 +3,12 @@
  * Distributed under the terms of the MIT License.
  *
  * Puts an icon theme's icons on Haiku's file types and folders, following
- * the icon map (data/Themes/icon-map), and takes them off again.
+ * the icon map (data/PowerTheme/icon-map), and takes them off again.
  *
  * File type icons are set through BMimeType, in the user's MIME database,
  * so Tracker shows them at once; folder icons are the folders' BEOS:ICON
  * attributes. What each one was before is kept in
- * ~/config/settings/Themes/icons the first time it is changed, so that
+ * ~/config/settings/PowerTheme/icons the first time it is changed, so that
  * "revert" puts back Haiku's own icons whatever themes came in between.
  */
 #ifndef ICON_INSTALLER_H

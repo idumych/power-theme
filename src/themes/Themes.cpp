@@ -2,16 +2,16 @@
  * Copyright 2026, idumych.
  * Distributed under the terms of the MIT License.
  *
- * Themes: switches the whole look of the desktop (window decorator,
+ * Power Theme: switches the whole look of the desktop (window decorator,
  * controls, colours, fonts and icons) between themes, and back.
  *
  * Without arguments it opens its window. From a Terminal:
  *
- *   Themes --list
- *   Themes --apply=NAME [--parts=decorator,controls,colors,fonts,icons]
- *   Themes --icons=ICON-THEME     only the icons ("haiku" for Haiku's own)
- *   Themes --revert               back to the look from before any theme
- *   Themes --status
+ *   powertheme --list
+ *   powertheme --apply=NAME [--parts=decorator,controls,colors,fonts,icons]
+ *   powertheme --icons=ICON-THEME  only the icons ("haiku" for Haiku's own)
+ *   powertheme --revert            back to the look from before any theme
+ *   powertheme --status
  */
 
 
@@ -34,7 +34,7 @@
 #include "ThemesWindow.h"
 
 
-static const char* kSignature = "application/x-vnd.idumych-Themes";
+static const char* kSignature = "application/x-vnd.idumych-PowerTheme";
 
 
 class ThemesApp : public BApplication {
@@ -63,7 +63,7 @@ public:
 
 	virtual void AboutRequested()
 	{
-		BAboutWindow* about = new BAboutWindow("Themes", kSignature);
+		BAboutWindow* about = new BAboutWindow("Power Theme", kSignature);
 		about->AddDescription("Switches the window borders, controls, "
 			"colors, fonts and icons of the desktop between themes, and "
 			"back. Icon themes are freedesktop icon themes.");
@@ -81,9 +81,9 @@ static void
 usage(FILE* out)
 {
 	fprintf(out,
-		"Usage: Themes [OPTION]\n"
+		"Usage: powertheme [OPTION]\n"
 		"Switches the look of the desktop between themes.\n"
-		"Without an option, opens the Themes window.\n\n"
+		"Without an option, opens the Power Theme window.\n\n"
 		"  -l, --list            list the installed themes and icon themes\n"
 		"  -a, --apply=NAME      apply the theme called NAME\n"
 		"  -p, --parts=LIST      with --apply, only these parts: decorator,\n"
@@ -129,7 +129,7 @@ parse_parts(const char* list)
 		else if (name == "deskbar")
 			parts |= THEME_DESKBAR;
 		else {
-			fprintf(stderr, "Themes: unknown part \"%s\"\n", name.String());
+			fprintf(stderr, "powertheme: unknown part \"%s\"\n", name.String());
 			return 0;
 		}
 	}
@@ -158,7 +158,7 @@ apply_icons(const char* id)
 
 	IconTheme* theme = load_icon_theme(id);
 	if (theme == NULL) {
-		fprintf(stderr, "Themes: the icon theme \"%s\" isn't installed\n",
+		fprintf(stderr, "powertheme: the icon theme \"%s\" isn't installed\n",
 			id);
 		return 1;
 	}
@@ -168,7 +168,7 @@ apply_icons(const char* id)
 	if (status == B_OK) {
 		printf("Icons from \"%s\" set on %" B_PRId32 " file types and "
 			"folders. Folders show theirs after Tracker restarts "
-			"(Themes --restart-tracker).\n", theme->Name().String(), changed);
+			"(powertheme --restart-tracker).\n", theme->Name().String(), changed);
 	}
 	delete theme;
 	return status == B_OK ? 0 : 1;
@@ -235,7 +235,7 @@ command_line(int argc, char** argv)
 	if (build) {
 		BString script;
 		if (find_build_script(script) != B_OK) {
-			fprintf(stderr, "Themes: build-decorators.sh isn't installed\n");
+			fprintf(stderr, "powertheme: build-decorators.sh isn't installed\n");
 			return 1;
 		}
 		// the script's progress lines are for the window; here they are
@@ -243,7 +243,7 @@ command_line(int argc, char** argv)
 		fflush(stdout);
 		execl("/bin/sh", "sh", script.String(),
 			installTools ? "--install-tools" : (char*)NULL, (char*)NULL);
-		fprintf(stderr, "Themes: can't run %s: %s\n", script.String(),
+		fprintf(stderr, "powertheme: can't run %s: %s\n", script.String(),
 			strerror(errno));
 		return 1;
 	}
@@ -251,7 +251,7 @@ command_line(int argc, char** argv)
 	if (restart) {
 		status_t result = restart_tracker();
 		if (result != B_OK) {
-			fprintf(stderr, "Themes: can't restart Tracker: %s\n",
+			fprintf(stderr, "powertheme: can't restart Tracker: %s\n",
 				strerror(result));
 			return 1;
 		}
@@ -272,7 +272,7 @@ command_line(int argc, char** argv)
 			found++;
 		}
 		if (found == 0) {
-			fprintf(stderr, "Themes: no theme is called \"%s\" (see "
+			fprintf(stderr, "powertheme: no theme is called \"%s\" (see "
 				"--list)\n", show);
 			return 1;
 		}
@@ -340,7 +340,7 @@ command_line(int argc, char** argv)
 				theme = themes.ItemAt(i);
 		}
 		if (theme == NULL) {
-			fprintf(stderr, "Themes: no theme is called \"%s\" (see "
+			fprintf(stderr, "powertheme: no theme is called \"%s\" (see "
 				"--list)\n", apply);
 			return 1;
 		}

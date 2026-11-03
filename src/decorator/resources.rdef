@@ -5,6 +5,6 @@ resource("be:decor:info") message('deco') {
 	"long_descr"		= "A Windows ME style frame: a grey bevelled border, a navy to light blue title bar and square bevelled buttons. After the Reactionary ME global theme for KDE Plasma (Die4Ever) and its Windows ME window decoration.",
 	"lic_url"			= "",
 	"lic_name"			= "MIT",
-	"support_url"		= "https://github.com/idumych/reactionary",
+	"support_url"		= "https://github.com/idumych/power-theme",
 	float "version"		= 0.1
 };

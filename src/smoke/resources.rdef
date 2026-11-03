@@ -5,6 +5,6 @@ resource("be:decor:info") message('deco') {
 	"long_descr"		= "A grey BeOS tab shading downwards, with a cross at its left end and two overlapping squares at its right, flowing into a black and grey frame with a lighter resize corner. Redrawn from screenshots of ZETA's Smoke decorator; no ZETA code or artwork is used.",
 	"lic_url"			= "",
 	"lic_name"			= "MIT",
-	"support_url"		= "https://github.com/idumych/reactionary",
+	"support_url"		= "https://github.com/idumych/power-theme",
 	float "version"		= 0.1
 };

@@ -152,7 +152,11 @@ themes_settings_path(BPath& path, const char* leaf)
 	status_t status = find_directory(B_USER_SETTINGS_DIRECTORY, &path, true);
 	if (status != B_OK)
 		return status;
-	path.Append("Themes");
+	// Power Theme was called Themes; its folder moves with the name
+	BPath old(path.Path(), "Themes");
+	path.Append("PowerTheme");
+	if (!BEntry(path.Path()).Exists() && BEntry(old.Path()).Exists())
+		rename(old.Path(), path.Path());
 	create_directory(path.Path(), 0755);
 	if (leaf != NULL)
 		path.Append(leaf);
@@ -242,7 +246,7 @@ find_build_script(BString& path)
 	BStringList directories;
 	data_directories(directories);
 	for (int32 i = 0; i < directories.CountStrings(); i++) {
-		BPath script(directories.StringAt(i), "Themes/build-decorators.sh");
+		BPath script(directories.StringAt(i), "PowerTheme/build-decorators.sh");
 		if (BEntry(script.Path()).Exists()) {
 			path = script.Path();
 			return B_OK;
@@ -956,7 +960,7 @@ apply_appearance(const Theme& theme, uint32 parts, BString& log)
 			return status;
 		}
 	} else {
-		// saved by an older Themes, before it changed these: they are still
+		// saved by an older Power Theme (then Themes), before it changed these: they are still
 		// as they were
 		bool changed = false;
 		if (!previous.HasData("wallpaper", B_RAW_TYPE)
@@ -1065,7 +1069,7 @@ void
 describe_theme(const Theme& theme, BString& out)
 {
 	out << "name: " << theme.Name() << "\n";
-	out << "format: " << (theme.IsUITheme() ? "Theme Manager" : "Themes")
+	out << "format: " << (theme.IsUITheme() ? "Theme Manager" : "Power Theme")
 		<< "\n";
 	out << "folder: " << theme.Folder() << "\n";
 

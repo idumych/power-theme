@@ -1,5 +1,5 @@
 #!/bin/sh
-# Build Themes' add-ons, the window decorators and control looks
+# Build Power Theme's add-ons, the window decorators and control looks
 # (Reactionary, Smoke, Gonx, and Haiku's Flat ones if the system lacks
 # them), on, and for, the running system.
 #
@@ -15,7 +15,7 @@
 # It fetches the branch's commits only (no files), finds the commit as many
 # commits past the hrev tag as the revision says, as git describe counts,
 # then checks out just the header files. They are kept in
-# ~/config/settings/Themes (~/config/cache is read-only on Renku). Without
+# ~/config/settings/PowerTheme (~/config/cache is read-only on Renku). Without
 # the right headers it stops: add-ons built for another system build could
 # take app_server down when a theme is applied.
 #
@@ -25,7 +25,7 @@
 #   --install-tools  install the compiler first (pkgman: gcc, haiku_devel)
 #   --headers        auto (default): bundled if they match, else fetched;
 #                    bundled: the bundled ones whatever the system (unsafe)
-#   --source         the add-ons' source: Themes' "source" folder, or a
+#   --source         the add-ons' source: Power Theme's "source" folder, or a
 #                    Reactionary source tree (default: next to this script)
 #   --dest           the add-ons folder to put them in, in "decorators" and
 #                    "control_look" (default: the user's non-packaged one)
@@ -33,9 +33,9 @@
 #                    version such as r1~beta6_hrev59866_92) instead of the
 #                    system's; with --fetch-only, fetch its headers and stop
 #                    (for testing, or to fetch on another machine; the
-#                    cache folder is then $THEMES_CACHE, if set)
+#                    cache folder is then $POWERTHEME_CACHE, if set)
 #
-# Output, for Themes' build window: "STEP <percent> <what>" lines for the
+# Output, for Power Theme's build window: "STEP <percent> <what>" lines for the
 # progress bar, "ERROR <what>" for failures, everything else is the log.
 # Exit status: 0 built, 1 failed, 3 tools are missing (the NEED_TOOLS line
 # names their packages; --install-tools installs them).
@@ -79,7 +79,7 @@ if [ -z "$dest" ] && ! $fetch_only; then
 	dest=$(finddir B_USER_NONPACKAGED_ADDONS_DIRECTORY)
 	reload=true
 fi
-cache=${THEMES_CACHE:-$(finddir B_USER_SETTINGS_DIRECTORY 2>/dev/null)/Themes}
+cache=${POWERTHEME_CACHE:-$(finddir B_USER_SETTINGS_DIRECTORY 2>/dev/null)/PowerTheme}
 
 # the add-ons: kind, name, folder in an installed source, folder in the
 # tree, and the source files' and resource file's names

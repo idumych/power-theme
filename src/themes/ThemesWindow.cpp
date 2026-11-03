@@ -2,7 +2,7 @@
  * Copyright 2026, idumych.
  * Distributed under the terms of the MIT License.
  *
- * The Themes window. See ThemesWindow.h.
+ * The Power Theme window. See ThemesWindow.h.
  */
 
 
@@ -421,7 +421,7 @@ ThemesWindow::_RestartTrackerThread(void* data)
 
 ThemesWindow::ThemesWindow(BRect frame, const char* selected)
 	:
-	BWindow(frame, "Themes", B_TITLED_WINDOW,
+	BWindow(frame, "Power Theme", B_TITLED_WINDOW,
 		B_AUTO_UPDATE_SIZE_LIMITS | B_QUIT_ON_WINDOW_CLOSE),
 	fBusy(false)
 {

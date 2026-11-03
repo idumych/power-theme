@@ -1,5 +1,5 @@
 #!/bin/sh
-# Assemble dist/reactionary-<version>.zip: install.sh / uninstall.sh,
+# Assemble dist/power-theme-<version>.zip: install.sh / uninstall.sh,
 # prebuilt files, the theme and icon theme, the full source (with the
 # private headers needed to build on the target system), README, licence
 # and a screenshot.
@@ -13,27 +13,27 @@ set -eu
 
 version=${1:-0.3}
 root=$(cd "$(dirname "$0")/../.." && pwd)
-name=reactionary-$version
+name=power-theme-$version
 out=$root/dist/$name
 
-for f in build/Reactionary build/control_look/Reactionary build/Themes \
+for f in build/Reactionary build/control_look/Reactionary build/PowerTheme \
 		build/FlatDecorator build/control_look/FlatControlLook \
 		build/Smoke build/control_look/Smoke build/control_look/Gonx \
-		build/data/Themes/build-decorators.sh \
+		build/data/PowerTheme/build-decorators.sh \
 		build/icons/ClassicOS2000/index.theme; do
 	[ -f "$root/$f" ] || { echo "missing $f" >&2; exit 1; }
 done
 
 rm -rf "$out" "$root/dist/$name.zip"
 mkdir -p "$out/prebuilt/control_look" "$out/source" "$out/data/themes" \
-	"$out/data/icons" "$out/data/Themes"
+	"$out/data/icons" "$out/data/PowerTheme"
 
 cp "$root/packaging/zip/install.sh" "$root/packaging/zip/uninstall.sh" \
 	"$root/packaging/zip/INSTALL.txt" "$out/"
 cp "$root/README.md" "$root/LICENSE" "$out/"
-cp "$root/docs/screenshot.png" "$out/screenshot.png"
+cp "$root/docs/screenshots/power-theme.png" "$out/screenshot.png"
 
-cp "$root/build/Reactionary" "$root/build/Themes" "$root/build/FlatDecorator" \
+cp "$root/build/Reactionary" "$root/build/PowerTheme" "$root/build/FlatDecorator" \
 	"$root/build/Smoke" "$out/prebuilt/"
 cp "$root/build/control_look/Reactionary" \
 	"$root/build/control_look/FlatControlLook" \
@@ -42,8 +42,8 @@ cp "$root/build/control_look/Reactionary" \
 cp "$root/build/BUILT_FOR" "$out/prebuilt/BUILT_FOR"
 
 cp -R "$root/data/themes/." "$out/data/themes/"
-cp "$root/data/Themes/icon-map" "$out/data/Themes/"
-cp -R "$root/build/data/Themes/." "$out/data/Themes/"
+cp "$root/data/PowerTheme/icon-map" "$out/data/PowerTheme/"
+cp -R "$root/build/data/PowerTheme/." "$out/data/PowerTheme/"
 # keeps the icon theme's aliases as symbolic links
 cp -R "$root/build/icons/ClassicOS2000" "$out/data/icons/"
 

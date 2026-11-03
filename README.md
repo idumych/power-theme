@@ -1,20 +1,29 @@
-# Reactionary for Renku OS and Haiku
+# Power Theme
 
-![Reactionary on Renku OS](docs/screenshot.png)
+![Power Theme on Haiku](docs/screenshots/power-theme.png)
 
-A Windows ME style look for [Renku OS](https://github.com/RenkuOS/Source)
-and Haiku, after **Reactionary ME**, a global theme for KDE Plasma by
-Die4Ever ([store.kde.org/p/2331482](https://store.kde.org/p/2331482)). It
-includes a window decorator, a control look, desktop and system colours,
-fonts, and the [ClassicOS 2000](https://github.com/ClassicOS-Themes/ClassicOS-2000-Icons)
-icons. With it comes **Themes**, a theme manager that switches between
-themes and freedesktop icon themes, and back.
+**Power Theme** is a theme manager for [Renku OS](https://github.com/RenkuOS/Source)
+and Haiku. It switches the whole look of the desktop between themes, and
+back: window borders, controls, colours, fonts, wallpaper, the Deskbar's
+place and freedesktop icon themes. It reads the themes made for Theme
+Manager (and BeOS and ZETA before it) too.
 
-This is an independent, unofficial port. It is not made by, affiliated
-with or endorsed by Die4Ever, the developers of Reactionary, Reactionary
-Plus or the themes they build on, or the ClassicOS project. It is a new implementation drawn to match
-the KDE theme. Colours and the title bar button glyphs come from the
-theme's files; the code shares nothing with them.
+It comes with its own looks:
+
+- **Reactionary ME**, a Windows ME style look after the KDE Plasma theme
+  of that name by Die4Ever ([store.kde.org/p/2331482](https://store.kde.org/p/2331482)),
+  with the [ClassicOS 2000](https://github.com/ClassicOS-Themes/ClassicOS-2000-Icons)
+  icons;
+- **Smoke** window borders and controls in the style of ZETA's;
+- **Renku**, in the colours of the Renku OS website;
+- and the Haiku, Gonx and four Flat themes.
+
+The Reactionary ME look is an independent, unofficial port. It is not
+made by, affiliated with or endorsed by Die4Ever, the developers of
+Reactionary, Reactionary Plus or the themes they build on, or the
+ClassicOS project. It is a new implementation drawn to match the KDE
+theme. Colours and the title bar button glyphs come from the theme's
+files; the code shares nothing with them.
 
 ## Screenshots
 
@@ -27,8 +36,8 @@ Tracker window.
 | **Reactionary ME**: Windows ME window borders and controls, the ClassicOS 2000 icons | **Renku**: Smoke window borders and flat controls in the Renku OS website's colours |
 | ![Smoke](docs/screenshots/smoke.png) | ![Gonx](docs/screenshots/gonx.png) |
 | **Smoke** window borders and controls, in the style of ZETA's, with the colours of the "smoke" Theme Manager theme | **Gonx**: Gonx's window borders and controls |
-| ![DarkFlat](docs/screenshots/darkflat.png) | ![The Themes window](docs/screenshots/themes-window.png) |
-| **DarkFlat**, from haiku_darkstyle, with Haiku's Flat window borders and controls | **Themes**: the theme list with a preview, the icon theme, and the parts to apply |
+| ![DarkFlat](docs/screenshots/darkflat.png) | ![The Power Theme window](docs/screenshots/themes-window.png) |
+| **DarkFlat**, from haiku_darkstyle, with Haiku's Flat window borders and controls | **Power Theme** under Renku: the theme list with a preview, the icon theme, and the parts to apply |
 
 ![Build add-ons](docs/screenshots/build-add-ons.png)
 
@@ -37,36 +46,35 @@ system, here with the bundled headers, which match this Renku build.
 
 ## Install
 
-Unpack `reactionary-0.2.zip`, open a Terminal in the `reactionary-0.2`
-folder and run:
+From a package (Haiku R1/beta6 and later, Renku OS):
 
 ```sh
-sh install.sh
+pkgman install ./powertheme-0.3-1-x86_64.hpkg
 ```
 
-If a compiler is installed, this builds Reactionary against your own
-system first. That is the safest way, because the decorator runs inside
-app_server. Without a compiler it uses the prebuilt files. To get the
-compiler:
+Then open **Power Theme** (Deskbar → Applications), click **Build
+add-ons…** once and apply a theme. The window borders and controls are
+built on your own system, because they use private parts of app_server
+and libbe; build them again after a system update. Power Theme offers to
+install the compiler if it is missing.
 
-```sh
-pkgman install gcc make haiku_devel
-sh install.sh --build
-```
+Or from the zip, into `~/config/non-packaged`: unpack
+`power-theme-0.3.zip`, open a Terminal in its folder and run
+`sh install.sh` (`sh install.sh --build` builds everything on your
+system; `pkgman install gcc make haiku_devel` gets the compiler).
 
-Everything goes into `~/config/non-packaged`; no package is installed.
 To get the new controls and fonts everywhere, restart running
 applications, or log out and back in.
 
 ```sh
-Themes --revert            # your previous decorator, controls, colours, fonts and icons
-sh uninstall.sh            # revert and remove Reactionary
+powertheme --revert        # your previous decorator, controls, colours, fonts and icons
+sh uninstall.sh            # (zip) revert and remove Power Theme
 ```
 
 If the desktop ever fails to start (for example after a system update),
 hold Space while booting, open **Select safe mode options** and choose
-**Disable user add-ons**. Once you're on the desktop, run `sh uninstall.sh`,
-or rebuild Reactionary for the new system with `sh install.sh --build`.
+**Disable user add-ons**. Once you're on the desktop, open Power Theme and
+click **Build add-ons…** again.
 
 ## What's here
 
@@ -126,7 +134,7 @@ or rebuild Reactionary for the new system with `sh install.sh --build`.
 - **The Gonx theme** (`data/themes/Gonx`): the look of
   [Gonx](https://github.com/idumych/gonx), with its colours, desktop colour
   and fonts over Haiku's defaults, and Haiku's icons. Gonx's control look
-  comes with Reactionary, and Themes builds its window decorator (below);
+  comes with Power Theme, which builds its window decorator (below);
   the sources are in `src/third_party/gonx`.
 - **The Flat themes** (`data/themes/DarkFlat`, `LightFlat`, `MoonFlat`,
   `OrangeFlat`), from unarix's
@@ -152,7 +160,8 @@ or rebuild Reactionary for the new system with `sh install.sh --build`.
   decorator and control look, the theme's "Windows ME" colour scheme, the
   3A6EA5 desktop colour, Noto Sans 10 pt fonts and the ClassicOS 2000
   icons.
-- **Themes** (`apps/Themes`, also a command), a theme manager. A theme is
+- **Power Theme** (`apps/PowerTheme`, also the `powertheme` command), the
+  theme manager. A theme is
   a folder with a `theme.settings` file (see `src/themes/Theme.h`);
   `control look = haiku` and `icons = haiku` stand for Haiku's own. A
   theme can set a wallpaper (`wallpaper = image.png`, scaled, centered,
@@ -173,7 +182,7 @@ or rebuild Reactionary for the new system with `sh install.sh --build`.
     Decorators run inside app_server and use its private classes, and
     control looks subclass Haiku's private HaikuControlLook, so ones built
     for another system build can fail there. The headers that come with
-    Themes are from one system revision (`build-headers/REVISION`); on any
+    Power Theme are from one system revision (`build-headers/REVISION`); on any
     other, it finds the system's revision (`hrev60072+339`, from its haiku
     package) and fetches that revision's headers from RenkuOS/Source, or
     haiku/haiku, with git: the commits back to the hrev tag only, the
@@ -181,9 +190,9 @@ or rebuild Reactionary for the new system with `sh install.sh --build`.
     files. If the compiler isn't installed, it offers to install it (gcc
     and haiku_devel). A decorator in use is switched to its new build, and
     set aside if app_server doesn't take it. The same from a Terminal:
-    `Themes --build-decorators
+    `powertheme --build-decorators
     [--install-tools]` (`src/themes/build-decorators.sh`).
-  - `Themes --list`, `--apply=NAME [--parts=…]`, `--icons=ID|haiku`,
+  - `powertheme --list`, `--apply=NAME [--parts=…]`, `--icons=ID|haiku`,
     `--revert`, `--status`, `--show=NAME`, `--restart-tracker` and
     `--build-decorators` do the same from a Terminal.
 - **Theme Manager themes**: themes made for
@@ -204,11 +213,11 @@ or rebuild Reactionary for the new system with `sh install.sh --build`.
   and fonts that come with a theme, are left out.
 - **Icon themes**: any [freedesktop icon theme](https://specifications.freedesktop.org/icon-theme-spec/latest/)
   (an `index.theme` with folders of PNG or SVG icons, including the themes
-  it inherits from). Themes turns each icon into a Haiku vector icon (HVIF)
+  it inherits from). Power Theme turns each icon into a Haiku vector icon (HVIF)
   that holds the theme's own 16, 24, 32 and 48 pixel designs, pixel for
   pixel, each drawn at its own size. It sets them on over 100 file types (as
   icons of the types, in your MIME database) and on your home, mail and
-  queries folders. `data/Themes/icon-map` says which icon goes where, and
+  queries folders. `data/PowerTheme/icon-map` says which icon goes where, and
   can be extended. The ClassicOS 2000 icons ship as PNG, rendered from the
   theme's SVG with librsvg (`tools/build-icon-theme.py`).
 
@@ -220,8 +229,8 @@ or rebuild Reactionary for the new system with `sh install.sh --build`.
   their own icons, which are part of them. The Trash keeps Tracker's icon
   (Tracker resets it whenever the Trash fills or empties), disks keep the
   icons their drivers give them, and alerts keep Haiku's.
-- Tracker shows the new folder icons only once it restarts: Themes offers
-  to restart it (`Themes --restart-tracker`).
+- Tracker shows the new folder icons only once it restarts: Power Theme
+  offers to restart it (`powertheme --restart-tracker`).
 - Icons with many colours lose a few to fit Haiku's vector icon format
   (255 colours and shapes in all); designs that still don't fit are left
   out, largest first. SVG icons are drawn with nanosvg, which leaves out
@@ -251,6 +260,11 @@ pixel.
 renders the ClassicOS 2000 icons (needs `rsvg-convert`), and
 `sh packaging/zip/make-zip.sh` assembles the zip from `build/`.
 
+`sh packaging/hpkg/build-hpkg.sh <build-dir> <icons-dir>` makes the
+package on a Haiku or Renku system, from `make build/PowerTheme
+decorator-source` and the rendered icons. Build it on the oldest system it
+should run on (Haiku R1/beta6), against that system's own headers.
+
 ## Credits
 
 - Reactionary ME global theme, "Windows ME" window decoration and colour
@@ -275,4 +289,4 @@ renders the ClassicOS 2000 icons (needs `rsvg-convert`), and
 - Project layout, scripts and the start of the theme tool from
   [Gonx](https://github.com/idumych/gonx).
 
-Reactionary's own code is under the MIT licence (see `LICENSE`).
+Power Theme's own code is under the MIT licence (see `LICENSE`).

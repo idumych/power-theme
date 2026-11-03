@@ -54,7 +54,7 @@ override CXXFLAGS += -O2 -Wall -Wno-multichar -fPIC $(SYSROOT_FLAGS)
 
 BUILD := build
 DECOR := $(BUILD)/Reactionary
-THEMES := $(BUILD)/Themes
+THEMES := $(BUILD)/PowerTheme
 LOOK := $(BUILD)/control_look/Reactionary
 
 FLAT_DECOR := $(BUILD)/FlatDecorator
@@ -66,10 +66,10 @@ SMOKE_LOOK := $(BUILD)/control_look/Smoke
 GONX := src/third_party/gonx
 GONX_LOOK := $(BUILD)/control_look/Gonx
 
-# What Themes needs to build the add-ons (decorators, control looks) on a
+# What Power Theme needs to build the add-ons (decorators, control looks) on a
 # user's system, laid
-# out as build-decorators.sh expects it in a data folder's "Themes".
-DECOR_SOURCE := $(BUILD)/data/Themes
+# out as build-decorators.sh expects it in a data folder's "PowerTheme".
+DECOR_SOURCE := $(BUILD)/data/PowerTheme
 
 all: $(DECOR) $(LOOK) $(THEMES) $(FLAT_DECOR) $(FLAT_LOOK) $(SMOKE_DECOR) \
 	$(SMOKE_LOOK) $(GONX_LOOK) decorator-source
@@ -100,7 +100,7 @@ decorator-source:
 	cp $(FLAT)/controllook/* $(DECOR_SOURCE)/source/control_looks/FlatControlLook/
 	cp LICENSE $(DECOR_SOURCE)/source/
 
-# Gonx's control look, for the Gonx theme (its decorator is built by Themes).
+# Gonx's control look, for the Gonx theme (its decorator is built by Power Theme).
 $(BUILD)/GonxControlLook.o: $(GONX)/controllook/GonxControlLook.cpp $(GONX)/controllook/GonxControlLook.h
 	@mkdir -p $(BUILD)
 	$(CXX) $(CXXFLAGS) -I$(PRIVATE)/interface -c $< -o $@
@@ -163,7 +163,7 @@ $(FLAT_LOOK): $(BUILD)/FlatControlLook.o $(BUILD)/FlatControlLook.rsrc
 		-lbe -lstdc++
 	$(XRES) -o $@ $(BUILD)/FlatControlLook.rsrc
 
-# Themes, the theme manager: an ordinary application, using a few private
+# Power Theme, the theme manager: an ordinary application, using a few private
 # interface kit headers (decorators, control looks, system fonts).
 THEMES_SOURCES := $(wildcard src/themes/*.cpp)
 THEMES_OBJECTS := $(patsubst src/themes/%.cpp,$(BUILD)/themes/%.o,$(THEMES_SOURCES))
@@ -193,7 +193,7 @@ $(BUILD)/%.rsrc:
 ifeq ($(shell uname -s),Haiku)
 	$(RC) -o $@ $<
 else
-	ssh $(RC_HOST) 'cat > /tmp/reactionary.rdef && rc -o /tmp/reactionary.rsrc /tmp/reactionary.rdef && cat /tmp/reactionary.rsrc' < $< > $@
+	ssh $(RC_HOST) 'cat > /tmp/powertheme.rdef && rc -o /tmp/powertheme.rsrc /tmp/powertheme.rdef && cat /tmp/powertheme.rsrc' < $< > $@
 endif
 
 $(BUILD)/ReactionaryDecorator.rsrc: src/decorator/resources.rdef

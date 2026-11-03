@@ -1,11 +1,12 @@
 #!/bin/sh
-# Install Reactionary for this user, without a package, and switch it on:
+# Install Power Theme for this user, without a package, and switch it on:
 #
 #   - the Reactionary window decorator and control look, Smoke ones in the
 #     style of ZETA's for Theme Manager themes that ask for them, and
 #     Haiku's Flat ones for the Flat themes unless the system has them
 #     (add-ons),
-#   - Themes, the theme manager (an application, also a command),
+#   - Power Theme, the theme manager (an application, also the powertheme
+#     command),
 #   - the themes (Reactionary ME, Haiku, Gonx, and the Flat themes from
 #     haiku_darkstyle) and the ClassicOS 2000 icon theme (data),
 #
@@ -36,10 +37,10 @@ if [ "$(uname -s)" != Haiku ]; then
 	exit 1
 fi
 
-if pkgman search -i reactionary 2>/dev/null | awk '$2 == "reactionary"' \
+if pkgman search -i powertheme 2>/dev/null | awk '$2 == "powertheme"' \
 		| grep -q .; then
-	echo "The reactionary package is installed. Remove it first:" >&2
-	echo "    Themes --revert; pkgman uninstall reactionary" >&2
+	echo "The powertheme package is installed. Remove it first:" >&2
+	echo "    powertheme --revert; pkgman uninstall powertheme" >&2
 	exit 1
 fi
 
@@ -66,8 +67,8 @@ case $mode in
 			echo "    pkgman install gcc make haiku_devel" >&2
 			exit 1
 		fi
-		echo "Building Reactionary against this system ($system)..."
-		work=$(mktemp -d /tmp/reactionary-build.XXXXXX)
+		echo "Building Power Theme against this system ($system)..."
+		work=$(mktemp -d /tmp/powertheme-build.XXXXXX)
 		cp -R "$here/source/." "$work/"
 		(cd "$work" && make clean >/dev/null && make >"$work/build.log" 2>&1) \
 			|| { echo "The build failed; see $work/build.log" >&2; exit 1; }
@@ -91,16 +92,19 @@ data=$(finddir B_USER_NONPACKAGED_DATA_DIRECTORY)
 apps=$nonpackaged/apps
 deskbar=$(finddir B_USER_SETTINGS_DIRECTORY)/deskbar/menu/Applications
 mkdir -p "$addons/decorators" "$addons/control_look" "$bin" "$apps" \
-	"$data/themes" "$data/icons" "$data/Themes"
+	"$data/themes" "$data/icons" "$data/PowerTheme"
 
-# Version 0.1 came with a reactionary-theme command instead of Themes.
+# Power Theme was called Themes up to 0.2 (and its command
+# reactionary-theme in 0.1); its settings folder moves when it first runs.
+rm -f "$apps/PowerTheme" "$bin/Themes" "$deskbar/Themes"
+rm -rf "$data/Themes"
 if [ -x "$bin/reactionary-theme" ]; then
 	"$bin/reactionary-theme" revert >/dev/null 2>&1 || true
 	rm -f "$bin/reactionary-theme"
 fi
 
 # A decorator in use is mapped by app_server, and the control look and
-# Themes by running applications: never overwrite them in place, put new
+# Power Theme by running applications: never overwrite them in place, put new
 # files in place by renaming.
 place() {
 	cp "$1" "$2.new"
@@ -135,13 +139,13 @@ if [ ! -e "$addons/control_look/Gonx" ] \
 	&& [ ! -e "$systemAddons/control_look/Gonx" ]; then
 	place "$files/control_look/Gonx" "$addons/control_look/Gonx"
 fi
-place "$files/Themes" "$apps/Themes"
+place "$files/PowerTheme" "$apps/PowerTheme"
 # its type, signature and icon, from its resources
-mimeset -f "$apps/Themes" 2>/dev/null || true
-ln -sf "$apps/Themes" "$bin/Themes"
+mimeset -f "$apps/PowerTheme" 2>/dev/null || true
+ln -sf "$apps/PowerTheme" "$bin/powertheme"
 if [ -d "$(dirname "$deskbar")" ]; then
 	mkdir -p "$deskbar"
-	ln -sf "$apps/Themes" "$deskbar/Themes"
+	ln -sf "$apps/PowerTheme" "$deskbar/Power Theme"
 fi
 
 # the themes (Reactionary ME, and Haiku's own to go back to), the icon
@@ -153,42 +157,43 @@ for theme in "$here"/data/themes/*; do
 done
 rm -rf "$data/icons/ClassicOS2000"
 cp -R "$here/data/icons/ClassicOS2000" "$data/icons/"
-cp "$here/data/Themes/icon-map" "$data/Themes/icon-map"
-# what Themes' "Build add-ons" needs: the script, the add-ons'
+cp "$here/data/PowerTheme/icon-map" "$data/PowerTheme/icon-map"
+# what Power Theme's "Build add-ons" needs: the script, the add-ons'
 # source and the app_server headers
-rm -rf "$data/Themes/source"
-cp -R "$here/data/Themes/source" "$data/Themes/"
-cp "$here/data/Themes/build-decorators.sh" "$data/Themes/"
+rm -rf "$data/PowerTheme/source"
+cp -R "$here/data/PowerTheme/source" "$data/PowerTheme/"
+cp "$here/data/PowerTheme/build-decorators.sh" "$data/PowerTheme/"
 
 appServer() {
 	ps | awk '$1 ~ /\/app_server$/ { print $(NF-3); exit }'
 }
 
 before=$(appServer)
-"$apps/Themes" --apply="Reactionary ME"
+"$apps/PowerTheme" --apply="Reactionary ME"
 sleep 2
 after=$(appServer)
 
 if [ -z "$after" ] || [ "$before" != "$after" ]; then
 	echo "app_server restarted after switching to Reactionary; switching" >&2
 	echo "back." >&2
-	"$apps/Themes" --revert || setdecor Default
+	"$apps/PowerTheme" --revert || setdecor Default
 	exit 1
 fi
 
-"$apps/Themes" --restart-tracker || true
+"$apps/PowerTheme" --restart-tracker || true
 
 cat <<EOF
 
-Reactionary is installed in ~/config/non-packaged and switched on.
+Power Theme is installed in ~/config/non-packaged, with the Reactionary ME
+theme switched on.
 Restart running applications (or log out and in) to get the new controls
 and fonts everywhere.
 
-Themes (in Deskbar's Applications menu, or "Themes" in a Terminal)
-switches between themes and icon themes, and back:
+Power Theme (in Deskbar's Applications menu, or "powertheme" in a
+Terminal) switches between themes and icon themes, and back:
 
-    Themes --revert        go back to your previous look and icons
-    sh uninstall.sh        remove Reactionary
+    powertheme --revert    go back to your previous look and icons
+    sh uninstall.sh        remove Power Theme
 
 If the desktop ever fails to start after a system update: hold Space while
 booting, open "Select safe mode options" and choose "Disable user add-ons";

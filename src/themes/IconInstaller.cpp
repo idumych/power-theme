@@ -49,7 +49,7 @@ find_icon_map(BPath& path)
 	BStringList directories;
 	data_directories(directories);
 	for (int32 i = 0; i < directories.CountStrings(); i++) {
-		path.SetTo(directories.StringAt(i), "Themes/icon-map");
+		path.SetTo(directories.StringAt(i), "PowerTheme/icon-map");
 		if (BEntry(path.Path()).Exists())
 			return true;
 	}
@@ -62,7 +62,7 @@ load_icon_map(std::vector<IconTarget>& targets, BString& log)
 {
 	BPath path;
 	if (!find_icon_map(path)) {
-		log << "The icon map (data/Themes/icon-map) isn't installed.\n";
+		log << "The icon map (data/PowerTheme/icon-map) isn't installed.\n";
 		return B_ENTRY_NOT_FOUND;
 	}
 

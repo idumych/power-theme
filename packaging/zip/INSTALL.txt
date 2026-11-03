@@ -1,21 +1,23 @@
-Reactionary for Renku OS and Haiku
+Power Theme for Renku OS and Haiku
 ==================================
 
-A Windows ME style look after the Reactionary ME theme for KDE Plasma
-(Die4Ever, store.kde.org/p/2331482): a window decorator, a control look,
-desktop and system colours, fonts, and the ClassicOS 2000 icons. With it
-comes Themes, which switches between themes and icon themes, and back.
+Power Theme switches the look of the desktop between themes and icon
+themes, and back. It comes with Reactionary ME, a Windows ME style look
+after the KDE Plasma theme of that name (Die4Ever,
+store.kde.org/p/2331482), with the ClassicOS 2000 icons; Smoke window
+borders and controls in the style of ZETA's; and the Renku, Gonx, Haiku
+and Flat themes.
 
-This is an independent port, not made by or affiliated with the authors
-of Reactionary ME or ClassicOS 2000.
+The Reactionary ME look is an independent port, not made by or
+affiliated with the authors of Reactionary ME or ClassicOS 2000.
 
 Install
 -------
-Unpack the zip, open a Terminal in the reactionary folder and run:
+Unpack the zip, open a Terminal in the power-theme folder and run:
 
     sh install.sh
 
-If a compiler is installed, this builds Reactionary against your own
+If a compiler is installed, this builds Power Theme against your own
 system first, which is the safest way: the decorator runs inside
 app_server and uses its private classes. Without one it uses the prebuilt
 files, which were made on the Renku build named in prebuilt/BUILT_FOR. To
@@ -30,35 +32,35 @@ when restarted; logging out and in (or rebooting) gets everything.
 
 Tested on Renku x86_64 (hrev60072+339).
 
-Themes
-------
-Themes is in Deskbar's Applications menu. It lists the installed themes
+Power Theme
+-----------
+Power Theme is in Deskbar's Applications menu. It lists the installed themes
 and icon themes, applies them (all of a theme, or some of its parts) and
 puts your previous look back. From a Terminal:
 
-    Themes --list              installed themes and icon themes
-    Themes --apply="Reactionary ME"
-    Themes --icons=ClassicOS2000    only the icons ("haiku" for Haiku's)
-    Themes --revert            your previous look and icons
-    Themes --help
+    powertheme --list          installed themes and icon themes
+    powertheme --apply="Reactionary ME"
+    powertheme --icons=ClassicOS2000  only the icons ("haiku" for Haiku's)
+    powertheme --revert        your previous look and icons
+    powertheme --help
 
 The "Haiku" theme switches back to stock Haiku: its window borders,
 controls, colors, fonts, wallpaper and icons. The "Gonx" theme comes with
-Gonx's controls; its window borders are built by Themes (below).
+Gonx's controls; its window borders are built by Power Theme (below).
 The "Renku" theme puts Smoke window borders and flat controls in the
 Renku OS website's colours, night blue with fire orange.
 DarkFlat, LightFlat, MoonFlat and OrangeFlat come from haiku_darkstyle by
 unarix (github.com/unarix/haiku_darkstyle), with Haiku's Flat window
 decorator and control look, which install.sh installs if your system
-doesn't have them. "Themes --revert" goes back to your own
+doesn't have them. "powertheme --revert" goes back to your own
 look from before the first theme, customizations included.
 
 Window borders and controls build on private parts of the system, so
-they must be built for the exact system they run on. In Themes,
+they must be built for the exact system they run on. In Power Theme,
 "Build add-ons..." compiles them (Reactionary, Smoke, Gonx, Flat) for the
 running system, fetching its headers if they differ from the bundled
 ones, and offers to install the compiler if it is missing. From a
-Terminal: Themes --build-decorators. Do this again after every system
+Terminal: powertheme --build-decorators. Do this again after every system
 update.
 
 Themes made for Theme Manager are listed too: put them in
@@ -72,22 +74,22 @@ More themes go in ~/config/non-packaged/data/themes, icon themes
 
 Undo
 ----
-    Themes --revert        your previous decorator, controls, colours,
+    powertheme --revert    your previous decorator, controls, colours,
                            desktop colour, fonts and icons
-    sh uninstall.sh        reverts and removes Reactionary
+    sh uninstall.sh        reverts and removes Power Theme
 
 If the desktop ever fails to start (for example after a system update):
 hold Space while booting, open "Select safe mode options" and choose
 "Disable user add-ons"; once on the desktop, run sh uninstall.sh, or
-sh install.sh --build to rebuild Reactionary for the new system.
+sh install.sh --build to rebuild Power Theme for the new system.
 
 Contents
 --------
-    install.sh, uninstall.sh   install and remove Reactionary for this user
+    install.sh, uninstall.sh   install and remove Power Theme for this user
     prebuilt/                  ready-made files (see prebuilt/BUILT_FOR)
     data/                      the Reactionary ME theme, the ClassicOS 2000
                                icons and the icon map
     source/                    full source, with the private app_server and
                                FreeType headers needed to build it
-    screenshot.png             Reactionary with a few apps open
+    screenshot.png             the Power Theme window
     README.md, LICENSE         description and licence (MIT)

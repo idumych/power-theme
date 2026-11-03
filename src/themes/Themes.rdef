@@ -1,10 +1,10 @@
 /*
- * Themes' resources. The icon is ClassicOS 2000's "preferences-desktop"
+ * Power Theme's resources. The icon is ClassicOS 2000's "preferences-desktop"
  * (github.com/ClassicOS-Themes/ClassicOS-2000-Icons; redistribution
  * permitted), at 16, 32 and 48 pixels, made with tools/icon-test.
  */
 
-resource app_signature "application/x-vnd.idumych-Themes";
+resource app_signature "application/x-vnd.idumych-PowerTheme";
 
 resource app_flags B_MULTIPLE_LAUNCH;
 
@@ -14,7 +14,7 @@ resource app_version {
 	minor = 0,
 	variety = B_APPV_ALPHA,
 	internal = 0,
-	short_info = "Themes",
+	short_info = "Power Theme",
 	long_info = "Switches window borders, controls, colors, fonts and icons between themes."
 };
 

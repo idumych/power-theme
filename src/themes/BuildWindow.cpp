@@ -66,7 +66,7 @@ BuildWindow::BuildWindow(BMessenger target)
 		"system. This compiles the Reactionary, Smoke and Gonx window "
 		"borders and controls, and Haiku's Flat ones if the system lacks "
 		"them, against the running system. When the headers that come with "
-		"Themes are from another system build, it fetches this build's own "
+		"Power Theme are from another system build, it fetches this build's own "
 		"from its source repository first, which needs a network "
 		"connection.");
 	fIntro->SetExplicitMinSize(BSize(be_plain_font->Size() * 34,
@@ -111,7 +111,7 @@ BuildWindow::BuildWindow(BMessenger target)
 
 	if (find_build_script(fScript) != B_OK) {
 		fBuild->SetEnabled(false);
-		fStatus->SetText("build-decorators.sh isn't installed with Themes.");
+		fStatus->SetText("build-decorators.sh isn't installed with Power Theme.");
 	} else
 		fStatus->SetText("Ready to build.");
 }

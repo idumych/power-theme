@@ -2,7 +2,7 @@
  * Copyright 2026, idumych.
  * Distributed under the terms of the MIT License.
  *
- * The Themes window: installed themes on the left; on the right a preview,
+ * The Power Theme window: installed themes on the left; on the right a preview,
  * the icons to use with the theme, and which parts of it to apply.
  */
 #ifndef THEMES_WINDOW_H
