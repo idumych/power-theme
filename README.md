@@ -27,13 +27,14 @@ files; the code shares nothing with them.
 
 ## Screenshots
 
-All on Renku OS, with the same two windows: a window of controls and a
-Tracker window.
+All on Renku OS, with a window of controls and a Tracker window (and, for
+Reactionary ME, a folder of different file types, to show its icons). The
+picture at the top is Power Theme itself, under the stock Haiku theme.
 
 | | |
 |---|---|
 | ![Reactionary ME](docs/screenshots/reactionary-me.png) | ![Renku](docs/screenshots/renku.png) |
-| **Reactionary ME**: Windows ME window borders and controls, the ClassicOS 2000 icons | **Renku**: Smoke window borders and flat controls in the Renku OS website's colours |
+| **Reactionary ME**: Windows ME window borders and controls, and the ClassicOS 2000 icons on folders and file types | **Renku**: Smoke window borders and flat controls in the Renku OS website's colours |
 | ![Smoke](docs/screenshots/smoke.png) | ![Gonx](docs/screenshots/gonx.png) |
 | **Smoke** window borders and controls, in the style of ZETA's, with the colours of the "smoke" Theme Manager theme | **Gonx**: Gonx's window borders and controls |
 | ![DarkFlat](docs/screenshots/darkflat.png) | ![The Power Theme window](docs/screenshots/themes-window.png) |
