@@ -75,6 +75,7 @@ BuildWindow::BuildWindow(BMessenger target)
 	fProgress = new BStatusBar("progress");
 	fProgress->SetMaxValue(100.0f);
 	fStatus = new BStringView("status", "");
+	fStatus->SetExplicitMinSize(BSize(0, B_SIZE_UNSET));
 	fStatus->SetExplicitMaxSize(BSize(B_SIZE_UNLIMITED, B_SIZE_UNSET));
 	fStatus->SetTruncation(B_TRUNCATE_END);
 
