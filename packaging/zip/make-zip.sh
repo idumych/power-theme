@@ -11,7 +11,7 @@
 # build/BUILT_FOR names the system the prebuilt files were built for.
 set -eu
 
-version=${1:-0.2}
+version=${1:-0.3}
 root=$(cd "$(dirname "$0")/../.." && pwd)
 name=reactionary-$version
 out=$root/dist/$name

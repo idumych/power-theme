@@ -154,7 +154,7 @@ done
 rm -rf "$data/icons/ClassicOS2000"
 cp -R "$here/data/icons/ClassicOS2000" "$data/icons/"
 cp "$here/data/Themes/icon-map" "$data/Themes/icon-map"
-# what Themes' "Build window borders" needs: the script, the decorators'
+# what Themes' "Build add-ons" needs: the script, the add-ons'
 # source and the app_server headers
 rm -rf "$data/Themes/source"
 cp -R "$here/data/Themes/source" "$data/Themes/"

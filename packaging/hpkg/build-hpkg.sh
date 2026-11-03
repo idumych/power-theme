@@ -1,0 +1,82 @@
+#!/bin/sh
+# Build reactionary-<version>-1-x86_64.hpkg on a Haiku or Renku system.
+#
+#   sh packaging/hpkg/build-hpkg.sh <build-dir> <icons-dir> [<version>]
+#
+# <build-dir> holds Themes and data/Themes (make build/Themes
+# decorator-source); <icons-dir> the ClassicOS 2000 icon theme
+# (tools/build-icon-theme.py, on a machine with Python and librsvg).
+#
+# The package has no window decorators or control looks: they use private
+# classes of app_server and libbe, so they only fit the system build they
+# were compiled for. It has their source and the build script instead, and
+# Themes' "Build add-ons..." compiles them on the system it runs on, into
+# the user's non-packaged add-ons. So the package itself fits any system
+# from the one it was built on.
+set -eu
+
+build=${1:?usage: build-hpkg.sh <build-dir> <icons-dir> [<version>]}
+icons=${2:?usage: build-hpkg.sh <build-dir> <icons-dir> [<version>]}
+version=${3:-0.3}
+here=$(cd "$(dirname "$0")" && pwd)
+root=$(cd "$here/../.." && pwd)
+
+haiku=$(pkgman search -i -D haiku 2>/dev/null \
+	| awk '$2 == "haiku" { print $3; exit }')
+haiku=${haiku%-*}	# drop the package revision
+[ -n "$haiku" ] || { echo "can't tell the installed haiku version" >&2; exit 1; }
+
+for f in "$build/Themes" "$build/data/Themes/build-decorators.sh" \
+		"$icons/index.theme"; do
+	[ -e "$f" ] || { echo "missing $f" >&2; exit 1; }
+done
+
+work=$(mktemp -d "${TMPDIR:-/tmp}/reactionary-hpkg.XXXXXX")
+trap 'rm -rf "$work"' EXIT
+
+mkdir -p "$work/apps" "$work/bin" "$work/data/themes" "$work/data/icons" \
+	"$work/data/deskbar/menu/Applications" \
+	"$work/documentation/packages/reactionary"
+cp "$build/Themes" "$work/apps/Themes"
+ln -s ../apps/Themes "$work/bin/Themes"
+ln -s ../../../../apps/Themes "$work/data/deskbar/menu/Applications/Themes"
+cp -R "$root/data/themes/." "$work/data/themes/"
+# keeps the icon theme's aliases as symbolic links
+cp -R "$icons" "$work/data/icons/ClassicOS2000"
+cp -R "$build/data/Themes" "$work/data/Themes"
+cp "$root/data/Themes/icon-map" "$work/data/Themes/icon-map"
+cp "$root/README.md" "$root/LICENSE" "$root/packaging/zip/INSTALL.txt" \
+	"$work/documentation/packages/reactionary/"
+
+cat > "$work/.PackageInfo" <<INFO
+name			reactionary
+version			$version-1
+architecture	x86_64
+summary			"Themes: a theme manager with window borders, controls and icon themes"
+description		"Themes switches the desktop between themes, and back: window \
+borders, controls, colours, fonts, wallpaper, the Deskbar's place and \
+freedesktop icon themes. It reads Theme Manager themes too. It comes with \
+the Reactionary ME (Windows ME), Smoke (in the style of ZETA), Renku, \
+Gonx, Haiku and four Flat themes and the ClassicOS 2000 icons. The window \
+borders and controls are built on your own system by Themes' \
+'Build add-ons...' (they use private parts of app_server and libbe, so they \
+must match the exact system build); it offers to install the compiler."
+packager		"idumych <idumych@users.noreply.github.com>"
+vendor			"idumych"
+copyrights		"2026 idumych"
+licenses		"MIT"
+urls			"https://github.com/idumych/reactionary"
+provides {
+	reactionary = $version
+	app:Themes = $version
+	cmd:Themes = $version
+}
+requires {
+	haiku >= $haiku
+	lib:libstdc++
+}
+INFO
+
+out="$PWD/reactionary-$version-1-x86_64.hpkg"
+(cd "$work" && package create -C . "$out")
+echo "$out (for haiku $haiku and later)"

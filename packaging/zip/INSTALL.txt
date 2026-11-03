@@ -53,12 +53,13 @@ decorator and control look, which install.sh installs if your system
 doesn't have them. "Themes --revert" goes back to your own
 look from before the first theme, customizations included.
 
-Window borders run inside app_server, so they must be built for the exact
-system they run on. In Themes, "Build window borders..." compiles them
-(Reactionary, Smoke, Gonx, Flat) for the running system, fetching its
-headers if they differ from the bundled ones, and offers to install the
-compiler if it is missing. From a Terminal: Themes --build-decorators.
-Do this again after every system update.
+Window borders and controls build on private parts of the system, so
+they must be built for the exact system they run on. In Themes,
+"Build add-ons..." compiles them (Reactionary, Smoke, Gonx, Flat) for the
+running system, fetching its headers if they differ from the bundled
+ones, and offers to install the compiler if it is missing. From a
+Terminal: Themes --build-decorators. Do this again after every system
+update.
 
 Themes made for Theme Manager are listed too: put them in
 ~/config/settings/UIThemes, as Theme Manager expects. Those that ask for

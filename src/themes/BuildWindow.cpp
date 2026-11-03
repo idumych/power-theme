@@ -2,7 +2,7 @@
  * Copyright 2026, idumych.
  * Distributed under the terms of the MIT License.
  *
- * The "Build window borders" window. See BuildWindow.h.
+ * The "Build add-ons" window. See BuildWindow.h.
  */
 
 
@@ -47,7 +47,7 @@ struct RunJob {
 
 BuildWindow::BuildWindow(BMessenger target)
 	:
-	BWindow(BRect(0, 0, 520, 420), "Build window borders",
+	BWindow(BRect(0, 0, 520, 420), "Build add-ons",
 		B_TITLED_WINDOW, B_AUTO_UPDATE_SIZE_LIMITS | B_NOT_ZOOMABLE),
 	fTarget(target),
 	fChild(-1),
@@ -61,12 +61,14 @@ BuildWindow::BuildWindow(BMessenger target)
 	fIntro->SetLowUIColor(B_PANEL_BACKGROUND_COLOR);
 	fIntro->SetStylable(false);
 	fIntro->SetWordWrap(true);
-	fIntro->SetText("Window borders run inside app_server, so they have to "
-		"be built for this exact system. This compiles Reactionary, Smoke, "
-		"Gonx and, if the system lacks it, Haiku's Flat decorator, against "
-		"the running system. When the headers that come with Themes are from "
-		"another system build, it fetches this build's own from its source "
-		"repository first, which needs a network connection.");
+	fIntro->SetText("Window borders run inside app_server and controls "
+		"build on Haiku's own, so both have to be built for this exact "
+		"system. This compiles the Reactionary, Smoke and Gonx window "
+		"borders and controls, and Haiku's Flat ones if the system lacks "
+		"them, against the running system. When the headers that come with "
+		"Themes are from another system build, it fetches this build's own "
+		"from its source repository first, which needs a network "
+		"connection.");
 	fIntro->SetExplicitMinSize(BSize(be_plain_font->Size() * 34,
 		be_plain_font->Size() * 6.5));
 
@@ -239,6 +241,7 @@ BuildWindow::_Start(bool installTools)
 	fRunning = true;
 	fStopping = false;
 	fError = "";
+	fNeedTools = "";
 	fLog->SetText("");
 	fProgress->Reset();
 	fStatus->SetText("Starting" B_UTF8_ELLIPSIS);
@@ -290,8 +293,10 @@ BuildWindow::_Line(const BString& line)
 		_AddToLog(BString("Error: ") << fError << "\n");
 		return;
 	}
-	if (line.StartsWith("NEED_TOOLS"))
+	if (line.StartsWith("NEED_TOOLS ")) {
+		line.CopyInto(fNeedTools, 11, line.Length() - 11);
 		return;
+	}
 	_AddToLog(BString(line) << "\n");
 }
 
@@ -313,20 +318,22 @@ BuildWindow::_Finished(int status)
 
 	if (status == 0) {
 		fProgress->Update(100.0f - fProgress->CurrentValue());
-		fStatus->SetText("Built. Themes with these window borders can be "
-			"applied now.");
+		fStatus->SetText("Built. Themes with these window borders and "
+			"controls can be applied now; restart applications to see new "
+			"controls in them.");
 		fTarget.SendMessage(kMsgDecoratorsBuilt);
 		return;
 	}
 
 	if (status == kNeedTools) {
-		fStatus->SetText("The compiler isn't installed.");
-		BAlert* alert = new BAlert("Build window borders",
-			"Building the window borders needs the C++ compiler (the gcc and "
-			"haiku_devel packages). Install them now with pkgman? This "
-			"needs a network connection.",
-			"Cancel", "Install and build", NULL, B_WIDTH_AS_USUAL,
-			B_IDEA_ALERT);
+		BString packages(fNeedTools.IsEmpty() ? "gcc haiku_devel" : fNeedTools);
+		fStatus->SetText(BString("Not installed: ") << packages << ".");
+		BString text("Building the add-ons needs these packages, which "
+			"aren't installed: ");
+		text << packages << ". Install them now with pkgman? This needs a "
+			"network connection.";
+		BAlert* alert = new BAlert("Build add-ons", text.String(), "Cancel",
+			"Install and build", NULL, B_WIDTH_AS_USUAL, B_IDEA_ALERT);
 		alert->SetShortcut(0, B_ESCAPE);
 		if (alert->Go() == 1)
 			_Start(true);

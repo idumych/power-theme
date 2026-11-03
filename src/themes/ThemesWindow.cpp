@@ -459,11 +459,11 @@ ThemesWindow::ThemesWindow(BRect frame, const char* selected)
 
 	fRestartTracker = new BButton("restart", "Restart Tracker",
 		new BMessage(kMsgRestartTracker));
-	fBuildDecorators = new BButton("build", "Build window borders"
-		B_UTF8_ELLIPSIS, new BMessage(kMsgBuildDecorators));
-	fBuildDecorators->SetToolTip("Compile the window borders for this "
-		"system. They run inside app_server, so they must match the exact "
-		"system build.");
+	fBuildDecorators = new BButton("build", "Build add-ons" B_UTF8_ELLIPSIS,
+		new BMessage(kMsgBuildDecorators));
+	fBuildDecorators->SetToolTip("Compile the window borders and controls "
+		"for this system. They build on app_server's and Haiku's own "
+		"private classes, so they must match the exact system build.");
 	fRevert = new BButton("revert", "Revert", new BMessage(kMsgRevert));
 	fApply = new BButton("apply", "Apply", new BMessage(kMsgApply));
 
@@ -844,8 +844,8 @@ ThemesWindow::_SelectTheme(int32 index)
 		} else {
 			BString text("Not installed: ");
 			text << missingParts.Join(", ") << ".";
-			if ((missing & THEME_DECORATOR) != 0)
-				text << " Build window borders" B_UTF8_ELLIPSIS " can make "
+			if ((missing & (THEME_DECORATOR | THEME_CONTROLS)) != 0)
+				text << " Build add-ons" B_UTF8_ELLIPSIS " can make "
 					"Reactionary, Smoke, Gonx and Flat ones.";
 			fStatus->SetText(text);
 			fStatus->SetToolTip(text);

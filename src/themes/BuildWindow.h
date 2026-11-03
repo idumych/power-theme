@@ -2,8 +2,8 @@
  * Copyright 2026, idumych.
  * Distributed under the terms of the MIT License.
  *
- * The "Build window borders" window: runs build-decorators.sh, which
- * compiles the window decorators against the running system's app_server
+ * The "Build add-ons" window: runs build-decorators.sh, which compiles the
+ * window decorators and control looks against the running system
  * (fetching its headers when the bundled ones are from another build), and
  * shows its steps in a progress bar and its output in a log.
  */
@@ -51,6 +51,7 @@ private:
 			bool				fRunning;
 			bool				fStopping;
 			BString				fError;
+			BString				fNeedTools;
 
 			BTextView*			fIntro;
 			BStatusBar*			fProgress;

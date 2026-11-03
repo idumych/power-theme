@@ -148,19 +148,21 @@ or rebuild Reactionary for the new system with `sh install.sh --build`.
     such and left out.
   - Saves your look and icons the first time, so **Revert** always gets
     back to them, whatever was applied in between.
-  - **Build window borders…** compiles the window decorators (Reactionary,
-    Smoke, Gonx, and Haiku's Flat one if the system lacks it) on the system
-    they will run on, with a progress bar and a log. Decorators run inside
-    app_server and use its private classes, so one built for another system
-    build can fail there. The headers that come with Themes are from one
-    system revision (`build-headers/REVISION`); on any other, it finds the
-    system's revision (`hrev60072+339`, from its haiku package) and fetches
-    that revision's headers from RenkuOS/Source, or haiku/haiku, with git:
-    the commits back to the hrev tag only, the commit as many past it as
-    the revision says, then just the 42 header files. If the compiler isn't
-    installed, it offers to install it (gcc and haiku_devel). A decorator in
-    use is switched to its new build, and set aside if app_server doesn't
-    take it. The same from a Terminal: `Themes --build-decorators
+  - **Build add-ons…** compiles the window decorators and control looks
+    (Reactionary, Smoke, Gonx, and Haiku's Flat ones if the system lacks
+    them) on the system they will run on, with a progress bar and a log.
+    Decorators run inside app_server and use its private classes, and
+    control looks subclass Haiku's private HaikuControlLook, so ones built
+    for another system build can fail there. The headers that come with
+    Themes are from one system revision (`build-headers/REVISION`); on any
+    other, it finds the system's revision (`hrev60072+339`, from its haiku
+    package) and fetches that revision's headers from RenkuOS/Source, or
+    haiku/haiku, with git: the commits back to the hrev tag only, the
+    commit as many past it as the revision says, then just the 42 header
+    files. If the compiler isn't installed, it offers to install it (gcc
+    and haiku_devel). A decorator in use is switched to its new build, and
+    set aside if app_server doesn't take it. The same from a Terminal:
+    `Themes --build-decorators
     [--install-tools]` (`src/themes/build-decorators.sh`).
   - `Themes --list`, `--apply=NAME [--parts=…]`, `--icons=ID|haiku`,
     `--revert`, `--status`, `--show=NAME`, `--restart-tracker` and

@@ -66,7 +66,8 @@ SMOKE_LOOK := $(BUILD)/control_look/Smoke
 GONX := src/third_party/gonx
 GONX_LOOK := $(BUILD)/control_look/Gonx
 
-# What Themes needs to build the window decorators on a user's system, laid
+# What Themes needs to build the add-ons (decorators, control looks) on a
+# user's system, laid
 # out as build-decorators.sh expects it in a data folder's "Themes".
 DECOR_SOURCE := $(BUILD)/data/Themes
 
@@ -78,7 +79,11 @@ decorator-source:
 	mkdir -p $(DECOR_SOURCE)/source/decorators/Reactionary \
 		$(DECOR_SOURCE)/source/decorators/Smoke \
 		$(DECOR_SOURCE)/source/decorators/Gonx \
-		$(DECOR_SOURCE)/source/decorators/FlatDecorator
+		$(DECOR_SOURCE)/source/decorators/FlatDecorator \
+		$(DECOR_SOURCE)/source/control_looks/Reactionary \
+		$(DECOR_SOURCE)/source/control_looks/Smoke \
+		$(DECOR_SOURCE)/source/control_looks/Gonx \
+		$(DECOR_SOURCE)/source/control_looks/FlatControlLook
 	cp src/themes/build-decorators.sh $(DECOR_SOURCE)/
 	cp -R build-headers $(DECOR_SOURCE)/source/
 	cp src/decorator/ReactionaryDecorator.* src/decorator/resources.rdef \
@@ -88,6 +93,11 @@ decorator-source:
 	cp $(GONX)/decorator/* $(GONX)/LICENSE \
 		$(DECOR_SOURCE)/source/decorators/Gonx/
 	cp $(FLAT)/decorator/* $(DECOR_SOURCE)/source/decorators/FlatDecorator/
+	cp src/controllook/* $(DECOR_SOURCE)/source/control_looks/Reactionary/
+	cp src/smoke/SmokeControlLook.* $(DECOR_SOURCE)/source/control_looks/Smoke/
+	cp $(GONX)/controllook/* $(GONX)/LICENSE \
+		$(DECOR_SOURCE)/source/control_looks/Gonx/
+	cp $(FLAT)/controllook/* $(DECOR_SOURCE)/source/control_looks/FlatControlLook/
 	cp LICENSE $(DECOR_SOURCE)/source/
 
 # Gonx's control look, for the Gonx theme (its decorator is built by Themes).
