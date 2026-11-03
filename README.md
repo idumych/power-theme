@@ -47,7 +47,8 @@ system, here with the bundled headers, which match this Renku build.
 
 ## Install
 
-From a package (Haiku R1/beta6 and later, Renku OS):
+Power Theme comes as a package for Haiku R1/beta6 and later, and Renku OS
+(x86_64), on the [releases page](https://github.com/idumych/power-theme/releases):
 
 ```sh
 pkgman install ./powertheme-0.3-1-x86_64.hpkg
@@ -59,17 +60,12 @@ built on your own system, because they use private parts of app_server
 and libbe; build them again after a system update. Power Theme offers to
 install the compiler if it is missing.
 
-Or from the zip, into `~/config/non-packaged`: unpack
-`power-theme-0.3.zip`, open a Terminal in its folder and run
-`sh install.sh` (`sh install.sh --build` builds everything on your
-system; `pkgman install gcc make haiku_devel` gets the compiler).
-
 To get the new controls and fonts everywhere, restart running
 applications, or log out and back in.
 
 ```sh
-powertheme --revert        # your previous decorator, controls, colours, fonts and icons
-sh uninstall.sh            # (zip) revert and remove Power Theme
+powertheme --revert           # your previous decorator, controls, colours, fonts and icons
+pkgman uninstall powertheme   # then remove Power Theme
 ```
 
 If the desktop ever fails to start (for example after a system update),
@@ -134,8 +130,8 @@ click **Build add-ons…** again.
   look from before the first theme, customisations included.
 - **The Gonx theme** (`data/themes/Gonx`): the look of
   [Gonx](https://github.com/idumych/gonx), with its colours, desktop colour
-  and fonts over Haiku's defaults, and Haiku's icons. Gonx's control look
-  comes with Power Theme, which builds its window decorator (below);
+  and fonts over Haiku's defaults, and Haiku's icons. Power Theme builds
+  Gonx's window borders and controls (below);
   the sources are in `src/third_party/gonx`.
 - **The Flat themes** (`data/themes/DarkFlat`, `LightFlat`, `MoonFlat`,
   `OrangeFlat`), from unarix's
@@ -143,9 +139,9 @@ click **Build add-ons…** again.
   window borders and controls in dark, light, moonlit and orange colours,
   the first three over its night sky wallpaper. They use Haiku's own
   FlatDecorator and FlatControlLook, which Haiku ships in its haiku_extras
-  package; Renku's repositories don't have it, so they are built here from
-  Renku's source (`src/third_party/haiku-flat`) and installed unless the
-  system already has them. Converted from Theme Manager's format by
+  package; Renku's repositories don't have it, so Power Theme builds them
+  from Renku's source (`src/third_party/haiku-flat`) unless the system
+  already has them. Converted from Theme Manager's format by
   `tools/import-uitheme.py`, with Noto Sans standing in for Noto Sans
   Display where that isn't installed; their Terminal, screensaver
   and sound settings are left out.
@@ -258,8 +254,7 @@ designs and compares Haiku's rendering of the result with them, pixel by
 pixel.
 
 `python3 tools/build-icon-theme.py <ClassicOS-2000-Icons checkout> build/icons`
-renders the ClassicOS 2000 icons (needs `rsvg-convert`), and
-`sh packaging/zip/make-zip.sh` assembles the zip from `build/`.
+renders the ClassicOS 2000 icons (needs `rsvg-convert`).
 
 `sh packaging/hpkg/build-hpkg.sh <build-dir> <icons-dir>` makes the
 package on a Haiku or Renku system, from `make build/PowerTheme
