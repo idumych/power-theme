@@ -1,0 +1,58 @@
+# LightFlat, converted from a Theme Manager theme by
+# tools/import-uitheme.py. Colours it leaves out are Haiku's light defaults.
+# From haiku_darkstyle by unarix (github.com/unarix/haiku_darkstyle, MIT).
+
+name = LightFlat
+description = Light and flat: pale rose-grey panels, white fields and yellow window tabs, over a night sky. From haiku_darkstyle by unarix.
+decorator = FlatDecorator | Default
+control look = FlatControlLook | haiku
+icons = haiku
+desktop color = #FFF6AE
+deskbar = right top, expanded
+wallpaper = wallpaper.jpg
+wallpaper mode = scaled
+
+font plain = Noto Sans Display | Noto Sans, Regular, 12
+font bold = Noto Sans Display | Noto Sans, Medium | Bold, 12
+font fixed = Noto Sans Mono, Regular, 12
+font menu = Noto Sans Display | Noto Sans, Regular, 12
+
+color B_PANEL_BACKGROUND_COLOR = #E0D7DA
+color B_MENU_BACKGROUND_COLOR = #E0D7DA
+color B_WINDOW_TAB_COLOR = #EDC746
+color B_KEYBOARD_NAVIGATION_COLOR = #B2B2B2
+color B_DESKTOP_COLOR = #FFF6AE
+color B_MENU_SELECTED_BACKGROUND_COLOR = #EDC746
+color B_MENU_ITEM_TEXT_COLOR = #141414
+color B_MENU_SELECTED_ITEM_TEXT_COLOR = #141414
+color B_MENU_SELECTED_BORDER_COLOR = #141414
+color B_PANEL_TEXT_COLOR = #141414
+color B_DOCUMENT_BACKGROUND_COLOR = #FFFFFF
+color B_DOCUMENT_TEXT_COLOR = #141414
+color B_CONTROL_BACKGROUND_COLOR = #FFF5FB
+color B_CONTROL_TEXT_COLOR = #141414
+color B_CONTROL_BORDER_COLOR = #B2B2B2
+color B_CONTROL_HIGHLIGHT_COLOR = #E0D7DA
+color B_NAVIGATION_PULSE_COLOR = #141414
+color B_SHINE_COLOR = #FFFFFF
+color B_SHADOW_COLOR = #141414
+color B_TOOLTIP_BACKGROUND_COLOR = #E0D7DA
+color B_TOOLTIP_TEXT_COLOR = #141414
+color B_WINDOW_TEXT_COLOR = #141414
+color B_WINDOW_INACTIVE_TAB_COLOR = #E0D7DA
+color B_WINDOW_INACTIVE_TEXT_COLOR = #646464
+color B_WINDOW_BORDER_COLOR = #E0D7DA
+color B_WINDOW_INACTIVE_BORDER_COLOR = #E0D7DA
+color B_CONTROL_MARK_COLOR = #B2B2B2
+color B_LIST_BACKGROUND_COLOR = #FFFFFF
+color B_LIST_SELECTED_BACKGROUND_COLOR = #E0D7DA
+color B_LIST_ITEM_TEXT_COLOR = #141414
+color B_LIST_SELECTED_ITEM_TEXT_COLOR = #000000
+color B_SCROLL_BAR_THUMB_COLOR = #EDC746
+color B_LINK_TEXT_COLOR = #3366BB
+color B_LINK_HOVER_COLOR = #6698CB
+color B_LINK_VISITED_COLOR = #91709B
+color B_LINK_ACTIVE_COLOR = #798ECB
+color B_STATUS_BAR_COLOR = #3296FF
+color B_SUCCESS_COLOR = #2ECC40
+color B_FAILURE_COLOR = #FF4136

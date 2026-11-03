@@ -1,0 +1,241 @@
+# Reactionary for Renku OS and Haiku
+
+![Reactionary on Renku OS](docs/screenshot.png)
+
+A Windows ME style look for [Renku OS](https://github.com/RenkuOS/Source)
+and Haiku, after **Reactionary ME**, a global theme for KDE Plasma by
+Die4Ever ([store.kde.org/p/2331482](https://store.kde.org/p/2331482)). It
+includes a window decorator, a control look, desktop and system colours,
+fonts, and the [ClassicOS 2000](https://github.com/ClassicOS-Themes/ClassicOS-2000-Icons)
+icons. With it comes **Themes**, a theme manager that switches between
+themes and freedesktop icon themes, and back.
+
+This is an independent, unofficial port. It is not made by, affiliated
+with or endorsed by Die4Ever, the developers of Reactionary, Reactionary
+Plus or the themes they build on, or the ClassicOS project. It is a new implementation drawn to match
+the KDE theme. Colours and the title bar button glyphs come from the
+theme's files; the code shares nothing with them.
+
+## Install
+
+Unpack `reactionary-0.2.zip`, open a Terminal in the `reactionary-0.2`
+folder and run:
+
+```sh
+sh install.sh
+```
+
+If a compiler is installed, this builds Reactionary against your own
+system first. That is the safest way, because the decorator runs inside
+app_server. Without a compiler it uses the prebuilt files. To get the
+compiler:
+
+```sh
+pkgman install gcc make haiku_devel
+sh install.sh --build
+```
+
+Everything goes into `~/config/non-packaged`; no package is installed.
+To get the new controls and fonts everywhere, restart running
+applications, or log out and back in.
+
+```sh
+Themes --revert            # your previous decorator, controls, colours, fonts and icons
+sh uninstall.sh            # revert and remove Reactionary
+```
+
+If the desktop ever fails to start (for example after a system update),
+hold Space while booting, open **Select safe mode options** and choose
+**Disable user add-ons**. Once you're on the desktop, run `sh uninstall.sh`,
+or rebuild Reactionary for the new system with `sh install.sh --build`.
+
+## What's here
+
+- **Window decorator** (`add-ons/decorators/Reactionary`), from the
+  theme's "Windows ME" Aurorae decoration:
+  - A four pixel grey frame, lit from the top left.
+  - A title bar shading from navy to light blue (grey when inactive), with
+    the title in bold white.
+  - Bevelled 16 × 14 minimize, zoom and close buttons. The glyphs are the
+    decoration's own bitmaps, and the buttons press in when clicked.
+  - Every edge resizes, and so do the ends of each edge from the corner.
+    Document windows get Windows' diagonal size grip.
+  - Tool windows get a lower title bar. Menus and tool tips get the outer
+    half of a raised edge.
+- **Control look** (`add-ons/control_look/Reactionary`), after Qt's
+  "Windows" style, which the theme uses:
+  - Push buttons with a two pixel raised bevel. Pressed buttons sink and
+    their label moves down and right. The default button gets a black
+    frame.
+  - White sunken fields, check boxes and radio buttons. The check box has
+    Windows' tick and the radio buttons are drawn pixel by pixel.
+  - Drop-down lists with a raised arrow button.
+  - Scroll bars with a dithered track and raised arrows and thumb. A bar
+    that can't scroll has no thumb.
+  - Raised menus with a navy highlight. An open menu bar title sinks into
+    the bar.
+  - Classic tabs, etched group boxes, a progress bar made of blocks, and
+    sliders with a sunken channel.
+  - Dotted focus rectangles and engraved disabled text.
+- **Smoke** (`add-ons/decorators/Smoke`, `add-ons/control_look/Smoke`), a
+  window decorator and control look in the style of ZETA's "Smoke"
+  decorator and ZETA's controls. They were redrawn from screenshots of ZETA
+  1.21, measured pixel by pixel; no ZETA code or artwork is used. Theme
+  Manager themes that name the Smoke decorator (such as the "smoke" sample
+  theme) get both.
+  - A sliding BeOS tab shading down from the window tab colour into a four
+    pixel frame (a black line, a light one, the tab colour, black again),
+    with a white cross at its left end and two overlapping squares at its
+    right. The bottom right corner of a resizable window is lighter;
+    document windows have a grip of six dots there.
+  - Rounded buttons, check boxes and fields with black outlines and a soft
+    shadow, faces shading downwards, a green tick (the control highlight
+    colour) reaching out of its box, and radio buttons to match.
+  - Menu fields with a pop-up section in the menu selection colour. ZETA
+    has it at the left end; it is at the right here, where Haiku's menu
+    fields keep room for it.
+  - Scroll bars with a light track, double chevrons and a shaded thumb;
+    outlined, rounded tabs on a strip; a shaded menu bar whose open title
+    is a sunken box; single line rounded group boxes.
+  - Radio buttons, pressed buttons and selected menu items weren't in the
+    screenshots, and are drawn to match the rest.
+- **The Haiku theme** (`data/themes/Haiku`): Haiku's own look, with its
+  default decorator, built-in controls, default colours, desktop colour and
+  fonts (from Haiku's source) and Haiku's icons. It switches back to stock
+  Haiku whatever you had before; **Revert** instead goes back to *your*
+  look from before the first theme, customisations included.
+- **The Gonx theme** (`data/themes/Gonx`): the look of
+  [Gonx](https://github.com/idumych/gonx), with its colours, desktop colour
+  and fonts over Haiku's defaults, and Haiku's icons. It needs Gonx's
+  window decorator and control look installed; Themes shows what is
+  missing and leaves those parts out.
+- **The Flat themes** (`data/themes/DarkFlat`, `LightFlat`, `MoonFlat`,
+  `OrangeFlat`), from unarix's
+  [haiku_darkstyle](https://github.com/unarix/haiku_darkstyle): flat
+  window borders and controls in dark, light, moonlit and orange colours,
+  the first three over its night sky wallpaper. They use Haiku's own
+  FlatDecorator and FlatControlLook, which Haiku ships in its haiku_extras
+  package; Renku's repositories don't have it, so they are built here from
+  Renku's source (`src/third_party/haiku-flat`) and installed unless the
+  system already has them. Converted from Theme Manager's format by
+  `tools/import-uitheme.py`, with Noto Sans standing in for Noto Sans
+  Display where that isn't installed; their Terminal, screensaver
+  and sound settings are left out.
+- **The Renku theme** (`data/themes/Renku`): Smoke window borders and
+  DarkFlat's flat controls in the colours of the
+  [Renku OS website](https://idumych.github.io/renkuos-website-draft):
+  night blue and indigo panels and lists, warm white text, fire orange
+  window tabs, menu highlights, focus and scroll bar thumbs, and gold and
+  seal red for links and failures. IBM Plex Sans and Mono where they are
+  installed, otherwise Noto Sans. Its wallpaper follows the site's front
+  page, with 連句 in outline; `tools/make-renku-wallpaper.py` draws it.
+- **The Reactionary ME theme** (`data/themes/Reactionary ME`): the
+  decorator and control look, the theme's "Windows ME" colour scheme, the
+  3A6EA5 desktop colour, Noto Sans 10 pt fonts and the ClassicOS 2000
+  icons.
+- **Themes** (`apps/Themes`, also a command), a theme manager. A theme is
+  a folder with a `theme.settings` file (see `src/themes/Theme.h`);
+  `control look = haiku` and `icons = haiku` stand for Haiku's own. A
+  theme can set a wallpaper (`wallpaper = image.png`, scaled, centered,
+  tiled or placed; `none`; or `default`, the one Tracker sets up on a new
+  system), as the Backgrounds preferences would.
+  - Lists the installed themes with a preview, and the icon themes with a
+    few of their icons.
+  - Applies a whole theme or only some parts of it (window borders,
+    controls, colours, fonts, wallpaper, Deskbar position, icons), and any
+    icon theme with
+    any theme. Parts whose add-ons or files aren't installed are shown as
+    such and left out.
+  - Saves your look and icons the first time, so **Revert** always gets
+    back to them, whatever was applied in between.
+  - `Themes --list`, `--apply=NAME [--parts=…]`, `--icons=ID|haiku`,
+    `--revert`, `--status`, `--show=NAME`, `--restart-tracker` do the same
+    from a Terminal.
+- **Theme Manager themes**: themes made for
+  [Theme Manager](https://github.com/HaikuArchives/HaikuThemeManager)
+  (and BeOS and ZETA before it), such as the
+  [sample themes](https://github.com/mmuman/HaikuThemes), are listed and
+  applied too, from the `UIThemes` folders Theme Manager uses (for example
+  `~/config/settings/UIThemes`). Taken over: colours (the ones a theme
+  leaves out are Haiku's light or dark defaults, so a theme looks the same
+  whatever came before), fonts (Noto Sans where theirs isn't installed),
+  title colours, the Deskbar's place, and backgrounds and desktop colours
+  per workspace, with images found in the theme's folder wherever it was
+  installed. Many
+  themes name ZETA decorators, which don't exist on Haiku; they get the
+  nearest installed one (Smoke: Smoke, with its controls; Win2k and
+  Redmond: Reactionary; GONX: Gonx; BeOS-like ones: BeDecorator; others:
+  Default) and Haiku's controls. Terminal, sound and screensaver settings,
+  and fonts that come with a theme, are left out.
+- **Icon themes**: any [freedesktop icon theme](https://specifications.freedesktop.org/icon-theme-spec/latest/)
+  (an `index.theme` with folders of PNG or SVG icons, including the themes
+  it inherits from). Themes turns each icon into a Haiku vector icon (HVIF)
+  that holds the theme's own 16, 24, 32 and 48 pixel designs, pixel for
+  pixel, each drawn at its own size. It sets them on over 100 file types (as
+  icons of the types, in your MIME database) and on your home, mail and
+  queries folders. `data/Themes/icon-map` says which icon goes where, and
+  can be extended. The ClassicOS 2000 icons ship as PNG, rendered from the
+  theme's SVG with librsvg (`tools/build-icon-theme.py`).
+
+## Limitations
+
+- Only the light "Windows ME" variant is ported. The theme's dark and dim
+  colour schemes, cursors and wallpaper are not.
+- Icons change for file types and some folders only. Applications keep
+  their own icons, which are part of them. The Trash keeps Tracker's icon
+  (Tracker resets it whenever the Trash fills or empties), disks keep the
+  icons their drivers give them, and alerts keep Haiku's.
+- Tracker shows the new folder icons only once it restarts: Themes offers
+  to restart it (`Themes --restart-tracker`).
+- Icons with many colours lose a few to fit Haiku's vector icon format
+  (255 colours and shapes in all); designs that still don't fit are left
+  out, largest first. SVG icons are drawn with nanosvg, which leaves out
+  elements with filters (usually blurred shadows).
+- Windows have no icon in the title bar: app_server decorators have no
+  access to application icons.
+- Haiku makes default buttons bigger than the others; Reactionary draws
+  them only one pixel bigger on each side, but the layout keeps the room.
+- Slider fill colours don't show, because the channel is as thin as
+  Windows'.
+
+## Building
+
+On Renku or Haiku, `make` builds everything against the running system.
+It uses the private app_server and FreeType headers bundled in
+`build-headers/`. `make demo` builds `build/controls-demo`, a window with
+every kind of control.
+
+To cross-build on Linux against a Renku source tree, run
+`sh tools/sync-sysroot.sh <ssh-host>` once per Renku build, then `make`.
+
+`make icon-test` builds `build/icon-test`, which encodes an icon's PNG
+designs and compares Haiku's rendering of the result with them, pixel by
+pixel.
+
+`python3 tools/build-icon-theme.py <ClassicOS-2000-Icons checkout> build/icons`
+renders the ClassicOS 2000 icons (needs `rsvg-convert`), and
+`sh packaging/zip/make-zip.sh` assembles the zip from `build/`.
+
+## Credits
+
+- Reactionary ME global theme, "Windows ME" window decoration and colour
+  schemes by Die4Ever (GPL 3+), forked from Reactionary Plus (phob1an),
+  Windows Classic hidpi (pixelocdguy) and Windows Classic colours.
+- ClassicOS 2000 icons by the ClassicOS contributors
+  ([licence](https://github.com/ClassicOS-Themes/ClassicOS-2000-Icons/blob/main/LICENSE):
+  redistribution permitted). Brand icons in the set are trademarks of
+  their owners.
+- DarkFlat, LightFlat, MoonFlat, OrangeFlat themes and their wallpaper
+  from [haiku_darkstyle](https://github.com/unarix/haiku_darkstyle) by
+  nhtello (unarix), MIT licence (in each theme's folder).
+- FlatDecorator and FlatControlLook from Haiku (as in Renku OS's source),
+  MIT licence, Haiku, Inc.; FlatControlLook by nhtello.
+- Smoke's look follows ZETA's Smoke decorator and controls (yellowTAB,
+  later magnussoft). ZETA is not affiliated with this project. Smoke is
+  drawn from scratch after screenshots; nothing from ZETA is included.
+- [nanosvg](https://github.com/memononen/nanosvg) by Mikko Mononen (zlib
+  licence), in `src/themes/third_party`.
+- Project layout, scripts and the start of the theme tool from
+  [Gonx](https://github.com/idumych/gonx).
+
+Reactionary's own code is under the MIT licence (see `LICENSE`).

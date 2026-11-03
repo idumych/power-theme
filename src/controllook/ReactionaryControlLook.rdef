@@ -1,0 +1,9 @@
+resource app_version {
+	major = 0,
+	middle = 1,
+	minor = 0,
+	variety = B_APPV_ALPHA,
+	internal = 0,
+	short_info = "Reactionary Control Look",
+	long_info = "Windows ME style controls after the Reactionary ME KDE theme. MIT licensed."
+};

@@ -1,0 +1,45 @@
+# Reactionary ME, after the KDE Plasma global theme by Die4Ever
+# (store.kde.org/p/2331482) and its "Windows ME" colour scheme.
+# An independent port, not affiliated with the theme's authors.
+
+name = Reactionary ME
+description = Windows ME style windows and controls: grey bevelled frames, navy to light blue title bars, white sunken fields and dithered scroll bars, with the ClassicOS 2000 icons.
+decorator = Reactionary
+control look = Reactionary
+icons = ClassicOS2000
+wallpaper = none
+deskbar = bottom, expanded
+desktop color = #3A6EA5
+
+font plain = Noto Sans, Regular, 10
+font bold = Noto Sans, Bold, 10
+font menu = Noto Sans, Regular, 10
+
+color B_PANEL_BACKGROUND_COLOR = #D4D0C8
+color B_PANEL_TEXT_COLOR = #000000
+color B_DOCUMENT_BACKGROUND_COLOR = #FFFFFF
+color B_DOCUMENT_TEXT_COLOR = #000000
+color B_CONTROL_BACKGROUND_COLOR = #FFFFFF
+color B_CONTROL_TEXT_COLOR = #000000
+color B_CONTROL_BORDER_COLOR = #000000
+color B_CONTROL_HIGHLIGHT_COLOR = #01178E
+color B_KEYBOARD_NAVIGATION_COLOR = #000000
+color B_MENU_BACKGROUND_COLOR = #D4D0C8
+color B_MENU_ITEM_TEXT_COLOR = #000000
+color B_MENU_SELECTED_BACKGROUND_COLOR = #01178E
+color B_MENU_SELECTED_ITEM_TEXT_COLOR = #FFFFFF
+color B_MENU_SELECTED_BORDER_COLOR = #01178E
+color B_LIST_BACKGROUND_COLOR = #FFFFFF
+color B_LIST_ITEM_TEXT_COLOR = #000000
+color B_LIST_SELECTED_BACKGROUND_COLOR = #01178E
+color B_LIST_SELECTED_ITEM_TEXT_COLOR = #FFFFFF
+color B_TOOLTIP_BACKGROUND_COLOR = #FFFFE1
+color B_TOOLTIP_TEXT_COLOR = #000000
+color B_STATUS_BAR_COLOR = #01178E
+color B_SCROLL_BAR_THUMB_COLOR = #D4D0C8
+color B_WINDOW_TAB_COLOR = #0A246A
+color B_WINDOW_TEXT_COLOR = #FFFFFF
+color B_WINDOW_INACTIVE_TAB_COLOR = #808080
+color B_WINDOW_INACTIVE_TEXT_COLOR = #D4D0C8
+color B_WINDOW_BORDER_COLOR = #C0C0C0
+color B_WINDOW_INACTIVE_BORDER_COLOR = #C0C0C0

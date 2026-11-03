@@ -1,0 +1,97 @@
+# Which icons of a freedesktop icon theme Themes puts where on Haiku.
+#
+#   mime <file type> = <icon name> <icon name> ...
+#   folder <folder> = <icon name> ...
+#
+# The first icon name the theme has is used. A type ending in "/*" stands
+# for every installed type of that group not named on a line of its own.
+# Types that aren't installed are left alone. "~" is the home folder.
+#
+# Application icons can't be changed: they are part of the applications.
+
+# Tracker's own kinds of files
+mime application/x-vnd.Be-directory = folder inode-directory
+mime application/x-vnd.Be-root = computer user-desktop
+mime application/x-vnd.Be-volume = drive-harddisk harddrive
+mime application/x-vnd.Be-query = folder-saved-search system-search
+mime application/x-vnd.Be-queryTemplate = folder-saved-search system-search
+mime application/x-vnd.Be-elfexecutable = application-x-executable application-x-ms-dos-executable
+mime application/x-vnd.Be-bookmark = text-html applications-internet
+mime application/octet-stream = application-octet-stream unknown stock_unknown gnome-unknown text-x-generic
+mime application/x-person = x-office-address-book stock_person contact-new
+mime application/x-vnd.Be.printer = printer
+
+# mail
+mime text/x-email = message-rfc822 mail-message internet-mail
+mime text/x-partial-email = message-rfc822 mail-message internet-mail
+mime message/rfc822 = message-rfc822 mail-message internet-mail
+mime text/x-vnd.Be-MailDraft = mail-message-new message-rfc822 internet-mail
+
+# text
+mime text = text-x-generic text-plain
+mime text/plain = text-plain text-x-generic
+mime text/html = text-html html
+mime text/css = text-css text-x-css
+mime text/xml = text-xml application-xml
+mime text/x-source-code = text-x-csrc text-x-c text-x-script
+mime text/x-makefile = text-x-makefile
+mime text/x-jamfile = text-x-makefile
+mime text/rtf = text-rtf text-richtext text-x-generic
+mime text/markdown = text-markdown text-x-generic
+mime text/x-patch = text-x-patch text-x-generic
+mime text/* = text-x-generic
+
+# documents
+mime application/pdf = application-pdf x-office-document
+mime application/postscript = application-postscript x-office-document
+mime application/msword = application-msword x-office-document
+mime application/vnd.openxmlformats-officedocument.wordprocessingml.document = application-vnd.openxmlformats-officedocument.wordprocessingml.document x-office-document
+mime application/vnd.oasis.opendocument.text = application-vnd.oasis.opendocument.text x-office-document
+mime application/vnd.oasis.opendocument.text-template = application-vnd.oasis.opendocument.text-template x-office-document-template
+mime application/vnd.ms-excel = application-vnd.ms-excel x-office-spreadsheet
+mime application/vnd.openxmlformats-officedocument.spreadsheetml.sheet = application-vnd.openxmlformats-officedocument.spreadsheetml.sheet x-office-spreadsheet
+mime application/vnd.oasis.opendocument.spreadsheet = application-vnd.oasis.opendocument.spreadsheet x-office-spreadsheet
+mime application/vnd.oasis.opendocument.spreadsheet-template = application-vnd.oasis.opendocument.spreadsheet-template x-office-spreadsheet-template
+mime application/vnd.ms-powerpoint = x-office-presentation
+mime application/vnd.oasis.opendocument.presentation = x-office-presentation
+
+# archives, packages and disk images
+mime application/zip = application-zip application-x-zip package-x-generic
+mime application/x-tar = application-x-tar package-x-generic
+mime application/x-gzip = application-x-gzip package-x-generic
+mime application/x-gunzip = application-x-gzip package-x-generic
+mime application/x-bzip2 = application-x-bzip package-x-generic
+mime application/x-7z-compressed = application-x-7z-compressed package-x-generic
+mime application/x-rar = application-x-rar package-x-generic
+mime application/x-lharc = application-x-lha package-x-generic
+mime application/x-lzip = application-x-lzma package-x-generic
+mime application/java-archive = application-x-java-archive package-x-generic
+mime application/x-vnd.haiku-package = package-x-generic application-x-deb
+mime application/x-cd-image = application-x-cd-image media-optical disk-image
+mime application/x-bfs-image = application-x-raw-disk-image disk-image
+mime application/x-ntfs-image = application-x-raw-disk-image disk-image
+mime application/x-intel-image = application-x-raw-disk-image disk-image
+
+# fonts
+mime application/x-font-ttf = font-x-generic
+mime application/font-woff = font-x-generic
+
+# pictures, sound and video
+mime image = image-x-generic image-bmp image-x-win-bitmap
+mime image/bmp = image-bmp image-x-generic
+mime image/svg+xml = image-svg+xml image-x-generic
+mime image/* = image-x-generic image-bmp image-x-win-bitmap
+mime audio = audio-x-generic
+mime audio/mpeg = audio-mpeg audio-x-mpeg audio-x-generic
+mime audio/x-wav = audio-x-wav audio-wav audio-x-generic
+mime audio/wav = audio-x-wav audio-wav audio-x-generic
+mime audio/x-flac = audio-x-flac audio-flac audio-x-generic
+mime audio/ogg = audio-x-vorbis+ogg audio-ogg audio-x-generic
+mime audio/* = audio-x-generic
+mime video = video-x-generic
+mime video/* = video-x-generic
+
+# folders
+folder ~ = user-home folder-home
+folder ~/queries = folder-saved-search
+folder ~/mail = folder-mail internet-mail

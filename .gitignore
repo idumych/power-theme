@@ -1,0 +1,6 @@
+# build output, including the sysroot copied from a Renku system
+build/
+# zips, release scratch
+dist/
+# reference VMs and the systems they run (not ours to redistribute)
+vm/

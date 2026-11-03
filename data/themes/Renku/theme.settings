@@ -1,0 +1,66 @@
+# Renku: Smoke window borders and DarkFlat's flat controls in the colours
+# of the Renku OS website (idumych.github.io/renkuos-website-draft): night blues
+# and indigo, washi white text, fire orange for what is active or chosen,
+# gold and seal red for links and failures. Without the Smoke and Flat
+# add-ons it falls back to Haiku's own decorator and controls, which suit dark
+# colours; light-faced looks such as Gonx draw white text on white fields.
+# The wallpaper is drawn by tools/make-renku-wallpaper.py after the site's
+# front page.
+
+name = Renku
+description = Renku OS's own colours: night blue and indigo, warm white text and fire orange window tabs and highlights, over a night sky with 連句 in outline. Smoke window borders and DarkFlat's flat controls.
+decorator = Smoke | FlatDecorator | Default
+control look = FlatControlLook | haiku
+icons = haiku
+desktop color = #0C0D12
+deskbar = right top, expanded
+wallpaper = wallpaper.jpg
+wallpaper mode = scaled
+
+font plain = IBM Plex Sans | Noto Sans, Regular, 12
+font bold = IBM Plex Sans | Noto Sans, SemiBold | Bold, 12
+font fixed = IBM Plex Mono | Noto Sans Mono, Regular, 12
+font menu = IBM Plex Sans | Noto Sans, Regular, 12
+
+# night #0C0D12, night 2 #12141C, indigo #191D2E, indigo 2 #232842,
+# window edge #3A3F55, washi #EFE9DD, washi 2 #C9C2B4, muted #8D8A99,
+# fire #FF6A13, fire 2 #FF8A3D, seal #D8432A, gold #F2C14E
+color B_PANEL_BACKGROUND_COLOR = #191D2E
+color B_PANEL_TEXT_COLOR = #EFE9DD
+color B_DOCUMENT_BACKGROUND_COLOR = #12141C
+color B_DOCUMENT_TEXT_COLOR = #EFE9DD
+color B_CONTROL_BACKGROUND_COLOR = #232842
+color B_CONTROL_TEXT_COLOR = #EFE9DD
+color B_CONTROL_BORDER_COLOR = #3A3F55
+color B_CONTROL_HIGHLIGHT_COLOR = #FF6A13
+color B_CONTROL_MARK_COLOR = #FF8A3D
+color B_KEYBOARD_NAVIGATION_COLOR = #FF6A13
+color B_NAVIGATION_PULSE_COLOR = #FF8A3D
+color B_SHINE_COLOR = #232842
+color B_SHADOW_COLOR = #0C0D12
+color B_TOOLTIP_BACKGROUND_COLOR = #232842
+color B_TOOLTIP_TEXT_COLOR = #EFE9DD
+color B_MENU_BACKGROUND_COLOR = #191D2E
+color B_MENU_SELECTED_BACKGROUND_COLOR = #FF6A13
+color B_MENU_ITEM_TEXT_COLOR = #EFE9DD
+color B_MENU_SELECTED_ITEM_TEXT_COLOR = #160A02
+color B_MENU_SELECTED_BORDER_COLOR = #FF6A13
+color B_WINDOW_TAB_COLOR = #FF6A13
+color B_WINDOW_TEXT_COLOR = #160A02
+color B_WINDOW_INACTIVE_TAB_COLOR = #232842
+color B_WINDOW_INACTIVE_TEXT_COLOR = #8D8A99
+color B_WINDOW_BORDER_COLOR = #191D2E
+color B_WINDOW_INACTIVE_BORDER_COLOR = #191D2E
+color B_LIST_BACKGROUND_COLOR = #0C0D12
+color B_LIST_SELECTED_BACKGROUND_COLOR = #232842
+color B_LIST_ITEM_TEXT_COLOR = #EFE9DD
+color B_LIST_SELECTED_ITEM_TEXT_COLOR = #FF8A3D
+color B_SCROLL_BAR_THUMB_COLOR = #FF8A3D
+color B_LINK_TEXT_COLOR = #FF8A3D
+color B_LINK_HOVER_COLOR = #F2C14E
+color B_LINK_VISITED_COLOR = #D8432A
+color B_LINK_ACTIVE_COLOR = #FF6A13
+color B_STATUS_BAR_COLOR = #FF6A13
+color B_SUCCESS_COLOR = #9FE3A8
+color B_FAILURE_COLOR = #D8432A
+color B_DESKTOP_COLOR = #0C0D12

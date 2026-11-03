@@ -1,0 +1,8 @@
+FlatDecorator and FlatControlLook from Haiku (as in Renku OS's source tree,
+github.com/RenkuOS/Source, commit 8cf759ea8e6b, src/add-ons/decorators and
+src/add-ons/control_look), unmodified. MIT licence, Copyright Haiku, Inc.;
+see the notices in each file. FlatControlLook is by nhtello (unarix), who
+first made both for haiku_darkstyle (github.com/unarix/haiku_darkstyle).
+
+Haiku ships them in its haiku_extras package; Renku's repositories don't
+offer that, so Reactionary builds them for the Flat themes.
