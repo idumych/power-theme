@@ -20,7 +20,6 @@
 #include <stdio.h>
 #include <string.h>
 #include <strings.h>
-#include <time.h>
 #include <unistd.h>
 
 #include <AboutWindow.h>
@@ -37,9 +36,6 @@
 #include "ThemesWindow.h"
 
 
-static const char* kSignature = "application/x-vnd.idumych-PowerTheme";
-static const char* kScheduleSignature
-	= "application/x-vnd.idumych-PowerTheme-schedule";
 static const bigtime_t kScheduleCheckInterval = 30000000;
 
 
@@ -47,8 +43,17 @@ class ThemesApp : public BApplication {
 public:
 	ThemesApp()
 		:
-		BApplication(kSignature)
+		BApplication(kThemeAppSignature),
+		fWindow(NULL)
 	{
+	}
+
+	virtual void MessageReceived(BMessage* message)
+	{
+		if (message->what == kMsgThemeSwitched && fWindow != NULL)
+			fWindow->PostMessage(message);
+		else
+			BApplication::MessageReceived(message);
 	}
 
 	virtual void ReadyToRun()
@@ -63,13 +68,13 @@ public:
 
 		BRect frame = settings.GetRect("frame", BRect());
 		const char* theme = settings.GetString("theme", NULL);
-		ThemesWindow* window = new ThemesWindow(frame, theme);
-		window->Show();
+		fWindow = new ThemesWindow(frame, theme);
+		fWindow->Show();
 	}
 
 	virtual void AboutRequested()
 	{
-		BAboutWindow* about = new BAboutWindow("Power Theme", kSignature);
+		BAboutWindow* about = new BAboutWindow("Power Theme", kThemeAppSignature);
 		about->AddDescription("Switches the window borders, controls, "
 			"colors, fonts and icons of the desktop between themes, and "
 			"back. Icon themes are freedesktop icon themes.");
@@ -77,6 +82,9 @@ public:
 		about->AddExtraInfo("Uses nanosvg by Mikko Mononen (zlib license).");
 		about->Show();
 	}
+
+private:
+	ThemesWindow*	fWindow;
 };
 
 
@@ -196,7 +204,7 @@ class ScheduleApp : public BApplication {
 public:
 	ScheduleApp()
 		:
-		BApplication(kScheduleSignature),
+		BApplication(kThemeScheduleSignature),
 		fMode(THEME_MODE_UNKNOWN)
 	{
 	}
@@ -221,11 +229,7 @@ private:
 			return;
 		}
 
-		time_t now = time(NULL);
-		struct tm local;
-		localtime_r(&now, &local);
-		const theme_mode mode = scheduled_mode(schedule,
-			local.tm_hour * 60 + local.tm_min);
+		const theme_mode mode = scheduled_mode_now(schedule);
 		if (mode == fMode)
 			return;
 
@@ -240,15 +244,8 @@ private:
 
 
 static int
-set_schedule(const char* times)
+set_schedule_times(const char* times)
 {
-	app_info info;
-	if (be_app->GetAppInfo(&info) != B_OK) {
-		fprintf(stderr, "powertheme: can't tell where Power Theme is\n");
-		return 1;
-	}
-	BPath program(&info.ref);
-
 	ThemeSchedule schedule;
 	load_schedule(schedule);
 	schedule.enabled = strcasecmp(times, "off") != 0;
@@ -273,32 +270,16 @@ set_schedule(const char* times)
 		}
 	}
 
-	status_t status = save_schedule(schedule, program.Path());
+	status_t status = set_schedule(schedule);
 	if (status != B_OK) {
-		fprintf(stderr, "powertheme: can't save the schedule: %s\n",
+		fprintf(stderr, "powertheme: can't set the schedule: %s\n",
 			strerror(status));
 		return 1;
 	}
-
-	if (!schedule.enabled) {
-		BMessenger(kScheduleSignature).SendMessage(B_QUIT_REQUESTED);
+	if (schedule.enabled)
+		printf("%s\n", schedule_description(schedule).String());
+	else
 		printf("The schedule is off.\n");
-		return 0;
-	}
-
-	// from the next login, the launch_daemon job starts it
-	if (!be_roster->IsRunning(kScheduleSignature)) {
-		const char* arguments[] = { "--run-schedule" };
-		status = be_roster->Launch(&info.ref, 1, arguments);
-		if (status != B_OK && status != B_ALREADY_RUNNING) {
-			fprintf(stderr, "powertheme: can't start the schedule: %s\n",
-				strerror(status));
-			return 1;
-		}
-	}
-	printf("Light at %02" B_PRId32 ":%02" B_PRId32 ", dark at %02" B_PRId32
-		":%02" B_PRId32 ", every day.\n", schedule.lightAt / 60,
-		schedule.lightAt % 60, schedule.darkAt / 60, schedule.darkAt % 60);
 	return 0;
 }
 
@@ -377,7 +358,7 @@ command_line(int argc, char** argv)
 	}
 
 	// colours, fonts and bitmaps need a connection to app_server
-	BApplication app(kSignature);
+	BApplication app(kThemeAppSignature);
 
 	if (build) {
 		BString script;
@@ -483,7 +464,7 @@ command_line(int argc, char** argv)
 	}
 
 	if (scheduleTimes != NULL)
-		return set_schedule(scheduleTimes);
+		return set_schedule_times(scheduleTimes);
 
 	if (mode != NULL && apply == NULL) {
 		theme_mode target = wantedMode;
@@ -566,7 +547,7 @@ int
 main(int argc, char** argv)
 {
 	if (argc == 2 && strcmp(argv[1], "--run-schedule") == 0) {
-		if (be_roster->IsRunning(kScheduleSignature))
+		if (be_roster->IsRunning(kThemeScheduleSignature))
 			return 0;
 		ScheduleApp app;
 		app.Run();
@@ -579,7 +560,7 @@ main(int argc, char** argv)
 	// The command line runs beside the window, so Themes can't be a single
 	// launch application; there is only one window all the same.
 	BList running;
-	be_roster->GetAppList(kSignature, &running);
+	be_roster->GetAppList(kThemeAppSignature, &running);
 	if (!running.IsEmpty()) {
 		be_roster->ActivateApp((team_id)(addr_t)running.ItemAt(0));
 		return 0;

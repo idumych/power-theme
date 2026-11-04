@@ -70,6 +70,13 @@ enum {
 };
 
 
+// the application, and what it is told when apply_mode() switches the theme
+extern const char* const kThemeAppSignature;
+enum {
+	kMsgThemeSwitched = 'tswi'
+};
+
+
 enum theme_mode {
 	THEME_MODE_UNKNOWN = 0,
 	THEME_MODE_LIGHT,
@@ -211,14 +218,22 @@ struct ThemeSchedule {
 	int32		darkAt;
 };
 
+// the background process that keeps to the schedule
+extern const char* const kThemeScheduleSignature;
+
 status_t	load_schedule(ThemeSchedule& schedule);
-// Also installs or removes the launch_daemon job for the next login, for the
-// program at \a program.
-status_t	save_schedule(const ThemeSchedule& schedule, const char* program);
+// Saves it, installs or removes the launch_daemon job for the next login, and
+// starts or stops the background process. Needs a running BApplication, of this
+// program. A running process picks up new times by itself.
+status_t	set_schedule(const ThemeSchedule& schedule);
 // "HH:MM" in minutes after midnight, or false
 bool		parse_schedule_time(const char* text, int32& minutes);
 // the mode \a schedule asks for at \a minutes after midnight
 theme_mode	scheduled_mode(const ThemeSchedule& schedule, int32 minutes);
+// the same, now
+theme_mode	scheduled_mode_now(const ThemeSchedule& schedule);
+// "Light at 07:00, dark at 19:00, every day."
+BString		schedule_description(const ThemeSchedule& schedule);
 
 // What applying \a theme would do on this system, line by line: the
 // decorator and control look found, fonts, colours and wallpapers.

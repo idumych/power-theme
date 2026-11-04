@@ -22,6 +22,7 @@ class BListView;
 class BMenuField;
 class BStatusBar;
 class BStringView;
+class BTextControl;
 class DescriptionView;
 class IconStripView;
 class PreviewView;
@@ -33,9 +34,12 @@ public:
 									const char* selected);
 	virtual						~ThemesWindow();
 
+	virtual	void				DispatchMessage(BMessage* message,
+									BHandler* handler);
 	virtual	void				MessageReceived(BMessage* message);
 	virtual	void				WindowActivated(bool active);
 	virtual	bool				QuitRequested();
+	virtual	void				Show();
 
 private:
 	static	status_t			_ApplyThread(void* data);
@@ -53,6 +57,8 @@ private:
 			BString				_ChosenIcons() const;
 			void				_SetBusy(bool busy);
 			void				_UpdateButtons();
+			void				_UpdateSchedule();
+			void				_ScheduleChanged();
 
 			ThemeList			fThemes;
 			// what the list shows: one theme of each light and dark pair
@@ -65,6 +71,9 @@ private:
 			PreviewView*		fPreview;
 			DescriptionView*	fDescription;
 			BMenuField*			fModeField;
+			BCheckBox*			fSchedule;
+			BTextControl*		fLightAt;
+			BTextControl*		fDarkAt;
 			BMenuField*			fIconsField;
 			IconStripView*		fIconStrip;
 			BCheckBox*			fDecorator;

@@ -34,6 +34,7 @@
 #include <StringItem.h>
 #include <StringList.h>
 #include <StringView.h>
+#include <TextControl.h>
 #include <TextView.h>
 #include <TranslationUtils.h>
 
@@ -44,6 +45,7 @@
 enum {
 	kMsgThemeSelected	= 'thsl',
 	kMsgModeChosen		= 'mdch',
+	kMsgScheduleChanged	= 'schd',
 	kMsgIconsChosen		= 'icch',
 	kMsgApply			= 'aply',
 	kMsgRevert			= 'rvrt',
@@ -57,6 +59,16 @@ enum {
 // the icons menu's first two choices
 static const char* kKeepIcons = "";
 static const char* kHaikuIcons = "-";
+
+
+static BString
+schedule_time_text(int32 minutes)
+{
+	char text[16];
+	snprintf(text, sizeof(text), "%02" B_PRId32 ":%02" B_PRId32, minutes / 60,
+		minutes % 60);
+	return text;
+}
 
 
 //	#pragma mark - PreviewView
@@ -448,6 +460,24 @@ ThemesWindow::ThemesWindow(BRect frame, const char* selected)
 	}
 	fModeField = new BMenuField("mode", "Mode:", modeMenu);
 
+	fSchedule = new BCheckBox("schedule", "Switch mode every day:",
+		new BMessage(kMsgScheduleChanged));
+	fSchedule->SetToolTip("Switches the theme in use to its light or dark "
+		"version at these times, as HH:MM. A theme switched by hand stays until "
+		"the next of them.");
+	fLightAt = new BTextControl("light at", "Light at:", "",
+		new BMessage(kMsgScheduleChanged));
+	fDarkAt = new BTextControl("dark at", "Dark at:", "",
+		new BMessage(kMsgScheduleChanged));
+	BTextControl* timeControls[] = { fLightAt, fDarkAt };
+	for (int32 i = 0; i < 2; i++) {
+		timeControls[i]->TextView()->SetMaxBytes(5);
+		timeControls[i]->TextView()->SetExplicitMinSize(BSize(
+			be_plain_font->StringWidth("00:00") + 8, B_SIZE_UNSET));
+		timeControls[i]->TextView()->SetExplicitMaxSize(BSize(
+			be_plain_font->StringWidth("00:00") + 8, B_SIZE_UNSET));
+	}
+
 	BPopUpMenu* iconsMenu = new BPopUpMenu("icons");
 	fIconsField = new BMenuField("icons", "Icons:", iconsMenu);
 	fIconStrip = new IconStripView();
@@ -495,8 +525,10 @@ ThemesWindow::ThemesWindow(BRect frame, const char* selected)
 			.Add(themeScroll, 1)
 			.AddGroup(B_VERTICAL, B_USE_DEFAULT_SPACING, 3)
 				.Add(previewBox)
-				.Add(fModeField)
-				.Add(fIconsField)
+				.AddGrid(B_USE_SMALL_SPACING, B_USE_DEFAULT_SPACING)
+					.AddMenuField(fModeField, 0, 0)
+					.AddMenuField(fIconsField, 0, 1)
+				.End()
 				.Add(fIconStrip)
 				.AddGrid(B_USE_DEFAULT_SPACING, B_USE_SMALL_SPACING)
 					.Add(fDecorator, 0, 0)
@@ -505,6 +537,13 @@ ThemesWindow::ThemesWindow(BRect frame, const char* selected)
 					.Add(fFonts, 1, 1)
 					.Add(fWallpaper, 0, 2)
 					.Add(fDeskbar, 1, 2)
+				.End()
+				.Add(new BSeparatorView(B_HORIZONTAL))
+				.AddGroup(B_HORIZONTAL)
+					.Add(fSchedule)
+					.Add(fLightAt)
+					.Add(fDarkAt)
+					.AddGlue()
 				.End()
 			.End()
 		.End()
@@ -526,6 +565,7 @@ ThemesWindow::ThemesWindow(BRect frame, const char* selected)
 
 	_LoadThemes(selected);
 	_UpdateButtons();
+	_UpdateSchedule();
 
 	if (!frame.IsValid() || frame.Width() < 10)
 		CenterOnScreen();
@@ -534,6 +574,36 @@ ThemesWindow::ThemesWindow(BRect frame, const char* selected)
 
 ThemesWindow::~ThemesWindow()
 {
+}
+
+
+void
+ThemesWindow::Show()
+{
+	BWindow::Show();
+
+	// a position saved when the window was smaller may not leave room for it
+	if (LockLooper()) {
+		Layout(false);
+		MoveOnScreen(B_MOVE_IF_PARTIALLY_OFFSCREEN);
+		UnlockLooper();
+	}
+}
+
+
+void
+ThemesWindow::DispatchMessage(BMessage* message, BHandler* handler)
+{
+	// Enter in a schedule time takes that time, instead of pressing Apply
+	const char* bytes;
+	if (message->what == B_KEY_DOWN
+		&& message->FindString("bytes", &bytes) == B_OK && bytes[0] == B_ENTER
+		&& (fLightAt->TextView()->IsFocus()
+			|| fDarkAt->TextView()->IsFocus())) {
+		_ScheduleChanged();
+		return;
+	}
+	BWindow::DispatchMessage(message, handler);
 }
 
 
@@ -560,6 +630,28 @@ ThemesWindow::MessageReceived(BMessage* message)
 			const char* id;
 			if (message->FindString("id", &id) == B_OK)
 				_SelectIcons(id);
+			break;
+		}
+
+		case kMsgScheduleChanged:
+			_ScheduleChanged();
+			break;
+
+		case kMsgThemeSwitched:
+		{
+			// switched from outside the window: by the schedule, or by hand
+			_UpdateLabels();
+			_UpdateButtons();
+			BString name, icons;
+			get_current(name, icons);
+			const Theme* current = find_theme(fThemes, name);
+			const Theme* row = fRows.ItemAt(fThemeList->CurrentSelection());
+			if (!fBusy && current != NULL && row != NULL
+				&& _RowName(current) == _RowName(row)
+				&& current->Mode() != THEME_MODE_UNKNOWN) {
+				_SelectMode(current->Mode());
+				_ShowTheme(_SelectedTheme());
+			}
 			break;
 		}
 
@@ -720,6 +812,7 @@ ThemesWindow::WindowActivated(bool active)
 	if (active) {
 		_UpdateLabels();
 		_UpdateButtons();
+		_UpdateSchedule();
 	}
 	BWindow::WindowActivated(active);
 }
@@ -1039,8 +1132,87 @@ ThemesWindow::_SetBusy(bool busy)
 	} else if (!fProgress->IsHidden())
 		fProgress->Hide();
 	fModeField->SetEnabled(!busy);
+	fSchedule->SetEnabled(!busy);
+	fLightAt->SetEnabled(!busy);
+	fDarkAt->SetEnabled(!busy);
 	fIconsField->SetEnabled(!busy);
 	_UpdateButtons();
+}
+
+
+/*!	Shows the schedule as saved, which the command line may have changed. Text
+	being typed stays.
+*/
+void
+ThemesWindow::_UpdateSchedule()
+{
+	ThemeSchedule schedule;
+	load_schedule(schedule);
+	fSchedule->SetValue(schedule.enabled ? B_CONTROL_ON : B_CONTROL_OFF);
+	if (!fLightAt->TextView()->IsFocus())
+		fLightAt->SetText(schedule_time_text(schedule.lightAt));
+	if (!fDarkAt->TextView()->IsFocus())
+		fDarkAt->SetText(schedule_time_text(schedule.darkAt));
+}
+
+
+void
+ThemesWindow::_ScheduleChanged()
+{
+	ThemeSchedule saved;
+	load_schedule(saved);
+
+	ThemeSchedule schedule = saved;
+	schedule.enabled = fSchedule->Value() == B_CONTROL_ON;
+	BString problem;
+	if (!parse_schedule_time(fLightAt->Text(), schedule.lightAt)
+		|| !parse_schedule_time(fDarkAt->Text(), schedule.darkAt)) {
+		problem = "Write schedule times like 07:00.";
+	} else if (schedule.lightAt == schedule.darkAt)
+		problem = "Light and dark need different times.";
+	if (!problem.IsEmpty()) {
+		fSchedule->SetValue(saved.enabled ? B_CONTROL_ON : B_CONTROL_OFF);
+		fStatus->SetText(problem);
+		fStatus->SetToolTip(problem);
+		return;
+	}
+
+	// tidied up, whatever else happens: 7:00 is 07:00
+	fLightAt->SetText(schedule_time_text(schedule.lightAt));
+	fDarkAt->SetText(schedule_time_text(schedule.darkAt));
+
+	if (schedule.enabled == saved.enabled
+		&& schedule.lightAt == saved.lightAt
+		&& schedule.darkAt == saved.darkAt) {
+		return;
+	}
+
+	status_t status = set_schedule(schedule);
+	if (status != B_OK) {
+		BString text("Can't set the schedule: ");
+		text << strerror(status) << ".";
+		fSchedule->SetValue(saved.enabled ? B_CONTROL_ON : B_CONTROL_OFF);
+		fStatus->SetText(text);
+		fStatus->SetToolTip(text);
+		return;
+	}
+
+	BString text(schedule.enabled
+		? schedule_description(schedule) : BString("The schedule is off."));
+	if (schedule.enabled) {
+		BString name, icons;
+		get_current(name, icons);
+		const Theme* current = find_theme(fThemes, name);
+		const bool paired = current != NULL
+			&& find_variant(fThemes, *current, THEME_MODE_LIGHT) != NULL
+			&& find_variant(fThemes, *current, THEME_MODE_DARK) != NULL;
+		if (!paired) {
+			text << " It does nothing until a theme with light and dark "
+				"versions is in use.";
+		}
+	}
+	fStatus->SetText(text);
+	fStatus->SetToolTip(text);
 }
 
 

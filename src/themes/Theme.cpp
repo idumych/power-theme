@@ -16,6 +16,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <strings.h>
+#include <time.h>
 #include <unistd.h>
 
 #include <Application.h>
@@ -1088,11 +1089,11 @@ find_variant(const ThemeList& themes, const Theme& theme, theme_mode mode)
 const Theme*
 find_theme(const ThemeList& themes, const char* name, theme_mode mode)
 {
-	const Theme* theme = NULL;
 	// themes with no VariantOf() would all match
 	if (name[0] == '\0')
 		return NULL;
 
+	const Theme* theme = NULL;
 	for (int32 i = 0; i < themes.CountItems() && theme == NULL; i++) {
 		if (themes.ItemAt(i)->Name().ICompare(name) == 0)
 			theme = themes.ItemAt(i);
@@ -1113,6 +1114,10 @@ find_theme(const ThemeList& themes, const char* name, theme_mode mode)
 	return light != NULL ? light : theme;
 }
 
+
+const char* const kThemeAppSignature = "application/x-vnd.idumych-PowerTheme";
+const char* const kThemeScheduleSignature
+	= "application/x-vnd.idumych-PowerTheme-schedule";
 
 static const char* kScheduleName = "schedule";
 static const char* kScheduleJob = "powertheme-schedule";
@@ -1136,7 +1141,7 @@ load_schedule(ThemeSchedule& schedule)
 }
 
 
-status_t
+static status_t
 save_schedule(const ThemeSchedule& schedule, const char* program)
 {
 	BMessage saved;
@@ -1181,6 +1186,37 @@ save_schedule(const ThemeSchedule& schedule, const char* program)
 }
 
 
+status_t
+set_schedule(const ThemeSchedule& schedule)
+{
+	app_info info;
+	status_t status = be_app->GetAppInfo(&info);
+	if (status != B_OK)
+		return status;
+
+	status = save_schedule(schedule, BPath(&info.ref).Path());
+	if (status != B_OK)
+		return status;
+
+	if (!schedule.enabled) {
+		// gone before this returns, so that turning it back on starts a new one
+		BMessenger(kThemeScheduleSignature).SendMessage(B_QUIT_REQUESTED);
+		for (int32 i = 0; i < 20 && be_roster->IsRunning(kThemeScheduleSignature);
+				i++) {
+			snooze(50000);
+		}
+		return B_OK;
+	}
+
+	// from the next login, the launch_daemon job starts it
+	if (be_roster->IsRunning(kThemeScheduleSignature))
+		return B_OK;
+	const char* arguments[] = { "--run-schedule" };
+	status = be_roster->Launch(&info.ref, 1, arguments);
+	return status == B_ALREADY_RUNNING ? B_OK : status;
+}
+
+
 bool
 parse_schedule_time(const char* text, int32& minutes)
 {
@@ -1208,6 +1244,28 @@ scheduled_mode(const ThemeSchedule& schedule, int32 minutes)
 
 
 theme_mode
+scheduled_mode_now(const ThemeSchedule& schedule)
+{
+	time_t now = time(NULL);
+	struct tm local;
+	localtime_r(&now, &local);
+	return scheduled_mode(schedule, local.tm_hour * 60 + local.tm_min);
+}
+
+
+BString
+schedule_description(const ThemeSchedule& schedule)
+{
+	char text[64];
+	snprintf(text, sizeof(text), "Light at %02" B_PRId32 ":%02" B_PRId32
+		", dark at %02" B_PRId32 ":%02" B_PRId32 ", every day.",
+		schedule.lightAt / 60, schedule.lightAt % 60, schedule.darkAt / 60,
+		schedule.darkAt % 60);
+	return text;
+}
+
+
+theme_mode
 current_mode()
 {
 	BString name, icons;
@@ -1225,6 +1283,7 @@ current_mode()
 status_t
 apply_mode(theme_mode mode, BString& log, BString* applied)
 {
+
 	BString name, icons;
 	get_current(name, icons);
 	if (name.IsEmpty()) {
@@ -1253,16 +1312,32 @@ apply_mode(theme_mode mode, BString& log, BString* applied)
 	// other one when switching back.
 	const uint32 parts = get_current_parts();
 	BStringList missing;
-	const uint32 available = parts & ~theme->Missing(&missing);
+	uint32 available = parts & ~theme->Missing(&missing);
 	if (!missing.IsEmpty()) {
 		log << "Not installed, so left out: " << missing.Join(", ") << ".\n";
 	}
 
+	// Two versions usually share window borders, and reloading those would only
+	// redraw every window's frame, leaving lines of it on the windows in front.
+	if (theme->Decorator() == current->Decorator())
+		available &= ~THEME_DECORATOR;
+
 	status_t status = apply_appearance(*theme, available, log);
 	set_current_parts(parts);
-	if (status == B_OK && applied != NULL)
+	if (status != B_OK)
+		return status;
+
+	if (applied != NULL)
 		*applied = theme->Name();
-	return status;
+	// an open window should show what is in use now; the command line also goes
+	// by this signature, but doesn't read its messages
+	BList running;
+	be_roster->GetAppList(kThemeAppSignature, &running);
+	for (int32 i = 0; i < running.CountItems(); i++) {
+		BMessenger(kThemeAppSignature, (team_id)(addr_t)running.ItemAt(i))
+			.SendMessage(kMsgThemeSwitched);
+	}
+	return B_OK;
 }
 
 
