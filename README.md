@@ -82,6 +82,7 @@ this work, with what's finished, tested and still open.
 | Applications can ask whether the desktop is dark, such as to swap their artwork | They can't, with a standard call | [#289](https://github.com/RenkuOS/Source/pull/289) |
 | Check boxes and radio buttons stay readable on dark panels, in applications that place controls by hand | Their labels can stay black | [#295](https://github.com/RenkuOS/Source/pull/295) |
 | Desktop labels stay readable on a plain pale desktop | They stay white, so Renku Light sets a darker system desktop colour to get black ones | [#296](https://github.com/RenkuOS/Source/pull/296) |
+| A slid BeOS-style tab keeps its place when the window borders change | It goes back to the start | [#297](https://github.com/RenkuOS/Source/pull/297) |
 
 ## Screenshots
 
@@ -111,7 +112,7 @@ Power Theme comes as a package for Haiku R1/beta6 and later, and Renku OS
 (x86_64), on the [releases page](https://github.com/idumych/power-theme/releases):
 
 ```sh
-pkgman install ./powertheme-0.4-1-x86_64.hpkg
+pkgman install ./powertheme-0.4.1-1-x86_64.hpkg
 ```
 
 Then open **Power Theme** (Deskbar → Applications), click **Build

@@ -45,6 +45,30 @@ with the close button on its left and the zoom button on its right, and no
 minimize button; off, a full-width title bar comes back. {p}-tabs.txt records
 both measured widths.
 
+### schedule
+Steps: with a theme that has both versions in use, `powertheme --schedule=` with
+the light time a minute or two away; wait past it; `--schedule=off`.
+PASS when: {p}-schedule.txt shows turning it on printed one line, the process
+isn't in the roster, the mode switched at the set time and the process has gone.
+The Deskbar shows no entry for it in a screenshot.
+
+### frame
+Steps: "Reactionary ME", with Terminal in front of and overlapping StyledEdit;
+screenshot; `--mode=dark`, `--mode=light`; screenshot again.
+PASS when: {p}-frame.txt says "pixels changed by a round trip: 0", outside the
+Deskbar. The back window's frame used to paint through the front one.
+
+### window-size
+Steps: in the Power Theme window, select "Reactionary ME" and click Apply, noting
+the window's frame before and after.
+PASS when: {p}-window.txt says "height changed by Apply: 0", and the whole window
+is on a 1024x768 screen in a screenshot.
+
+### labels
+Steps: "Reactionary ME", restart Tracker, screenshot the desktop.
+PASS when: {p}-labels.txt says "desktop labels white: yes", from the brightest
+pixels under the first icon.
+
 ### revert
 Steps: note every icon attribute in `mime_db` and the colours before any theme;
 apply themes as above; `powertheme --revert`; compare.
