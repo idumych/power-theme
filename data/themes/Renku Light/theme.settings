@@ -63,4 +63,6 @@ color B_LINK_ACTIVE_COLOR = #FF6A13
 color B_STATUS_BAR_COLOR = #FF6A13
 color B_SUCCESS_COLOR = #1F6B2E
 color B_FAILURE_COLOR = #A8321E
-color B_DESKTOP_COLOR = #EFE9DD
+# darker than the desktop colour above, which is how Tracker and the control
+# looks know to use black labels on the desktop rather than white ones
+color B_DESKTOP_COLOR = #C9C2B4

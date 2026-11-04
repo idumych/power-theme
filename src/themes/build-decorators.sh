@@ -138,7 +138,8 @@ missing_packages() {
 	packages=""
 	command -v g++ >/dev/null 2>&1 || packages="$packages gcc"
 	{ command -v rc >/dev/null 2>&1 && command -v xres >/dev/null 2>&1 \
-		&& [ -f /boot/system/develop/headers/os/interface/View.h ]; } \
+		&& { [ -f /boot/system/develop/headers/os/interface/View.h ] \
+			|| [ -n "$develFolder" ]; }; } \
 		|| packages="$packages haiku_devel"
 	if $needGit; then
 		command -v git >/dev/null 2>&1 || packages="$packages git"
@@ -153,12 +154,60 @@ if $fetch_only; then
 		command -v git >/dev/null 2>&1 || echo git
 	}
 fi
+
+# The repository's haiku_devel can be for an older build than the system, and
+# pkgman only offers to downgrade the system to install it. These add-ons just
+# need its headers and startup objects, so it's unpacked for this build instead.
+develFolder=""
+develFlags=""
+develLink=""
+build=""
+trap 'rm -rf "$develFolder" "$build"' EXIT
+unpack_devel() {
+	found=$(pkgman search -D haiku_devel 2>/dev/null \
+		| awk '$2 == "haiku_devel" { print $1, $3; exit }')
+	repository=${found%% *}
+	version=${found#* }
+	[ -n "$found" ] || return 1
+	base=$(pkgman list-repos -v 2>/dev/null | awk -v name="$repository" '
+		$1 == name && NF == 1 { inside = 1; next }
+		inside && $1 == "base-url:" && NF > 1 { print $2; exit }')
+	[ -n "$base" ] || return 1
+	folder=$(mktemp -d "${TMPDIR:-/tmp}/themes-devel.XXXXXX") || return 1
+	file=$folder/haiku_devel.hpkg
+	if ! curl -fsSL -o "$file" \
+			"$base/packages/haiku_devel-$version-x86_64.hpkg" \
+		|| ! (cd "$folder" && package extract "$file" >/dev/null); then
+		rm -rf "$folder"
+		return 1
+	fi
+	rm -f "$file"
+	develFolder=$folder
+	headers=$folder/develop/headers
+	develFlags="-B$folder/develop/lib/ -idirafter $headers/posix"
+	develFlags="$develFlags -idirafter $headers"
+	for kit in $(find "$headers/os" -type d); do
+		develFlags="$develFlags -idirafter $kit"
+	done
+	develLink="-B$folder/develop/lib/ -L/boot/system/lib"
+}
+
 packages=$(missing_packages)
 if [ -n "$packages" ] && $install_tools; then
 	say 7 "Installing $packages"
-	# shellcheck disable=SC2086
-	pkgman install -y $packages 2>&1 | grep -v '^[[:space:]]*$' | tail -20
+	# one at a time: pkgman installs none of them if it can't install one
+	for package in $packages; do
+		# shellcheck disable=SC2086
+		pkgman install -y $package 2>&1 | grep -v '^[[:space:]]*$' | tail -20
+	done
 	packages=$(missing_packages)
+	case " $packages " in
+		*" haiku_devel "*)
+			say 8 "Unpacking the development files"
+			unpack_devel || echo "Can't unpack haiku_devel"
+			packages=$(missing_packages)
+			;;
+	esac
 fi
 if [ -n "$packages" ]; then
 	echo "NEED_TOOLS $packages"
@@ -327,7 +376,6 @@ flags="-O2 -Wall -Wno-multichar -fPIC -std=gnu++17
 	-I$private/graphics -I$headers/renku/headers/libs/agg -I$freetype"
 
 build=$(mktemp -d "${TMPDIR:-/tmp}/themes-build.XXXXXX") || fail "no temporary folder"
-trap 'rm -rf "$build"' EXIT
 
 todo=""
 for entry in $addons; do
@@ -372,13 +420,14 @@ for item in $todo; do
 		object=$build/$kind-$name-$(basename "$file" .cpp).o
 		echo "g++ -c $(basename "$file")"
 		# shellcheck disable=SC2086
-		g++ $kindflags -c "$file" -o "$object" 2>&1 || fail "$label: doesn't compile"
+		g++ $kindflags $develFlags -c "$file" -o "$object" 2>&1 \
+			|| fail "$label: doesn't compile"
 		objects="$objects $object"
 	done
 	output=$build/$kind/$name
 	mkdir -p "$build/$kind"
 	# shellcheck disable=SC2086
-	g++ -shared -s -o "$output" $objects $link 2>&1 \
+	g++ -shared -s -o "$output" $objects $develLink $link 2>&1 \
 		|| fail "$label: doesn't link"
 	for rdef in "$folder"/$resources; do
 		rc -o "$output.rsrc" "$rdef" 2>&1 || fail "$label: rc failed"
