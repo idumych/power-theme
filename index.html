@@ -113,6 +113,15 @@ footer { border-top: 1px solid var(--line); padding: 24px 0 48px; color: var(--m
 	<p class="caption">Drag across the picture. One command switches between these two, with every window left open. The windows are the same ones, on Renku OS in a virtual machine.</p>
 
 	<section>
+		<h2>Get Power Theme 0.4</h2>
+		<div class="sheet">
+			<p>Light and dark versions, the daily schedule, Haiku Dark, Renku Light, the dark icons and BeOS-style tabs are in <a href="https://github.com/idumych/power-theme/releases/tag/v0.4">this release</a>, for Haiku R1/beta6 and later and Renku OS on x86_64.</p>
+			<pre>pkgman install ./powertheme-0.4-1-x86_64.hpkg</pre>
+			<p>Then open Power Theme, click <b>Build add-ons…</b> once and apply a theme. The Renku changes described below are separate, and still in review.</p>
+		</div>
+	</section>
+
+	<section>
 		<h2>Controls change live</h2>
 		<div class="sheet">
 			<p>Choosing a new control look now reaches every running application: buttons, sliders and menus redraw and reflow on the spot. An old look stays loaded until its app quits, because another thread may still be using it. Each look loads once, so the cost depends on how many different looks you use, not how many times you switch.</p>
@@ -144,7 +153,7 @@ footer { border-top: 1px solid var(--line); padding: 24px 0 48px; color: var(--m
 mode = dark
 
 powertheme --mode=toggle</pre>
-			<p class="status"><b>On <a href="https://github.com/idumych/power-theme">Power Theme's main branch</a>,</b> not in a release yet.</p>
+			<p class="status"><b>Released in <a href="https://github.com/idumych/power-theme/releases/tag/v0.4">Power Theme 0.4</a>.</b></p>
 		</div>
 	</section>
 
@@ -162,7 +171,7 @@ powertheme --mode=toggle</pre>
 			</div>
 			<p class="caption">Drag across the picture. These are from the test VM, with its fallback fonts in place of IBM Plex.</p>
 <pre>powertheme --apply=Renku --mode=light</pre>
-			<p class="status"><b>On <a href="https://github.com/idumych/power-theme">Power Theme's main branch</a>,</b> not in a release yet. The window borders and controls come from <b>Build add-ons…</b>, which builds them for your system.</p>
+			<p class="status"><b>Released in <a href="https://github.com/idumych/power-theme/releases/tag/v0.4">Power Theme 0.4</a>.</b> The window borders and controls come from <b>Build add-ons…</b>, which builds them for your system.</p>
 		</div>
 	</section>
 
@@ -172,7 +181,7 @@ powertheme --mode=toggle</pre>
 			<p>Window borders can now draw a classic BeOS tab, even in a theme that wasn't made for one. It's as wide as the title and sits on top of the frame, with close on the left and zoom on the right. Shift-drag it to slide it along the window, and stacked windows share the width. Reactionary is the first to support this, here in its Windows ME look.</p>
 			<img src="img/beos-tabs.png" width="1024" height="768" alt="Windows in the Reactionary ME look with narrow tabs on top of their frames, and a BeOS-style tabs checkbox in Power Theme." loading="lazy" style="margin:18px 0 6px;border:1px solid var(--line)">
 <pre>powertheme --beos-tabs=on</pre>
-			<p class="status"><b>On <a href="https://github.com/idumych/power-theme">Power Theme's main branch</a>,</b> not in a release yet. It's optional, and needs <b>Build add-ons…</b> run again.</p>
+			<p class="status"><b>Released in <a href="https://github.com/idumych/power-theme/releases/tag/v0.4">Power Theme 0.4</a>.</b> It's optional, and needs <b>Build add-ons…</b> run again.</p>
 		</div>
 	</section>
 
@@ -185,7 +194,7 @@ powertheme --mode=toggle</pre>
 				<figure><img src="img/controls-dark.png" width="388" height="265" alt="The same controls in Haiku Dark, with the dark Haiku icons." loading="lazy"><figcaption>In Haiku Dark, with its dark icons.</figcaption></figure>
 			</div>
 <pre>powertheme --schedule=07:00,19:00</pre>
-			<p class="status"><b>On <a href="https://github.com/idumych/power-theme">Power Theme's main branch</a>,</b> not in a release yet.</p>
+			<p class="status"><b>Released in <a href="https://github.com/idumych/power-theme/releases/tag/v0.4">Power Theme 0.4</a>.</b></p>
 		</div>
 	</section>
 
@@ -199,7 +208,7 @@ powertheme --mode=toggle</pre>
 			<figure style="margin:18px 0 6px"><img src="img/dark-icons.png" width="1086" height="176" alt="A row of Haiku's icons above the same icons in the dark palette, on a dark grey background." loading="lazy" style="border:1px solid var(--line)"><figcaption>Haiku's icons, and the dark versions below them.</figcaption></figure>
 			<figure style="margin:18px 0 6px"><img src="img/dark-tracker.png" width="810" height="260" alt="A Tracker window under Haiku Dark showing folders, documents and packages in the dark palette." loading="lazy" style="border:1px solid var(--line)"><figcaption>In Tracker under Haiku Dark.</figcaption></figure>
 			<p>Dark icon themes from elsewhere, such as Breeze Dark, can be installed and chosen too. Power Theme now reads the stylesheet colours they rely on, which its SVG renderer used to ignore.</p>
-			<p class="status"><b>On <a href="https://github.com/idumych/power-theme">Power Theme's main branch</a>,</b> not in a release yet.</p>
+			<p class="status"><b>Released in <a href="https://github.com/idumych/power-theme/releases/tag/v0.4">Power Theme 0.4</a>.</b></p>
 		</div>
 	</section>
 
@@ -281,6 +290,7 @@ powertheme --mode=toggle</pre>
 				<tr><td class="n">480 updates</td><td>System font changes, with app_server's font state checked for stability throughout.</td></tr>
 				<tr><td class="n">0 and 3 pixels</td><td>Difference between a window switched live and one started fresh, for Be and Flat. The comparison also caught a slider that was 1,559 pixels off, since fixed.</td></tr>
 				<tr><td class="n">Live switch</td><td>The schedule changed theme and icons at the set minute, with Power Theme open. It also caught up at start, kept a manual change and restarted after a reboot.</td></tr>
+				<tr><td class="n">The 0.4 package</td><td>Installed on Haiku R1/beta6 on a 16 GB disk and on a stock Renku nightly. Add-ons built on each, themes and BeOS-style tabs applied and reverted, with no crashes. On beta6 it also came through a reboot with them on.</td></tr>
 				<tr><td class="n">Exact revert</td><td>After 20 rounds of applying and reverting icons, the file count stayed the same. A separate check found every icon restored exactly.</td></tr>
 				</tbody>
 			</table></div>
@@ -291,7 +301,7 @@ powertheme --mode=toggle</pre>
 		<h2>What isn't finished</h2>
 		<div class="sheet">
 			<ul>
-				<li>Nothing here is in a release, and the Renku changes are awaiting review.</li>
+				<li>The Renku changes are awaiting review, so live controls, fonts and Tracker updates need a build that has them. On a stock system, running apps need a restart to pick up a new theme.</li>
 				<li>None of it has run on real hardware.</li>
 				<li>The dark icons' outlines can still show slight stair-stepping on diagonals at small sizes, as any thin line does at low resolution.</li>
 				<li>Until the Tracker changes land, open windows show some new icons only after Tracker restarts.</li>
