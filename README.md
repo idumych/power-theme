@@ -205,6 +205,12 @@ click **Build add-ons…** again.
   (with Reactionary ME Dark) come this way; other themes stay as they are until
   they have both. `powertheme --mode=dark` switches the theme in use, keeping
   the parts it was applied with and your icons.
+- **Switching by the time of day**: `powertheme --schedule=07:00,19:00` switches
+  the theme in use to its light version at 07:00 and its dark one at 19:00,
+  every day, until `--schedule=off`. It runs in the background, from a job in
+  `~/config/settings/launch` at each login. A system started at night comes up
+  dark, and a theme switched by hand stays until the next scheduled time.
+  There's no control for this in the window yet.
 - **Theme Manager themes**: themes made for
   [Theme Manager](https://github.com/HaikuArchives/HaikuThemeManager)
   (and BeOS and ZETA before it), such as the

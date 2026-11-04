@@ -1110,6 +1110,99 @@ find_theme(const ThemeList& themes, const char* name, theme_mode mode)
 }
 
 
+static const char* kScheduleName = "schedule";
+static const char* kScheduleJob = "powertheme-schedule";
+
+
+status_t
+load_schedule(ThemeSchedule& schedule)
+{
+	schedule.enabled = false;
+	schedule.lightAt = 7 * 60;
+	schedule.darkAt = 19 * 60;
+
+	BMessage saved;
+	status_t status = load_message(kScheduleName, saved);
+	if (status != B_OK)
+		return status;
+	schedule.enabled = saved.GetBool("enabled", false);
+	schedule.lightAt = saved.GetInt32("light at", schedule.lightAt);
+	schedule.darkAt = saved.GetInt32("dark at", schedule.darkAt);
+	return B_OK;
+}
+
+
+status_t
+save_schedule(const ThemeSchedule& schedule, const char* program)
+{
+	BMessage saved;
+	saved.AddBool("enabled", schedule.enabled);
+	saved.AddInt32("light at", schedule.lightAt);
+	saved.AddInt32("dark at", schedule.darkAt);
+	status_t status = save_message(kScheduleName, saved);
+	if (status != B_OK)
+		return status;
+
+	BPath job;
+	status = find_directory(B_USER_SETTINGS_DIRECTORY, &job, true);
+	if (status == B_OK)
+		status = job.Append("launch");
+	if (status != B_OK)
+		return status;
+	create_directory(job.Path(), 0755);
+	status = job.Append(kScheduleJob);
+	if (status != B_OK)
+		return status;
+
+	if (!schedule.enabled) {
+		BEntry entry(job.Path());
+		return entry.Exists() ? entry.Remove() : B_OK;
+	}
+
+	BFile file(job.Path(), B_WRITE_ONLY | B_CREATE_FILE | B_ERASE_FILE);
+	status = file.InitCheck();
+	if (status != B_OK)
+		return status;
+	BString text;
+	text << "# Written by Power Theme; powertheme --schedule=off removes it.\n"
+		"target desktop {\n"
+		"\tjob x-vnd.idumych-PowerTheme-schedule {\n"
+		"\t\tlaunch \"" << program << "\" --run-schedule\n"
+		"\t\ton initial_volumes_mounted\n"
+		"\t}\n"
+		"}\n";
+	ssize_t written = file.Write(text.String(), text.Length());
+	return written == text.Length() ? B_OK
+		: written < 0 ? (status_t)written : B_IO_ERROR;
+}
+
+
+bool
+parse_schedule_time(const char* text, int32& minutes)
+{
+	int hour, minute;
+	char end;
+	if (sscanf(text, "%d:%d%c", &hour, &minute, &end) != 2
+		|| hour < 0 || hour > 23 || minute < 0 || minute > 59) {
+		return false;
+	}
+	minutes = hour * 60 + minute;
+	return true;
+}
+
+
+theme_mode
+scheduled_mode(const ThemeSchedule& schedule, int32 minutes)
+{
+	if (schedule.lightAt < schedule.darkAt) {
+		return minutes >= schedule.lightAt && minutes < schedule.darkAt
+			? THEME_MODE_LIGHT : THEME_MODE_DARK;
+	}
+	return minutes >= schedule.darkAt && minutes < schedule.lightAt
+		? THEME_MODE_DARK : THEME_MODE_LIGHT;
+}
+
+
 theme_mode
 current_mode()
 {

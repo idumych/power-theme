@@ -20,11 +20,13 @@
 #include <stdio.h>
 #include <string.h>
 #include <strings.h>
+#include <time.h>
 #include <unistd.h>
 
 #include <AboutWindow.h>
 #include <Application.h>
 #include <File.h>
+#include <Messenger.h>
 #include <Path.h>
 #include <Roster.h>
 #include <StringList.h>
@@ -36,6 +38,9 @@
 
 
 static const char* kSignature = "application/x-vnd.idumych-PowerTheme";
+static const char* kScheduleSignature
+	= "application/x-vnd.idumych-PowerTheme-schedule";
+static const bigtime_t kScheduleCheckInterval = 30000000;
 
 
 class ThemesApp : public BApplication {
@@ -93,6 +98,9 @@ usage(FILE* out)
 		"  -m, --mode=MODE       switch the theme in use to its light or dark\n"
 		"                        version, or toggle between them; with --apply,\n"
 		"                        apply that version (light or dark)\n"
+		"      --schedule=LIGHT,DARK  switch the theme in use to its light\n"
+		"                        version at LIGHT and its dark one at DARK, every\n"
+		"                        day (as HH:MM, 24 hour); \"off\" stops that\n"
 		"  -i, --icons=ID        use only the icon theme in folder ID;\n"
 		"                        \"haiku\" puts Haiku's own icons back\n"
 		"  -r, --revert          go back to the look from before any theme\n"
@@ -179,6 +187,122 @@ apply_icons(const char* id)
 }
 
 
+/*!	Runs in the background, for as long as there is a schedule. It only acts
+	when the mode the schedule asks for changes, so that a theme switched by hand
+	stays until the next scheduled time. It starts out without one, so a system
+	started at night comes up dark.
+*/
+class ScheduleApp : public BApplication {
+public:
+	ScheduleApp()
+		:
+		BApplication(kScheduleSignature),
+		fMode(THEME_MODE_UNKNOWN)
+	{
+	}
+
+	virtual void ReadyToRun()
+	{
+		_Check();
+		SetPulseRate(kScheduleCheckInterval);
+	}
+
+	virtual void Pulse()
+	{
+		_Check();
+	}
+
+private:
+	void _Check()
+	{
+		ThemeSchedule schedule;
+		if (load_schedule(schedule) != B_OK || !schedule.enabled) {
+			PostMessage(B_QUIT_REQUESTED);
+			return;
+		}
+
+		time_t now = time(NULL);
+		struct tm local;
+		localtime_r(&now, &local);
+		const theme_mode mode = scheduled_mode(schedule,
+			local.tm_hour * 60 + local.tm_min);
+		if (mode == fMode)
+			return;
+
+		fMode = mode;
+		BString log;
+		apply_mode(mode, log);
+		print_log(log);
+	}
+
+	theme_mode	fMode;
+};
+
+
+static int
+set_schedule(const char* times)
+{
+	app_info info;
+	if (be_app->GetAppInfo(&info) != B_OK) {
+		fprintf(stderr, "powertheme: can't tell where Power Theme is\n");
+		return 1;
+	}
+	BPath program(&info.ref);
+
+	ThemeSchedule schedule;
+	load_schedule(schedule);
+	schedule.enabled = strcasecmp(times, "off") != 0;
+	if (schedule.enabled) {
+		BString text(times);
+		int32 comma = text.FindFirst(',');
+		BString light, dark;
+		if (comma > 0) {
+			text.CopyInto(light, 0, comma);
+			text.CopyInto(dark, comma + 1, text.Length() - comma - 1);
+		}
+		if (comma <= 0 || !parse_schedule_time(light, schedule.lightAt)
+			|| !parse_schedule_time(dark, schedule.darkAt)) {
+			fprintf(stderr, "powertheme: the schedule is LIGHT,DARK as HH:MM, "
+				"such as 07:00,19:00, or off\n");
+			return 2;
+		}
+		if (schedule.lightAt == schedule.darkAt) {
+			fprintf(stderr, "powertheme: light and dark need different "
+				"times\n");
+			return 2;
+		}
+	}
+
+	status_t status = save_schedule(schedule, program.Path());
+	if (status != B_OK) {
+		fprintf(stderr, "powertheme: can't save the schedule: %s\n",
+			strerror(status));
+		return 1;
+	}
+
+	if (!schedule.enabled) {
+		BMessenger(kScheduleSignature).SendMessage(B_QUIT_REQUESTED);
+		printf("The schedule is off.\n");
+		return 0;
+	}
+
+	// from the next login, the launch_daemon job starts it
+	if (!be_roster->IsRunning(kScheduleSignature)) {
+		const char* arguments[] = { "--run-schedule" };
+		status = be_roster->Launch(&info.ref, 1, arguments);
+		if (status != B_OK && status != B_ALREADY_RUNNING) {
+			fprintf(stderr, "powertheme: can't start the schedule: %s\n",
+				strerror(status));
+			return 1;
+		}
+	}
+	printf("Light at %02" B_PRId32 ":%02" B_PRId32 ", dark at %02" B_PRId32
+		":%02" B_PRId32 ", every day.\n", schedule.lightAt / 60,
+		schedule.lightAt % 60, schedule.darkAt / 60, schedule.darkAt % 60);
+	return 0;
+}
+
+
 static int
 command_line(int argc, char** argv)
 {
@@ -191,6 +315,7 @@ command_line(int argc, char** argv)
 		{ "status", no_argument, NULL, 's' },
 		{ "show", required_argument, NULL, 'w' },
 		{ "mode", required_argument, NULL, 'm' },
+		{ "schedule", required_argument, NULL, 'S' },
 		{ "restart-tracker", no_argument, NULL, 't' },
 		{ "build-decorators", no_argument, NULL, 'b' },
 		{ "install-tools", no_argument, NULL, 'T' },
@@ -205,6 +330,7 @@ command_line(int argc, char** argv)
 	bool build = false, installTools = false;
 	const char* show = NULL;
 	const char* mode = NULL;
+	const char* scheduleTimes = NULL;
 
 	int option;
 	while ((option = getopt_long(argc, argv, "la:p:m:i:rstw:bh", kOptions, NULL))
@@ -218,6 +344,7 @@ command_line(int argc, char** argv)
 					return 2;
 				break;
 			case 'm': mode = optarg; break;
+			case 'S': scheduleTimes = optarg; break;
 			case 'i': icons = optarg; break;
 			case 'r': revert = true; break;
 			case 's': status = true; break;
@@ -231,7 +358,7 @@ command_line(int argc, char** argv)
 	}
 	if (optind < argc
 		|| (!list && !apply && !icons && !revert && !status && !restart
-			&& !show && !build && !mode)) {
+			&& !show && !build && !mode && !scheduleTimes)) {
 		usage(stderr);
 		return 2;
 	}
@@ -337,6 +464,15 @@ command_line(int argc, char** argv)
 		printf("theme: %s\n", currentTheme.IsEmpty()
 			? "(none)" : currentTheme.String());
 		printf("mode: %s\n", mode_name(current_mode()));
+		ThemeSchedule schedule;
+		load_schedule(schedule);
+		if (schedule.enabled) {
+			printf("schedule: light at %02" B_PRId32 ":%02" B_PRId32 ", dark at "
+				"%02" B_PRId32 ":%02" B_PRId32 "\n", schedule.lightAt / 60,
+				schedule.lightAt % 60, schedule.darkAt / 60,
+				schedule.darkAt % 60);
+		} else
+			printf("schedule: off\n");
 		printf("icons: %s\n", currentIcons.IsEmpty()
 			? "(Haiku's own)" : currentIcons.String());
 		printf("previous look saved: %s\n",
@@ -345,6 +481,9 @@ command_line(int argc, char** argv)
 			has_saved_icons() ? "yes" : "no");
 		return 0;
 	}
+
+	if (scheduleTimes != NULL)
+		return set_schedule(scheduleTimes);
 
 	if (mode != NULL && apply == NULL) {
 		theme_mode target = wantedMode;
@@ -426,6 +565,14 @@ command_line(int argc, char** argv)
 int
 main(int argc, char** argv)
 {
+	if (argc == 2 && strcmp(argv[1], "--run-schedule") == 0) {
+		if (be_roster->IsRunning(kScheduleSignature))
+			return 0;
+		ScheduleApp app;
+		app.Run();
+		return 0;
+	}
+
 	if (argc > 1)
 		return command_line(argc, argv);
 

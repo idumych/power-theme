@@ -203,6 +203,23 @@ theme_mode	current_mode();
 // version in that mode.
 status_t	apply_mode(theme_mode mode, BString& log, BString* applied = NULL);
 
+// When to switch the theme in use between its versions: light from \a lightAt
+// and dark from \a darkAt, in minutes after midnight, local time.
+struct ThemeSchedule {
+	bool		enabled;
+	int32		lightAt;
+	int32		darkAt;
+};
+
+status_t	load_schedule(ThemeSchedule& schedule);
+// Also installs or removes the launch_daemon job for the next login, for the
+// program at \a program.
+status_t	save_schedule(const ThemeSchedule& schedule, const char* program);
+// "HH:MM" in minutes after midnight, or false
+bool		parse_schedule_time(const char* text, int32& minutes);
+// the mode \a schedule asks for at \a minutes after midnight
+theme_mode	scheduled_mode(const ThemeSchedule& schedule, int32 minutes);
+
 // What applying \a theme would do on this system, line by line: the
 // decorator and control look found, fonts, colours and wallpapers.
 void		describe_theme(const Theme& theme, BString& out);
