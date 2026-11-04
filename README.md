@@ -215,7 +215,7 @@ click **Build add-ons…** again.
 - **Haiku icons (dark)**: dark versions of Haiku's own icons, and what Haiku Dark
   uses (`icons = haiku-dark`). Power Theme recolours the icons of the running
   system when it applies them, so new file types and system updates are covered:
-  a chosen palette of deeper colours and a thin white outline, on the same
+  a chosen palette of deeper colours and a thin soft white outline, on the same
   shapes. Icon themes with dark versions, such as Breeze Dark or Papirus-Dark,
   can go in `~/config/non-packaged/data/icons`; they mostly differ in their
   one-colour icons.

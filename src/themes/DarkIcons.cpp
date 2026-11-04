@@ -46,19 +46,36 @@ enum {
 	TRANSFORMER_STROKE = 23
 };
 
-// the outline: a stroke of width 2 on the 64 unit grid, half of it showing,
-// with round caps and joins
-const uint8_t kOutlineStroke[] = { TRANSFORMER_STROKE, 128 + 2, 0x11, 4 };
-
-const int kMaxItems = 255;
-
-
 struct Color {
 	uint8_t	red;
 	uint8_t	green;
 	uint8_t	blue;
 	uint8_t	alpha;
 };
+
+// The outline is a stroke behind the shapes, so half of its width shows. A width
+// is in units of the 64 unit grid, so one fixed width would become too thin to
+// draw evenly on small icons. So there's a stroke for each range of sizes, about
+// 3/4 of a pixel wide, or 1 at 64 pixels. Sizes are as shapes store them, 63.75
+// being the icon's full size of 64 pixels.
+const struct {
+	uint8_t	minScale;
+	uint8_t	maxScale;
+	uint8_t	width;
+} kOutlines[] = {
+	{ 0, 24, 6 },
+	{ 24, 48, 3 },
+	{ 48, 255, 2 }
+};
+
+const uint8_t kOutlineStrokeOptions = 0x11;
+	// round caps and joins
+const uint8_t kOutlineMiterLimit = 4;
+
+const Color kOutlineColor = { 0xe6, 0xe8, 0xea, 255 };
+
+const int kMaxItems = 255;
+
 
 typedef uint32_t Ramp[5];
 
@@ -356,6 +373,8 @@ struct Shape {
 	int		style;
 	size_t	flagsAt;
 	uint8_t	flags;
+	// where its range of sizes is, or where it would be without one
+	size_t	scaleAt;
 	// where the number of transformers is, or 0 without any
 	size_t	transformersAt;
 };
@@ -381,6 +400,7 @@ read_shapes(Reader& in, std::vector<Shape>& shapes)
 			in.SkipCoord();
 			in.SkipCoord();
 		}
+		shape.scaleAt = in.At();
 		if ((shape.flags & SHAPE_LOD_SCALE) != 0)
 			in.Skip(2);
 		if ((shape.flags & SHAPE_TRANSFORMERS) != 0) {
@@ -446,7 +466,7 @@ make_dark_icon(const uint8_t* data, size_t size, std::vector<uint8_t>& dark)
 		return true;
 	}
 
-	// a copy of each solid shape, stroked in the outline's style
+	// copies of each solid shape, stroked in the outline's style
 	std::vector<std::vector<uint8_t> > outlines;
 	std::set<std::vector<uint8_t> > seen;
 	for (size_t i = 0; i < shapes.size(); i++) {
@@ -454,19 +474,35 @@ make_dark_icon(const uint8_t* data, size_t size, std::vector<uint8_t>& dark)
 		if (shape.style >= (int)styles.size() || !styles[shape.style].solid)
 			continue;
 
-		std::vector<uint8_t> copy(data + shape.start, data + shape.end);
-		copy[1] = (uint8_t)styles.size();
-		if (shape.transformersAt != 0)
-			copy[shape.transformersAt - shape.start]++;
-		else {
+		const bool hasScale = (shape.flags & SHAPE_LOD_SCALE) != 0;
+		const int minScale = hasScale ? data[shape.scaleAt] : 0;
+		const int maxScale = hasScale ? data[shape.scaleAt + 1] : 255;
+
+		for (size_t o = 0; o < sizeof(kOutlines) / sizeof(kOutlines[0]); o++) {
+			const int from = std::max(minScale, (int)kOutlines[o].minScale);
+			const int to = std::min(maxScale, (int)kOutlines[o].maxScale);
+			if (from >= to)
+				continue;
+
+			std::vector<uint8_t> copy(data + shape.start, data + shape.scaleAt);
+			copy[1] = (uint8_t)styles.size();
 			copy[shape.flagsAt - shape.start]
-				= shape.flags | SHAPE_TRANSFORMERS;
-			copy.push_back(1);
+				= shape.flags | SHAPE_LOD_SCALE | SHAPE_TRANSFORMERS;
+			copy.push_back((uint8_t)from);
+			copy.push_back((uint8_t)to);
+			if (shape.transformersAt != 0) {
+				copy.push_back(data[shape.transformersAt] + 1);
+				copy.insert(copy.end(), data + shape.transformersAt + 1,
+					data + shape.end);
+			} else
+				copy.push_back(1);
+			copy.push_back(TRANSFORMER_STROKE);
+			copy.push_back(128 + kOutlines[o].width);
+			copy.push_back(kOutlineStrokeOptions);
+			copy.push_back(kOutlineMiterLimit);
+			if (seen.insert(copy).second)
+				outlines.push_back(copy);
 		}
-		copy.insert(copy.end(), kOutlineStroke,
-			kOutlineStroke + sizeof(kOutlineStroke));
-		if (seen.insert(copy).second)
-			outlines.push_back(copy);
 	}
 
 	// There's only so much room; the topmost shapes matter most.
@@ -477,9 +513,8 @@ make_dark_icon(const uint8_t* data, size_t size, std::vector<uint8_t>& dark)
 	dark.assign(data, data + 4);
 	dark.push_back((uint8_t)(styles.size() + 1));
 	dark.insert(dark.end(), styleBytes.begin() + 1, styleBytes.end());
-	const Color white = { 255, 255, 255, 255 };
 	dark.push_back(STYLE_SOLID);
-	add_color(dark, white);
+	add_color(dark, kOutlineColor);
 	dark.insert(dark.end(), data + pathsAt, data + shapesAt);
 
 	// behind everything but the shadows
