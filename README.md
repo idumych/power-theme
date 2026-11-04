@@ -196,6 +196,7 @@ click **Build add-ons…** again.
     [--install-tools]` (`src/themes/build-decorators.sh`).
   - `powertheme --list`, `--apply=NAME [--parts=…] [--mode=light|dark]`,
     `--mode=light|dark|toggle`, `--icons=ID|haiku`,
+    `--light-icons=ID|haiku|keep`, `--dark-icons=ID|haiku|keep`,
     `--revert`, `--status`, `--show=NAME`, `--restart-tracker` and
     `--build-decorators` do the same from a Terminal.
 - **Light and dark versions**: two themes are versions of the same one if their
@@ -204,7 +205,16 @@ click **Build add-ons…** again.
   and DarkFlat), **Haiku** (Haiku and Haiku Dark) and **Reactionary ME**
   (with Reactionary ME Dark) come this way; other themes stay as they are until
   they have both. `powertheme --mode=dark` switches the theme in use, keeping
-  the parts it was applied with and your icons.
+  the parts it was applied with.
+- **Light and dark icons**: each version of a theme has its own icons: what its
+  `theme.settings` names, or what you choose with **Light icons** and **Dark
+  icons** in the window (which menu you see follows **Mode**, and **Apply** keeps
+  both), or with `--light-icons` and `--dark-icons`. Switching modes then changes
+  the icons too. **Keep the current icons** leaves them alone, and so do icons
+  set apart from a theme with `--icons`. Dark icon themes, such as Breeze Dark or
+  Papirus-Dark, aren't included; install one in
+  `~/config/non-packaged/data/icons`. They mostly differ in their one-colour
+  icons, so colourful folders and documents may look the same in both.
 - **Switching by the time of day**: `powertheme --schedule=07:00,19:00` switches
   the theme in use to its light version at 07:00 and its dark one at 19:00,
   every day, until `--schedule=off`; **Switch mode every day** in the window does
@@ -252,6 +262,8 @@ click **Build add-ons…** again.
   (255 colours and shapes in all); designs that still don't fit are left
   out, largest first. SVG icons are drawn with nanosvg, which leaves out
   elements with filters (usually blurred shadows).
+- Tracker shows a scheduled change of folder icons at its next restart, as it
+  does any other; Power Theme doesn't restart it behind your back.
 - Windows have no icon in the title bar: app_server decorators have no
   access to application icons.
 - Haiku makes default buttons bigger than the others; Reactionary draws

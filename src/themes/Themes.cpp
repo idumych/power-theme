@@ -109,6 +109,10 @@ usage(FILE* out)
 		"      --schedule=LIGHT,DARK  switch the theme in use to its light\n"
 		"                        version at LIGHT and its dark one at DARK, every\n"
 		"                        day (as HH:MM, 24 hour); \"off\" stops that\n"
+		"      --light-icons=ID  the icons for the theme in use's light version,\n"
+		"      --dark-icons=ID   and for its dark one: an icon theme, \"haiku\", or\n"
+		"                        \"keep\" to leave the icons alone. Switching modes\n"
+		"                        then changes the icons too\n"
 		"  -i, --icons=ID        use only the icon theme in folder ID;\n"
 		"                        \"haiku\" puts Haiku's own icons back\n"
 		"  -r, --revert          go back to the look from before any theme\n"
@@ -284,6 +288,46 @@ set_schedule_times(const char* times)
 }
 
 
+/*!	Chooses the icons for the theme in use's version in \a mode, and uses them
+	right away if that's the version in use.
+*/
+static int
+set_mode_icons(theme_mode mode, const char* id)
+{
+	BString name, inUse;
+	get_current(name, inUse);
+	ThemeList themes;
+	find_themes(themes);
+	const Theme* current = find_theme(themes, name);
+	const Theme* variant = current != NULL
+		? find_variant(themes, *current, mode) : NULL;
+	if (variant == NULL) {
+		fprintf(stderr, "powertheme: the theme in use has no %s version\n",
+			mode_name(mode));
+		return 1;
+	}
+
+	const bool keep = strcasecmp(id, "keep") == 0;
+	if (!keep && !is_haiku(id)) {
+		IconTheme* icons = load_icon_theme(id);
+		if (icons == NULL) {
+			fprintf(stderr, "powertheme: the icon theme \"%s\" isn't "
+				"installed\n", id);
+			return 1;
+		}
+		delete icons;
+	}
+
+	set_theme_icons(*variant, keep ? "keep" : id);
+	set_icons_follow_mode(true);
+	printf("\"%s\" now uses %s.\n", variant->Name().String(),
+		keep ? "whatever icons are in use" : id);
+	if (!keep && variant == current)
+		return apply_icons(id);
+	return 0;
+}
+
+
 static int
 command_line(int argc, char** argv)
 {
@@ -297,6 +341,8 @@ command_line(int argc, char** argv)
 		{ "show", required_argument, NULL, 'w' },
 		{ "mode", required_argument, NULL, 'm' },
 		{ "schedule", required_argument, NULL, 'S' },
+		{ "light-icons", required_argument, NULL, 'L' },
+		{ "dark-icons", required_argument, NULL, 'D' },
 		{ "restart-tracker", no_argument, NULL, 't' },
 		{ "build-decorators", no_argument, NULL, 'b' },
 		{ "install-tools", no_argument, NULL, 'T' },
@@ -312,6 +358,8 @@ command_line(int argc, char** argv)
 	const char* show = NULL;
 	const char* mode = NULL;
 	const char* scheduleTimes = NULL;
+	const char* lightIcons = NULL;
+	const char* darkIcons = NULL;
 
 	int option;
 	while ((option = getopt_long(argc, argv, "la:p:m:i:rstw:bh", kOptions, NULL))
@@ -326,6 +374,8 @@ command_line(int argc, char** argv)
 				break;
 			case 'm': mode = optarg; break;
 			case 'S': scheduleTimes = optarg; break;
+			case 'L': lightIcons = optarg; break;
+			case 'D': darkIcons = optarg; break;
 			case 'i': icons = optarg; break;
 			case 'r': revert = true; break;
 			case 's': status = true; break;
@@ -339,7 +389,8 @@ command_line(int argc, char** argv)
 	}
 	if (optind < argc
 		|| (!list && !apply && !icons && !revert && !status && !restart
-			&& !show && !build && !mode && !scheduleTimes)) {
+			&& !show && !build && !mode && !scheduleTimes && !lightIcons
+			&& !darkIcons)) {
 		usage(stderr);
 		return 2;
 	}
@@ -456,6 +507,19 @@ command_line(int argc, char** argv)
 			printf("schedule: off\n");
 		printf("icons: %s\n", currentIcons.IsEmpty()
 			? "(Haiku's own)" : currentIcons.String());
+		ThemeList themes;
+		find_themes(themes);
+		const Theme* current = find_theme(themes, currentTheme);
+		if (current != NULL && icons_follow_mode()) {
+			const theme_mode modes[] = { THEME_MODE_LIGHT, THEME_MODE_DARK };
+			for (int32 i = 0; i < 2; i++) {
+				const Theme* variant = find_variant(themes, *current, modes[i]);
+				if (variant != NULL) {
+					printf("%s icons: %s\n", mode_name(modes[i]),
+						theme_icons(*variant).String());
+				}
+			}
+		}
 		printf("previous look saved: %s\n",
 			has_saved_appearance() ? "yes" : "no");
 		printf("previous icons saved: %s\n",
@@ -465,6 +529,15 @@ command_line(int argc, char** argv)
 
 	if (scheduleTimes != NULL)
 		return set_schedule_times(scheduleTimes);
+
+	if (lightIcons != NULL || darkIcons != NULL) {
+		int result = 0;
+		if (lightIcons != NULL)
+			result = set_mode_icons(THEME_MODE_LIGHT, lightIcons);
+		if (darkIcons != NULL && result == 0)
+			result = set_mode_icons(THEME_MODE_DARK, darkIcons);
+		return result;
+	}
 
 	if (mode != NULL && apply == NULL) {
 		theme_mode target = wantedMode;
@@ -478,7 +551,8 @@ command_line(int argc, char** argv)
 		}
 
 		BString log, applied;
-		status_t result = apply_mode(target, log, &applied);
+		bool iconsChanged;
+		status_t result = apply_mode(target, log, &applied, &iconsChanged);
 		print_log(log);
 		if (result != B_OK)
 			return 1;
@@ -487,6 +561,10 @@ command_line(int argc, char** argv)
 		else {
 			printf("\"%s\" applied. %s\n", applied.String(),
 				running_applications_note());
+		}
+		if (iconsChanged) {
+			printf("Folders show their new icons after Tracker restarts "
+				"(powertheme --restart-tracker).\n");
 		}
 		return 0;
 	}
@@ -516,6 +594,8 @@ command_line(int argc, char** argv)
 			return 1;
 		}
 
+		const bool wantsIcons = (parts & THEME_ICONS) != 0;
+
 		// leave out what isn't installed, saying so
 		BStringList missing;
 		parts &= ~theme->Missing(&missing);
@@ -528,13 +608,28 @@ command_line(int argc, char** argv)
 		apply_appearance(*theme, parts, log);
 		print_log(log);
 		int result = 0;
-		if ((parts & THEME_ICONS) != 0 && !theme->Icons().IsEmpty()
-				&& icons == NULL)
-			result = apply_icons(theme->Icons());
+		if (icons != NULL) {
+			// so that switching back to this version brings them back
+			if (!theme->VariantOf().IsEmpty())
+				set_theme_icons(*theme, is_haiku(icons) ? "haiku" : icons);
+			set_icons_follow_mode(true);
+		} else {
+			// what was chosen for this theme, or what it names if that's
+			// installed
+			const BString wanted = theme_icons(*theme);
+			const bool useIcons = wantsIcons && wanted != "keep"
+				&& (wanted != theme->Icons() || (parts & THEME_ICONS) != 0);
+			set_icons_follow_mode(useIcons);
+			if (useIcons)
+				result = apply_icons(wanted);
+		}
 		printf("\"%s\" applied. %s\n", theme->Name().String(),
 			running_applications_note());
 		if (icons == NULL)
 			return result;
+	} else if (icons != NULL) {
+		// icons of their own, which a change of mode shouldn't replace
+		set_icons_follow_mode(false);
 	}
 
 	if (icons != NULL)

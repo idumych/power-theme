@@ -61,6 +61,32 @@ static const char* kKeepIcons = "";
 static const char* kHaikuIcons = "-";
 
 
+//! What the icons menu calls icons that theme_icons() calls \a icons.
+static BString
+menu_icons(const BString& icons, const IconThemeList& installed)
+{
+	if (is_haiku(icons))
+		return kHaikuIcons;
+	for (int32 i = 0; i < installed.CountItems(); i++) {
+		if (installed.ItemAt(i)->ID() == icons)
+			return icons;
+	}
+	return kKeepIcons;
+}
+
+
+//! What theme_icons() calls what the icons menu calls \a id.
+static BString
+theme_icons_of(const BString& id)
+{
+	if (id == kKeepIcons)
+		return "keep";
+	if (id == kHaikuIcons)
+		return "haiku";
+	return id;
+}
+
+
 static BString
 schedule_time_text(int32 minutes)
 {
@@ -440,6 +466,8 @@ ThemesWindow::ThemesWindow(BRect frame, const char* selected)
 		? THEME_MODE_DARK : THEME_MODE_LIGHT),
 	fBusy(false)
 {
+	fIconChoiceChanged[0] = fIconChoiceChanged[1] = false;
+
 	fThemeList = new BListView("themes");
 	fThemeList->SetSelectionMessage(new BMessage(kMsgThemeSelected));
 	BScrollView* themeScroll = new BScrollView("theme scroll", fThemeList, 0,
@@ -628,8 +656,12 @@ ThemesWindow::MessageReceived(BMessage* message)
 		case kMsgIconsChosen:
 		{
 			const char* id;
-			if (message->FindString("id", &id) == B_OK)
+			if (message->FindString("id", &id) == B_OK) {
+				const int32 mode = fMode == THEME_MODE_DARK ? 1 : 0;
+				fIconChoice[mode] = id;
+				fIconChoiceChanged[mode] = true;
 				_SelectIcons(id);
+			}
 			break;
 		}
 
@@ -683,6 +715,7 @@ ThemesWindow::MessageReceived(BMessage* message)
 					job->parts |= THEME_DESKBAR;
 			}
 			job->icons = _ChosenIcons();
+			_SaveIconChoices(job->icons != kKeepIcons);
 
 			thread_id thread = spawn_thread(_ApplyThread, "apply theme",
 				B_NORMAL_PRIORITY, job);
@@ -989,6 +1022,7 @@ ThemesWindow::_SelectTheme(int32 index)
 		fModeField->Hide();
 
 	_SelectMode(fMode);
+	_LoadIconChoices();
 	_ShowTheme(_SelectedTheme());
 }
 
@@ -1044,8 +1078,12 @@ ThemesWindow::_ShowTheme(const Theme* theme)
 	fDescription->SetText(theme->Description());
 
 	// parts whose add-ons or files aren't installed can't be applied
+	// (a version of a pair with icons chosen for it doesn't need its own)
+	const bool iconsChosen = _SelectedIsPair()
+		&& fIconChoice[fMode == THEME_MODE_DARK ? 1 : 0] != kKeepIcons;
 	BStringList missingParts;
-	const uint32 missing = theme->Missing(&missingParts);
+	const uint32 missing = theme->Missing(&missingParts,
+		iconsChosen ? THEME_ALL & ~THEME_ICONS : THEME_ALL);
 	const uint32 parts = theme->Parts() & ~missing;
 	BCheckBox* boxes[] = { fDecorator, fControls, fColors, fFonts,
 		fWallpaper, fDeskbar };
@@ -1070,15 +1108,67 @@ ThemesWindow::_ShowTheme(const Theme* theme)
 		}
 	}
 
-	// the theme's own icons, if they are installed
-	BString icons = kKeepIcons;
-	if (is_haiku(theme->Icons()))
-		icons = kHaikuIcons;
-	for (int32 i = 0; i < fIconThemes.CountItems(); i++) {
-		if (fIconThemes.ItemAt(i)->ID() == theme->Icons())
-			icons = theme->Icons();
+	// what was chosen for this version of a pair, or else the theme's own
+	// icons, if they are installed
+	if (_SelectedIsPair()) {
+		const bool dark = fMode == THEME_MODE_DARK;
+		fIconsField->SetLabel(dark ? "Dark icons:" : "Light icons:");
+		_SelectIcons(fIconChoice[dark ? 1 : 0]);
+	} else {
+		fIconsField->SetLabel("Icons:");
+		_SelectIcons(menu_icons(theme->Icons(), fIconThemes));
 	}
-	_SelectIcons(icons);
+	// the label is drawn as it changes, before there is room for a longer one
+	Layout(false);
+	fIconsField->Invalidate();
+}
+
+
+bool
+ThemesWindow::_SelectedIsPair() const
+{
+	const Theme* row = fRows.ItemAt(fThemeList->CurrentSelection());
+	return row != NULL && find_variant(fThemes, *row, THEME_MODE_LIGHT) != NULL
+		&& find_variant(fThemes, *row, THEME_MODE_DARK) != NULL;
+}
+
+
+void
+ThemesWindow::_LoadIconChoices()
+{
+	fIconChoiceChanged[0] = fIconChoiceChanged[1] = false;
+	if (!_SelectedIsPair())
+		return;
+
+	const Theme* row = fRows.ItemAt(fThemeList->CurrentSelection());
+	const theme_mode modes[] = { THEME_MODE_LIGHT, THEME_MODE_DARK };
+	for (int32 i = 0; i < 2; i++) {
+		fIconChoice[i] = menu_icons(
+			theme_icons(*find_variant(fThemes, *row, modes[i])), fIconThemes);
+	}
+}
+
+
+/*!	Keeps the icons chosen for each version of a pair, for when the mode next
+	changes. \a applyingIcons says whether icons are being applied now.
+*/
+void
+ThemesWindow::_SaveIconChoices(bool applyingIcons)
+{
+	bool follow = applyingIcons;
+	if (_SelectedIsPair()) {
+		const Theme* row = fRows.ItemAt(fThemeList->CurrentSelection());
+		const theme_mode modes[] = { THEME_MODE_LIGHT, THEME_MODE_DARK };
+		for (int32 i = 0; i < 2; i++) {
+			if (fIconChoiceChanged[i]) {
+				set_theme_icons(*find_variant(fThemes, *row, modes[i]),
+					theme_icons_of(fIconChoice[i]));
+				fIconChoiceChanged[i] = false;
+			}
+			follow |= fIconChoice[i] != kKeepIcons;
+		}
+	}
+	set_icons_follow_mode(follow);
 }
 
 

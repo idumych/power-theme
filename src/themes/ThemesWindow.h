@@ -53,6 +53,9 @@ private:
 			void				_SelectMode(theme_mode mode);
 			BString				_RowName(const Theme* theme) const;
 			const Theme*		_SelectedTheme() const;
+			bool				_SelectedIsPair() const;
+			void				_LoadIconChoices();
+			void				_SaveIconChoices(bool applyingIcons);
 			void				_SelectIcons(const char* id);
 			BString				_ChosenIcons() const;
 			void				_SetBusy(bool busy);
@@ -64,6 +67,10 @@ private:
 			// what the list shows: one theme of each light and dark pair
 			BObjectList<const Theme, false> fRows;
 			theme_mode			fMode;
+			// the icons menu's choice for the selected pair's light and dark
+			// versions, and whether it was changed from what they had
+			BString				fIconChoice[2];
+			bool				fIconChoiceChanged[2];
 			IconThemeList		fIconThemes;
 			bool				fBusy;
 

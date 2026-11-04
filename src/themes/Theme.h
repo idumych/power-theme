@@ -33,7 +33,8 @@
  *
  * A theme can be one version of another: "variant of = Flat" and "mode =
  * dark". Two themes that say they are the same theme's light and dark versions
- * are shown as one, and can be switched between with apply_mode().
+ * are shown as one, and can be switched between with apply_mode(). Each names
+ * its own "icons", so a dark version can use a dark icon theme.
  *
  * Themes made for Theme Manager (HaikuThemeManager, and BeOS and ZETA
  * before it) are read too, from the "UIThemes" folders it uses; see
@@ -146,9 +147,11 @@ public:
 
 			// what it changes, as THEME_* flags
 			uint32				Parts() const;
-			// the parts whose add-ons, icons or images aren't installed, as
-			// THEME_* flags, with a line for the user about each in \a what
-			uint32				Missing(BStringList* what = NULL) const;
+			// which of \a parts have add-ons, icons or images that aren't
+			// installed, as THEME_* flags, with a line for the user about each
+			// in \a what
+			uint32				Missing(BStringList* what = NULL,
+									uint32 parts = THEME_ALL) const;
 
 private:
 			BString				fName;
@@ -204,11 +207,23 @@ theme_mode	current_mode();
 
 // Switches the theme in use to its version in \a mode, with the same parts as
 // when it was applied. This is what anything choosing a mode should call,
-// whatever it goes by. Icons stay as they are. \a applied gets the name of the
-// theme applied, and stays empty if it was in that mode already. Returns an
-// error, with a line for the user in \a log, if no theme is in use or it has no
-// version in that mode.
-status_t	apply_mode(theme_mode mode, BString& log, BString* applied = NULL);
+// whatever it goes by. Icons change too if icons_follow_mode(). \a applied gets
+// the name of the theme applied, and stays empty if it was in that mode already;
+// \a iconsChanged says whether the icons changed. Returns an error, with a line
+// for the user in \a log, if no theme is in use or it has no version in that
+// mode.
+status_t	apply_mode(theme_mode mode, BString& log, BString* applied = NULL,
+				bool* iconsChanged = NULL);
+
+// The icons to use with \a theme: those chosen for it, or else those it names.
+// An icon theme's folder name, "haiku", or "keep" to leave the icons alone.
+BString		theme_icons(const Theme& theme);
+void		set_theme_icons(const Theme& theme, const char* icons);
+
+// Whether switching modes changes the icons as well. It only does once icons
+// have been applied with a theme, so that icons set apart from one stay.
+bool		icons_follow_mode();
+void		set_icons_follow_mode(bool follow);
 
 // When to switch the theme in use between its versions: light from \a lightAt
 // and dark from \a darkAt, in minutes after midnight, local time.

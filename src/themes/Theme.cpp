@@ -40,6 +40,7 @@
 #include <DecoratorPrivate.h>
 #include <InterfacePrivate.h>
 
+#include "IconInstaller.h"
 #include "IconTheme.h"
 
 
@@ -52,6 +53,8 @@ static const char* kPreviousName = "previous";
 static const char* kTrackerSignature = "application/x-vnd.Be-TRAK";
 static const char* kBackgroundImageSet = "be:bgndimginfoset";
 static const char* kCurrentName = "current";
+static const char* kThemeIconsName = "theme icons";
+static const char* kKeepIcons = "keep";
 
 // Every system colour. Not all values in between are colours, and
 // ui_color_name() complains about the others.
@@ -259,6 +262,49 @@ get_current_parts()
 	BMessage current;
 	load_message(kCurrentName, current);
 	return current.GetUInt32("parts", THEME_ALL);
+}
+
+
+bool
+icons_follow_mode()
+{
+	BMessage current;
+	load_message(kCurrentName, current);
+	return current.GetBool("icons follow mode", false);
+}
+
+
+void
+set_icons_follow_mode(bool follow)
+{
+	BMessage current;
+	load_message(kCurrentName, current);
+	current.RemoveName("icons follow mode");
+	current.AddBool("icons follow mode", follow);
+	save_message(kCurrentName, current);
+}
+
+
+BString
+theme_icons(const Theme& theme)
+{
+	BMessage chosen;
+	load_message(kThemeIconsName, chosen);
+	const char* icons;
+	if (chosen.FindString(theme.Name(), &icons) == B_OK)
+		return icons;
+	return theme.Icons().IsEmpty() ? BString(kKeepIcons) : theme.Icons();
+}
+
+
+void
+set_theme_icons(const Theme& theme, const char* icons)
+{
+	BMessage chosen;
+	load_message(kThemeIconsName, chosen);
+	chosen.RemoveName(theme.Name());
+	chosen.AddString(theme.Name(), icons);
+	save_message(kThemeIconsName, chosen);
 }
 
 
@@ -608,10 +654,10 @@ find_control_look_of(const BString& names, BString& path)
 
 
 uint32
-Theme::Missing(BStringList* what) const
+Theme::Missing(BStringList* what, uint32 parts) const
 {
 	uint32 missing = 0;
-	if (!fDecorator.IsEmpty()) {
+	if ((parts & THEME_DECORATOR) != 0 && !fDecorator.IsEmpty()) {
 		DecorInfoUtility decorators;
 		if (find_decorator(decorators, fDecorator) == NULL) {
 			missing |= THEME_DECORATOR;
@@ -623,13 +669,14 @@ Theme::Missing(BStringList* what) const
 	}
 
 	BString path;
-	if (!fControlLook.IsEmpty() && !find_control_look_of(fControlLook, path)) {
+	if ((parts & THEME_CONTROLS) != 0 && !fControlLook.IsEmpty()
+		&& !find_control_look_of(fControlLook, path)) {
 		missing |= THEME_CONTROLS;
 		if (what != NULL)
 			what->Add(BString("the control look \"") << fControlLook << "\"");
 	}
 
-	if (!fIcons.IsEmpty() && !is_haiku(fIcons)) {
+	if ((parts & THEME_ICONS) != 0 && !fIcons.IsEmpty() && !is_haiku(fIcons)) {
 		IconTheme* icons = load_icon_theme(fIcons);
 		if (icons == NULL) {
 			missing |= THEME_ICONS;
@@ -639,7 +686,8 @@ Theme::Missing(BStringList* what) const
 		delete icons;
 	}
 
-	if (fBackground.IsEmpty() && !fWallpaper.IsEmpty() && fWallpaper != "none"
+	if ((parts & THEME_WALLPAPER) != 0 && fBackground.IsEmpty()
+		&& !fWallpaper.IsEmpty() && fWallpaper != "none"
 		&& fWallpaper != "default" && !BEntry(fWallpaper).Exists()) {
 		missing |= THEME_WALLPAPER;
 		if (what != NULL) {
@@ -1280,9 +1328,38 @@ current_mode()
 }
 
 
-status_t
-apply_mode(theme_mode mode, BString& log, BString* applied)
+//! Changes to the icons of \a theme, if they aren't in use. Whether it did.
+static bool
+apply_icons_of(const Theme& theme, BString& log)
 {
+	const BString wanted = theme_icons(theme);
+	BString themeInUse, inUse;
+	get_current(themeInUse, inUse);
+	if (wanted == kKeepIcons || wanted == inUse
+		|| (is_haiku(wanted) && inUse.IsEmpty())) {
+		return false;
+	}
+
+	if (is_haiku(wanted))
+		return revert_icons(log) == B_OK;
+
+	IconTheme* icons = load_icon_theme(wanted);
+	if (icons == NULL) {
+		log << "The icon theme \"" << wanted << "\" isn't installed.\n";
+		return false;
+	}
+	int32 changed;
+	const status_t status = apply_icon_theme(*icons, log, changed);
+	delete icons;
+	return status == B_OK;
+}
+
+
+status_t
+apply_mode(theme_mode mode, BString& log, BString* applied, bool* iconsChanged)
+{
+	if (iconsChanged != NULL)
+		*iconsChanged = false;
 
 	BString name, icons;
 	get_current(name, icons);
@@ -1312,7 +1389,7 @@ apply_mode(theme_mode mode, BString& log, BString* applied)
 	// other one when switching back.
 	const uint32 parts = get_current_parts();
 	BStringList missing;
-	uint32 available = parts & ~theme->Missing(&missing);
+	uint32 available = parts & ~theme->Missing(&missing, parts);
 	if (!missing.IsEmpty()) {
 		log << "Not installed, so left out: " << missing.Join(", ") << ".\n";
 	}
@@ -1329,6 +1406,12 @@ apply_mode(theme_mode mode, BString& log, BString* applied)
 
 	if (applied != NULL)
 		*applied = theme->Name();
+	if (icons_follow_mode()) {
+		const bool changed = apply_icons_of(*theme, log);
+		if (iconsChanged != NULL)
+			*iconsChanged = changed;
+	}
+
 	// an open window should show what is in use now; the command line also goes
 	// by this signature, but doesn't read its messages
 	BList running;
