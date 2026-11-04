@@ -54,8 +54,8 @@ top left of the first pictures shows how an application can follow the mode.
 
 ## What needs pending Renku OS changes
 
-Everything in Power Theme works on current Renku OS and Haiku R1/beta6, including
-Haiku Dark, its icons and the schedule. A few things only happen in place, or at
+Power Theme works without these changes, including Haiku Dark, its icons and the
+schedule, as tested on Haiku R1/beta6. A few things only happen in place, or at
 all, with changes still in review. Power Theme checks for the first two and says
 what to do if they're missing. The
 [Power Theme: Live Themes page](https://idumych.github.io/power-theme/) shows all of
