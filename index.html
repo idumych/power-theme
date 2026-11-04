@@ -1,0 +1,279 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Power Theme: Live Themes</title>
+<meta name="description" content="Theme changes that reach running applications on Renku OS, light and dark themes, a daily schedule, and a way for apps to follow along.">
+<style>
+:root {
+	--bg: #e9e8e3; --panel: #f6f5f1; --text: #1b1b1c; --muted: #5b5b58;
+	--line: #c9c7bf; --accent: #ffcb00; --on-accent: #1b1b1c; --link: #174a9c;
+	--code: #ecebe5; color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+	:root:not([data-theme="light"]) {
+		--bg: #0c0c0d; --panel: #1c1c1e; --text: #ecebe6; --muted: #a7a6a0;
+		--line: #38383a; --accent: #ffcb00; --on-accent: #1b1b1c; --link: #ffd84d;
+		--code: #262628; color-scheme: dark;
+	}
+}
+:root[data-theme="dark"] {
+	--bg: #0c0c0d; --panel: #1c1c1e; --text: #ecebe6; --muted: #a7a6a0;
+	--line: #38383a; --accent: #ffcb00; --on-accent: #1b1b1c; --link: #ffd84d;
+	--code: #262628; color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+	margin: 0; background: var(--bg); color: var(--text);
+	font: 17px/1.6 "Noto Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+a { color: var(--link); }
+img { display: block; max-width: 100%; height: auto; }
+.wrap { max-width: 1040px; margin: 0 auto; padding: 0 16px; }
+.top { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 18px 0; }
+.name { font-weight: 700; }
+button.mode {
+	font: inherit; font-size: 15px; color: var(--text); background: var(--panel);
+	border: 1px solid var(--line); border-radius: 4px; padding: 5px 12px; cursor: pointer;
+}
+header h1 { font-size: clamp(2rem, 6vw, 3.4rem); line-height: 1.08; margin: 26px 0 14px; letter-spacing: -.02em; max-width: 24ch; }
+header p { font-size: 1.15rem; color: var(--muted); max-width: 62ch; margin: 0 0 30px; }
+
+/* the slider between the two themes */
+.compare {
+	position: relative; overflow: hidden; border: 1px solid var(--line);
+	aspect-ratio: 4 / 3; background: #000; touch-action: pan-y;
+}
+.compare img { position: absolute; inset: 0; width: 100%; height: 100%; }
+.compare .over { clip-path: inset(0 calc(100% - var(--at, 50%)) 0 0); }
+.compare .bar { position: absolute; top: 0; bottom: 0; left: var(--at, 50%); width: 3px; margin-left: -1px; background: var(--accent); pointer-events: none; }
+.compare input { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; opacity: 0; cursor: ew-resize; }
+.compare .tag { position: absolute; bottom: 10px; font-size: 13px; font-weight: 700; padding: 2px 9px; background: var(--accent); color: var(--on-accent); pointer-events: none; }
+.compare .tag.l { left: 10px; } .compare .tag.r { right: 10px; }
+.caption { color: var(--muted); font-size: 15px; margin: 10px 0 0; }
+
+section { margin: 68px 0; }
+/* a section heading wears a window tab */
+h2 {
+	display: inline-block; margin: 0; padding: 5px 16px 4px; font-size: 1.15rem;
+	background: var(--accent); color: var(--on-accent); border-radius: 3px 3px 0 0;
+}
+.sheet { background: var(--panel); border: 1px solid var(--line); padding: 24px; }
+.sheet > :first-child { margin-top: 0; }
+.sheet > :last-child { margin-bottom: 0; }
+.status { font-size: 14px; color: var(--muted); }
+.status b { color: var(--text); }
+.pair { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; margin: 20px 0 6px; }
+.pair.narrow { max-width: 620px; }
+.pair figure { margin: 0; }
+.pair img { border: 1px solid var(--line); }
+figcaption { font-size: 14px; color: var(--muted); margin-top: 6px; }
+pre {
+	background: var(--code); padding: 14px 16px; overflow-x: auto; margin: 18px 0;
+	font: 14px/1.5 "Noto Sans Mono", ui-monospace, Menlo, Consolas, monospace;
+}
+code { font-family: "Noto Sans Mono", ui-monospace, Menlo, Consolas, monospace; font-size: .92em; }
+.table { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; font-size: 15.5px; }
+th, td { text-align: left; padding: 9px 12px 9px 0; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { font-size: 14px; color: var(--muted); font-weight: 600; }
+td.n { white-space: nowrap; font-weight: 700; }
+ul { padding-left: 1.2em; } li { margin: 6px 0; }
+footer { border-top: 1px solid var(--line); padding: 24px 0 48px; color: var(--muted); font-size: 14.5px; }
+@media (max-width: 560px) {
+	body { font-size: 16px; }
+	.sheet { padding: 16px; }
+	.pair { gap: 10px; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+	<div class="top">
+		<span class="name">Power Theme</span>
+		<button class="mode" id="mode" type="button">Switch to dark</button>
+	</div>
+
+	<header>
+		<h1>Change the theme. Keep your apps open.</h1>
+		<p>Changing a theme on Renku OS used to mean restarting your applications to see all of it. This work makes controls and fonts change in place, gives themes light and dark versions that can switch by the time of day, and lets apps follow along.</p>
+	</header>
+
+	<div class="compare" id="compare">
+		<img src="img/haiku-light.png" width="1024" height="768" alt="Power Theme, a test app and the Deskbar in the light Haiku theme.">
+		<img class="over" src="img/haiku-dark.png" width="1024" height="768" alt="The same windows in the black and yellow Haiku Dark theme, with a dark icon theme.">
+		<div class="bar"></div>
+		<span class="tag l">Haiku Dark</span>
+		<span class="tag r">Haiku</span>
+		<input type="range" min="0" max="100" value="50" aria-label="Compare the Haiku Dark and Haiku themes">
+	</div>
+	<p class="caption">Drag across the picture. One command switches between these two, with every window left open. The windows are the same ones, on Renku OS in a virtual machine.</p>
+
+	<section>
+		<h2>Controls change live</h2>
+		<div class="sheet">
+			<p>Choosing a new control look now reaches every running application: buttons, sliders and menus redraw and reflow on the spot. An old look stays loaded until its app quits, because another thread may still be using it. Each look loads once, so the cost depends on how many different looks you use, not how many times you switch.</p>
+			<div class="pair narrow">
+				<figure><img src="img/look-be.png" width="160" height="450" alt="A test window with the Be control look." loading="lazy"><figcaption>The Be look.</figcaption></figure>
+				<figure><img src="img/look-flat.png" width="160" height="450" alt="The same test window with the Flat control look." loading="lazy"><figcaption>Flat, switched while it ran.</figcaption></figure>
+			</div>
+			<p class="status"><b>In review:</b> <a href="https://github.com/RenkuOS/Source/pull/284">#284</a> is ready, and <a href="https://github.com/RenkuOS/Source/pull/285">#285</a> is a draft stacked on it.</p>
+		</div>
+	</section>
+
+	<section>
+		<h2>Fonts change live</h2>
+		<div class="sheet">
+			<p>Views follow the system font unless they chose their own, with family and size tracked separately. An app that set its own size keeps that size and still follows the family. A font it set outright stays as it is.</p>
+			<div class="pair narrow">
+				<figure><img src="img/font-a.png" width="200" height="660" alt="A font test window at one system font setting." loading="lazy"><figcaption>One system font setting.</figcaption></figure>
+				<figure><img src="img/font-b.png" width="230" height="705" alt="The font test window at a larger system font setting." loading="lazy"><figcaption>A larger one.</figcaption></figure>
+			</div>
+			<p class="status"><b>Drafts:</b> <a href="https://github.com/RenkuOS/Source/pull/286">#286</a> and <a href="https://github.com/RenkuOS/Source/pull/287">#287</a>, stacked on the two above.</p>
+		</div>
+	</section>
+
+	<section>
+		<h2>Light and dark versions</h2>
+		<div class="sheet">
+			<p>A theme can now say it's one version of another. The two appear as one row in Power Theme, with a <b>Mode</b> menu. Flat, Haiku and Reactionary ME come as pairs, and Haiku Dark is black and yellow, like DarkFlat.</p>
+<pre>variant of = Haiku
+mode = dark
+
+powertheme --mode=toggle</pre>
+			<p class="status"><b>On <a href="https://github.com/idumych/power-theme">Power Theme's main branch</a>,</b> not in a release yet.</p>
+		</div>
+	</section>
+
+	<section>
+		<h2>Switching by the time of day</h2>
+		<div class="sheet">
+			<p>Pick a time for light and a time for dark, and the theme in use follows them every day. A computer started at night comes up dark, and a theme you switch by hand stays until the next scheduled time.</p>
+			<div class="pair">
+				<figure><img src="img/controls-light.png" width="388" height="265" alt="Mode, Light icons, the parts of a theme and the daily schedule, in the light theme." loading="lazy"><figcaption>The new controls in Haiku.</figcaption></figure>
+				<figure><img src="img/controls-dark.png" width="388" height="265" alt="The same controls in Haiku Dark, with Breeze Dark as the dark icons." loading="lazy"><figcaption>In Haiku Dark, with its own icons.</figcaption></figure>
+			</div>
+<pre>powertheme --schedule=07:00,19:00</pre>
+			<p class="status"><b>Command line:</b> on the main branch. <b>Controls in the window:</b> finished and tested, not merged yet.</p>
+		</div>
+	</section>
+
+	<section>
+		<h2>Dark icons</h2>
+		<div class="sheet">
+			<p>Each version of a theme can have its own icons, chosen in the window or from the command line, and a mode switch brings them along. Nothing changes unless you've applied icons with a theme, so icons you set separately stay where they are.</p>
+<pre>powertheme --light-icons=haiku --dark-icons=breeze-dark</pre>
+			<p>Making this work uncovered a catch. Linux icon themes usually tell light from dark with a small stylesheet and <code>currentColor</code>, which Power Theme's SVG renderer doesn't read, so both versions came out identical. Power Theme now writes those colours into each icon before drawing it. Before the fix, none of the roughly 200 icons differed between Breeze and Breeze Dark; now 8 do, including folders, programs and volumes.</p>
+			<p>That small number is the honest picture: dark icon themes mostly change their one-colour icons, so colourful folders and documents can look the same in both. Dark icon themes aren't bundled, so you install the one you want.</p>
+			<p class="status"><b>Finished and tested, not merged yet.</b></p>
+		</div>
+	</section>
+
+	<section>
+		<h2>Apps can follow along</h2>
+		<div class="sheet">
+			<p>Like <code>prefers-color-scheme</code> on the web, this gives an app one question to ask and a message telling it when to ask again, so it can swap its icons or artwork. The answer comes from the colours actually on screen, so it can't disagree with them and existing themes work unchanged.</p>
+<pre>void MyView::MessageReceived(BMessage* message)
+{
+	if (message-&gt;what == B_COLORS_UPDATED)
+		_UseArtwork(ui_is_dark() ? fDarkIcon : fLightIcon);
+	BView::MessageReceived(message);
+}</pre>
+			<div class="pair narrow">
+				<figure><img src="img/app-light.png" width="228" height="216" alt="A test app drawing a navy circle and reporting light artwork." loading="lazy"><figcaption>The test app's light artwork.</figcaption></figure>
+				<figure><img src="img/app-dark.png" width="228" height="216" alt="The same app drawing a yellow circle and reporting dark artwork." loading="lazy"><figcaption>Its dark artwork, swapped as it ran.</figcaption></figure>
+			</div>
+			<p class="status"><b>Open for review:</b> <a href="https://github.com/RenkuOS/Source/pull/289">#289</a>. No bundled app uses it yet.</p>
+		</div>
+	</section>
+
+	<section>
+		<h2>The Deskbar logo</h2>
+		<div class="sheet">
+			<p>The Deskbar's navy logo was hard to see on dark menus. It now has a light version and swaps by comparing the menu's text with its background.</p>
+			<div class="pair narrow">
+				<figure><img src="img/deskbar-light.png" width="408" height="150" alt="The Deskbar with a navy RenkuOS logo on a light menu." loading="lazy"><figcaption>On a light menu.</figcaption></figure>
+				<figure><img src="img/deskbar-dark.png" width="408" height="150" alt="The Deskbar with a pale RenkuOS logo on a dark menu." loading="lazy"><figcaption>On a dark menu.</figcaption></figure>
+			</div>
+			<p class="status"><b>Open for review:</b> <a href="https://github.com/RenkuOS/Source/pull/288">#288</a>.</p>
+		</div>
+	</section>
+
+	<section>
+		<h2>Older systems still work</h2>
+		<div class="sheet">
+			<p>Power Theme checks the running system for these changes. Where they aren't there, it applies themes as before and asks you to restart your apps, instead of promising something the system can't do. Light and dark versions and the schedule work there too.</p>
+		</div>
+	</section>
+
+	<section>
+		<h2>How it was tested</h2>
+		<div class="sheet">
+			<p>On full x86_64 Renku images in VirtualBox, and on Haiku R1/beta6. The Renku changes also pass their project's build and boot checks on x86_64 and x86_gcc2.</p>
+			<div class="table"><table>
+				<thead><tr><th>Result</th><th>What was done</th></tr></thead>
+				<tbody>
+				<tr><td class="n">2,300 swaps</td><td>Control looks switched as fast as possible, with four threads using the look and windows redrawing every 16 ms. No crashes.</td></tr>
+				<tr><td class="n">480 updates</td><td>System font changes, with app_server's font state checked for stability throughout.</td></tr>
+				<tr><td class="n">0 and 3 pixels</td><td>Difference between a window switched live and one started fresh, for Be and Flat. The comparison also caught a slider that was 1,559 pixels off, since fixed.</td></tr>
+				<tr><td class="n">Live switch</td><td>The schedule changed theme and icons at the set minute, with Power Theme open. It also caught up at start, kept a manual change and restarted after a reboot.</td></tr>
+				<tr><td class="n">Exact revert</td><td>After 20 rounds of applying and reverting icons, the file count stayed the same. A separate check found every icon restored exactly.</td></tr>
+				</tbody>
+			</table></div>
+		</div>
+	</section>
+
+	<section>
+		<h2>What isn't finished</h2>
+		<div class="sheet">
+			<ul>
+				<li>Nothing here is in a release, and the Renku changes are awaiting review.</li>
+				<li>None of it has run on real hardware.</li>
+				<li>Tracker keeps old row heights and text widths after a font change, and shows new folder icons only when it restarts.</li>
+				<li>While a schedule is on, its background process appears as a second Power Theme entry in the Deskbar.</li>
+				<li>Switching modes in Reactionary ME can leave small marks in title bars until they next redraw. The Haiku theme's decorator didn't show this.</li>
+				<li>Icon swapping was tested on Renku only. Beta6 got the themes, window and schedule, as its test machine has almost no free disk.</li>
+				<li>During testing, a test VM's kernel panicked once in the file system while reading an attribute. The file wasn't one Power Theme normally writes, and it didn't happen again in 20 stress rounds, but the cause is unknown.</li>
+			</ul>
+		</div>
+	</section>
+
+	<footer>
+		<p>By <a href="https://github.com/idumych">idumych</a>, built with <a href="https://claude.com/claude-code">Claude Code</a>. See <a href="https://github.com/idumych/power-theme">Power Theme</a> and <a href="https://github.com/RenkuOS/Source">Renku OS</a>.</p>
+		<p>Haiku Dark uses DarkFlat's colours from haiku_darkstyle by unarix. The dark icons shown are Breeze Dark, from KDE (LGPL), which Power Theme doesn't include. This is an independent project, not affiliated with or endorsed by the Haiku project.</p>
+	</footer>
+</div>
+<script>
+(function () {
+	var root = document.documentElement, button = document.getElementById("mode");
+	function isDark() {
+		var chosen = root.getAttribute("data-theme");
+		return chosen ? chosen === "dark"
+			: matchMedia("(prefers-color-scheme: dark)").matches;
+	}
+	function label() {
+		button.textContent = isDark() ? "Switch to light" : "Switch to dark";
+	}
+	try {
+		var saved = localStorage.getItem("theme");
+		if (saved) root.setAttribute("data-theme", saved);
+	} catch (e) {}
+	label();
+	button.addEventListener("click", function () {
+		var next = isDark() ? "light" : "dark";
+		root.setAttribute("data-theme", next);
+		try { localStorage.setItem("theme", next); } catch (e) {}
+		label();
+	});
+	matchMedia("(prefers-color-scheme: dark)").addEventListener("change", label);
+
+	var compare = document.getElementById("compare");
+	compare.querySelector("input").addEventListener("input", function (event) {
+		compare.style.setProperty("--at", event.target.value + "%");
+	});
+})();
+</script>
+</body>
+</html>
