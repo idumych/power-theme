@@ -167,7 +167,7 @@ powertheme --mode=toggle</pre>
 <pre>powertheme --light-icons=haiku --dark-icons=breeze-dark</pre>
 			<p>Making this work uncovered a catch. Linux icon themes usually tell light from dark with a small stylesheet and <code>currentColor</code>, which Power Theme's SVG renderer doesn't read, so both versions came out identical. Power Theme now writes those colours into each icon before drawing it. Before the fix, none of the roughly 200 icons differed between Breeze and Breeze Dark; now 8 do, including folders, programs and volumes.</p>
 			<p>That small number is the honest picture: dark icon themes mostly change their one-colour icons, so colourful folders and documents can look the same in both.</p>
-			<p><b>Breeze Dark is a placeholder.</b> It's here as a proof of concept that the mechanism works, and Power Theme doesn't include it. A dark version of the Haiku icons is planned to take its place.</p>
+			<p><b>Breeze Dark is a placeholder.</b> It comes with Power Theme as a proof of concept, ready to choose from the icons menu, and themes don't use it unless you pick it. A dark version of the Haiku icons is planned to take its place.</p>
 			<p class="status"><b>On <a href="https://github.com/idumych/power-theme">Power Theme's main branch</a>,</b> not in a release yet.</p>
 		</div>
 	</section>
@@ -244,7 +244,7 @@ powertheme --mode=toggle</pre>
 
 	<footer>
 		<p>By <a href="https://github.com/idumych">idumych</a>, built with <a href="https://claude.com/claude-code">Claude Code</a>. See <a href="https://github.com/idumych/power-theme">Power Theme</a> and <a href="https://github.com/RenkuOS/Source">Renku OS</a>.</p>
-		<p>Haiku Dark uses DarkFlat's colours from haiku_darkstyle by unarix. The dark icons shown are Breeze Dark, from KDE (LGPL), used as a placeholder and not included in Power Theme. This is an independent project, not affiliated with or endorsed by the Haiku project.</p>
+		<p>Haiku Dark uses DarkFlat's colours from haiku_darkstyle by unarix. The dark icons shown are Breeze Dark, from KDE (LGPL), included as a placeholder. This is an independent project, not affiliated with or endorsed by the Haiku project.</p>
 	</footer>
 </div>
 <script>
