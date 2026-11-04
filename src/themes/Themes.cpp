@@ -17,6 +17,7 @@
 
 #include <errno.h>
 #include <getopt.h>
+#include <fcntl.h>
 #include <stdio.h>
 #include <string.h>
 #include <strings.h>
@@ -25,9 +26,11 @@
 #include <AboutWindow.h>
 #include <Application.h>
 #include <File.h>
+#include <OS.h>
 #include <Messenger.h>
 #include <Path.h>
 #include <Roster.h>
+#include <image.h>
 #include <StringList.h>
 
 #include "IconInstaller.h"
@@ -218,48 +221,67 @@ apply_icons(const char* id)
 	when the mode the schedule asks for changes, so that a theme switched by hand
 	stays until the next scheduled time. It starts out without one, so a system
 	started at night comes up dark.
+
+	It isn't an application, as those get a Deskbar entry, and the file's flags,
+	which could hide one, are the window's too. A switch runs this program again.
 */
-class ScheduleApp : public BApplication {
-public:
-	ScheduleApp()
-		:
-		BApplication(kThemeScheduleSignature),
-		fMode(THEME_MODE_UNKNOWN)
-	{
+static int
+run_schedule()
+{
+	if (find_port(kThemeSchedulePort) >= 0)
+		return 0;
+	const port_id port = create_port(1, kThemeSchedulePort);
+	if (port < 0)
+		return 1;
+
+	// it outlasts the Terminal that may have started it
+	setsid();
+	const int null = open("/dev/null", O_RDWR);
+	if (null >= 0) {
+		dup2(null, STDIN_FILENO);
+		dup2(null, STDOUT_FILENO);
+		dup2(null, STDERR_FILENO);
+		if (null > STDERR_FILENO)
+			close(null);
 	}
 
-	virtual void ReadyToRun()
-	{
-		_Check();
-		SetPulseRate(kScheduleCheckInterval);
+	image_info image;
+	int32 cookie = 0;
+	while (get_next_image_info(B_CURRENT_TEAM, &cookie, &image) == B_OK
+		&& image.type != B_APP_IMAGE) {
 	}
 
-	virtual void Pulse()
-	{
-		_Check();
-	}
-
-private:
-	void _Check()
-	{
+	theme_mode current = THEME_MODE_UNKNOWN;
+	while (true) {
 		ThemeSchedule schedule;
-		if (load_schedule(schedule) != B_OK || !schedule.enabled) {
-			PostMessage(B_QUIT_REQUESTED);
-			return;
-		}
+		if (load_schedule(schedule) != B_OK || !schedule.enabled)
+			break;
 
 		const theme_mode mode = scheduled_mode_now(schedule);
-		if (mode == fMode)
-			return;
+		if (mode != current) {
+			current = mode;
+			const char* arguments[] = { image.name,
+				mode == THEME_MODE_DARK ? "--mode=dark" : "--mode=light" };
+			const thread_id team = load_image(2, arguments,
+				const_cast<const char**>(environ));
+			if (team >= 0) {
+				status_t result;
+				resume_thread(team);
+				wait_for_thread(team, &result);
+			}
+		}
 
-		fMode = mode;
-		BString log;
-		apply_mode(mode, log);
-		print_log(log);
+		// set_schedule() ends the wait to stop it
+		int32 code;
+		if (read_port_etc(port, &code, NULL, 0, B_RELATIVE_TIMEOUT,
+				kScheduleCheckInterval) != B_TIMED_OUT) {
+			break;
+		}
 	}
 
-	theme_mode	fMode;
-};
+	delete_port(port);
+	return 0;
+}
 
 
 static int
@@ -673,13 +695,8 @@ command_line(int argc, char** argv)
 int
 main(int argc, char** argv)
 {
-	if (argc == 2 && strcmp(argv[1], "--run-schedule") == 0) {
-		if (be_roster->IsRunning(kThemeScheduleSignature))
-			return 0;
-		ScheduleApp app;
-		app.Run();
-		return 0;
-	}
+	if (argc == 2 && strcmp(argv[1], "--run-schedule") == 0)
+		return run_schedule();
 
 	if (argc > 1)
 		return command_line(argc, argv);

@@ -1177,8 +1177,7 @@ find_theme(const ThemeList& themes, const char* name, theme_mode mode)
 
 
 const char* const kThemeAppSignature = "application/x-vnd.idumych-PowerTheme";
-const char* const kThemeScheduleSignature
-	= "application/x-vnd.idumych-PowerTheme-schedule";
+const char* const kThemeSchedulePort = "PowerTheme schedule";
 
 static const char* kScheduleName = "schedule";
 static const char* kScheduleJob = "powertheme-schedule";
@@ -1261,20 +1260,22 @@ set_schedule(const ThemeSchedule& schedule)
 
 	if (!schedule.enabled) {
 		// gone before this returns, so that turning it back on starts a new one
-		BMessenger(kThemeScheduleSignature).SendMessage(B_QUIT_REQUESTED);
-		for (int32 i = 0; i < 20 && be_roster->IsRunning(kThemeScheduleSignature);
-				i++) {
+		const port_id port = find_port(kThemeSchedulePort);
+		if (port >= 0)
+			write_port_etc(port, 0, NULL, 0, B_RELATIVE_TIMEOUT, 100000);
+		for (int32 i = 0; i < 20 && find_port(kThemeSchedulePort) >= 0; i++)
 			snooze(50000);
-		}
 		return B_OK;
 	}
 
 	// from the next login, the launch_daemon job starts it
-	if (be_roster->IsRunning(kThemeScheduleSignature))
+	if (find_port(kThemeSchedulePort) >= 0)
 		return B_OK;
-	const char* arguments[] = { "--run-schedule" };
-	status = be_roster->Launch(&info.ref, 1, arguments);
-	return status == B_ALREADY_RUNNING ? B_OK : status;
+	BPath program(&info.ref);
+	const char* arguments[] = { program.Path(), "--run-schedule" };
+	const thread_id team = load_image(2, arguments,
+		const_cast<const char**>(environ));
+	return team >= 0 ? resume_thread(team) : (status_t)team;
 }
 
 

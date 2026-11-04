@@ -235,7 +235,7 @@ struct ThemeSchedule {
 };
 
 // the background process that keeps to the schedule
-extern const char* const kThemeScheduleSignature;
+extern const char* const kThemeSchedulePort;
 
 status_t	load_schedule(ThemeSchedule& schedule);
 // Saves it, installs or removes the launch_daemon job for the next login, and
