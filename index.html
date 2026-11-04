@@ -222,6 +222,22 @@ powertheme --mode=toggle</pre>
 	</section>
 
 	<section>
+		<h2>Tracker keeps up</h2>
+		<div class="sheet">
+			<p>Tracker now follows along too, with its windows left open. When a file type's icon changes, every file showing it redraws, including types that take their icon from a parent type like <code>image</code>. When the system font changes, rows, columns, the title bar and truncated text all fit themselves to it again.</p>
+			<div class="pair">
+				<figure><img src="img/tracker-icons-light.png" width="810" height="260" alt="A Tracker window in the Haiku theme with Haiku's icons." loading="lazy"><figcaption>An open window in Haiku.</figcaption></figure>
+				<figure><img src="img/tracker-icons-dark.png" width="810" height="260" alt="The same window in Haiku Dark with the dark icons." loading="lazy"><figcaption>The same window after a mode switch, with no restart.</figcaption></figure>
+			</div>
+			<div class="pair">
+				<figure><img src="img/tracker-font-default.png" width="704" height="390" alt="A Tracker list view at the default font." loading="lazy"><figcaption>A list view at the default font.</figcaption></figure>
+				<figure><img src="img/tracker-font-big.png" width="704" height="390" alt="The same list view at a larger serif font." loading="lazy"><figcaption>The same window after the font changed.</figcaption></figure>
+			</div>
+			<p class="status"><b>In review:</b> <a href="https://github.com/RenkuOS/Source/pull/292">#292</a> for icons and <a href="https://github.com/RenkuOS/Source/pull/293">#293</a> for fonts, which needs the font changes above.</p>
+		</div>
+	</section>
+
+	<section>
 		<h2>Older systems still work</h2>
 		<div class="sheet">
 			<p>Power Theme checks the running system for these changes. Where they aren't there, it applies themes as before and asks you to restart your apps, instead of promising something the system can't do. Light and dark versions and the schedule work there too.</p>
@@ -251,11 +267,10 @@ powertheme --mode=toggle</pre>
 			<ul>
 				<li>Nothing here is in a release, and the Renku changes are awaiting review.</li>
 				<li>None of it has run on real hardware.</li>
-				<li>Open Tracker windows show some of the new icons from a mode switch, such as those for folders and plain text, only after Tracker restarts. Application icons don't change at all, as they're part of the applications.</li>
+				<li>Until the Tracker changes land, open windows show some new icons only after Tracker restarts. Application icons don't change at all, as they're part of the applications.</li>
 				<li>Tracker crashed in its Attributes menu code in 2 of 12 tests that restarted it and then resized a window by script, with Haiku's icons and the dark ones alike, and in none of 12 without the resize. It looks like a timing bug in Tracker, but that isn't confirmed.</li>
 				<li>ZSnake's app_server change (#280) hasn't run on a built image yet, and one crash of a test Deskbar on closing its menu was seen once.</li>
-				<li>Tracker keeps old row heights and text widths after a font change, and shows new folder icons only when it restarts.</li>
-				<li>While a schedule is on, its background process appears as a second Power Theme entry in the Deskbar.</li>
+								<li>While a schedule is on, its background process appears as a second Power Theme entry in the Deskbar.</li>
 				<li>Switching modes in Reactionary ME can leave small marks in title bars until they next redraw. The Haiku theme's decorator didn't show this.</li>
 				<li>Icon swapping was tested on Renku only. Beta6 got the themes, window and schedule, as its test machine has almost no free disk.</li>
 				<li>During testing, a test VM's kernel panicked once in the file system while reading an attribute. The file wasn't one Power Theme normally writes, and it didn't happen again in 20 stress rounds, but the cause is unknown.</li>
