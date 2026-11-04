@@ -167,10 +167,9 @@ powertheme --mode=toggle</pre>
 			<p>Each version of a theme can have its own icons, chosen in the window or from the command line, and a mode switch brings them along. Nothing changes unless you've applied icons with a theme, so icons you set separately stay where they are.</p>
 <pre>powertheme --light-icons=haiku --dark-icons=haiku-dark</pre>
 			<h3>Haiku icons (dark)</h3>
-			<p>Haiku Dark uses dark versions of Haiku's own icons, with the same shapes. Each colour moves onto a hand-picked ramp with deep shadows and bright highlights, folders turn a rich burnt orange, and a thin white outline lifts each icon off a dark background. Power Theme recolours the running system's icons when it applies them, so new file types and system updates are covered, and Revert restores the originals exactly.</p>
+			<p>Haiku Dark uses dark versions of Haiku's own icons, with the same shapes. Each colour moves onto a hand-picked ramp with deep shadows and bright highlights, folders turn a rich burnt orange, and a thin, soft white outline lifts each icon off a dark background, kept even at small sizes. Power Theme recolours the running system's icons when it applies them, so new file types and system updates are covered, and Revert restores the originals exactly.</p>
 			<figure style="margin:18px 0 6px"><img src="img/dark-icons.png" width="1086" height="176" alt="A row of Haiku's icons above the same icons in the dark palette, on a dark grey background." loading="lazy" style="border:1px solid var(--line)"><figcaption>Haiku's icons, and the dark versions below them.</figcaption></figure>
 			<figure style="margin:18px 0 6px"><img src="img/dark-tracker.png" width="810" height="260" alt="A Tracker window under Haiku Dark showing folders, documents and packages in the dark palette." loading="lazy" style="border:1px solid var(--line)"><figcaption>In Tracker under Haiku Dark.</figcaption></figure>
-			<p>The outlines may look a little jagged in these screenshots, which are low-resolution captures that your browser may scale. The icons are vector graphics, so on a running system they're drawn smoothly at whatever size they're shown.</p>
 			<p>Dark icon themes from elsewhere, such as Breeze Dark, can be installed and chosen too. Power Theme now reads the stylesheet colours they rely on, which its SVG renderer used to ignore.</p>
 			<p class="status"><b>On <a href="https://github.com/idumych/power-theme">Power Theme's main branch</a>,</b> not in a release yet.</p>
 		</div>
@@ -265,6 +264,7 @@ powertheme --mode=toggle</pre>
 			<ul>
 				<li>Nothing here is in a release, and the Renku changes are awaiting review.</li>
 				<li>None of it has run on real hardware.</li>
+				<li>The dark icons' outlines can still show slight stair-stepping on diagonals at small sizes, as any thin line does at low resolution.</li>
 				<li>Until the Tracker changes land, open windows show some new icons only after Tracker restarts.</li>
 				<li>Application icons don't change at all, as they're part of the applications, so they keep their original colours next to the dark icons.</li>
 				<li>Tracker sometimes crashes in its Attributes menu code when a script resizes a window just after a restart, with Haiku's icons or the dark ones, and with or without the Tracker changes. The cause is unknown.</li>
