@@ -60,8 +60,11 @@ built on your own system, because they use private parts of app_server
 and libbe; build them again after a system update. Power Theme offers to
 install the compiler if it is missing.
 
-To get the new controls and fonts everywhere, restart running
-applications, or log out and back in.
+On systems whose running applications can follow a theme, new controls and
+fonts appear straight away, although an application that keeps fonts or sizes of
+its own needs a restart. On others, including Haiku R1/beta6, restart running
+applications or log out and back in to see them; Power Theme tells you which
+applies.
 
 ```sh
 powertheme --revert           # your previous decorator, controls, colours, fonts and icons

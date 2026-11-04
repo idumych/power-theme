@@ -326,8 +326,8 @@ command_line(int argc, char** argv)
 		revert_appearance(log);
 		revert_icons(log);
 		print_log(log);
-		printf("Your previous look is back. Restart running applications "
-			"to see it everywhere.\n");
+		printf("Your previous look is back. %s\n",
+			running_applications_note());
 		return 0;
 	}
 
@@ -360,8 +360,8 @@ command_line(int argc, char** argv)
 		if ((parts & THEME_ICONS) != 0 && !theme->Icons().IsEmpty()
 				&& icons == NULL)
 			result = apply_icons(theme->Icons());
-		printf("\"%s\" applied. Restart running applications to see the "
-			"new controls and fonts in them.\n", theme->Name().String());
+		printf("\"%s\" applied. %s\n", theme->Name().String(),
+			running_applications_note());
 		if (icons == NULL)
 			return result;
 	}

@@ -177,6 +177,11 @@ void		data_directories(BStringList& directories);
 void		set_current(const char* theme, const char* icons);
 void		get_current(BString& theme, BString& icons);
 
+// What to tell users about the applications already running after a change of
+// theme. Newer systems change their controls and fonts as they run; older ones
+// only do so after a restart.
+const char*	running_applications_note();
+
 // Quits and restarts Tracker, which keeps some icons (folders') until then.
 status_t	restart_tracker();
 

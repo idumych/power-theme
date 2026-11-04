@@ -11,6 +11,7 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <math.h>
+#include <image.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -271,6 +272,46 @@ find_build_script(BString& path)
 		}
 	}
 	return B_ENTRY_NOT_FOUND;
+}
+
+
+//! Whether the running system's libbe has the given function.
+static bool
+libbe_has(const char* symbol)
+{
+	image_info info;
+	int32 cookie = 0;
+	while (get_next_image_info(B_CURRENT_TEAM, &cookie, &info) == B_OK) {
+		const char* leaf = strrchr(info.name, '/');
+		if (strcmp(leaf != NULL ? leaf + 1 : info.name, "libbe.so") != 0)
+			continue;
+
+		void* function;
+		return get_image_symbol(info.id, symbol, B_SYMBOL_TYPE_TEXT, &function)
+			== B_OK;
+	}
+	return false;
+}
+
+
+const char*
+running_applications_note()
+{
+	// BPrivate::update_control_look() and BPrivate::update_system_fonts().
+	// If these ever change, the note only asks for a restart that's not needed.
+	const bool controls = libbe_has("_ZN8BPrivate19update_control_lookEv");
+	const bool fonts = libbe_has("_ZN8BPrivate19update_system_fontsEv");
+
+	if (controls && fonts) {
+		return "Running applications change along, though some keep fonts or "
+			"sizes of their own until they restart.";
+	}
+	if (controls)
+		return "Restart running applications to see the new fonts in them.";
+	if (fonts)
+		return "Restart running applications to see the new controls in them.";
+	return "Restart running applications to see the new controls and fonts in "
+		"them.";
 }
 
 
