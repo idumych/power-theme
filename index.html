@@ -153,10 +153,10 @@ powertheme --mode=toggle</pre>
 			<p>Pick a time for light and a time for dark, and the theme in use follows them every day. A computer started at night comes up dark, and a theme you switch by hand stays until the next scheduled time.</p>
 			<div class="pair">
 				<figure><img src="img/controls-light.png" width="388" height="265" alt="Mode, Light icons, the parts of a theme and the daily schedule, in the light theme." loading="lazy"><figcaption>The new controls in Haiku.</figcaption></figure>
-				<figure><img src="img/controls-dark.png" width="388" height="265" alt="The same controls in Haiku Dark, with Breeze Dark as the dark icons." loading="lazy"><figcaption>In Haiku Dark, with its own icons.</figcaption></figure>
+				<figure><img src="img/controls-dark.png" width="388" height="265" alt="The same controls in Haiku Dark, with Breeze Dark as the dark icons." loading="lazy"><figcaption>In Haiku Dark, with Breeze Dark standing in for its icons.</figcaption></figure>
 			</div>
 <pre>powertheme --schedule=07:00,19:00</pre>
-			<p class="status"><b>Command line:</b> on the main branch. <b>Controls in the window:</b> finished and tested, not merged yet.</p>
+			<p class="status"><b>On <a href="https://github.com/idumych/power-theme">Power Theme's main branch</a>,</b> not in a release yet.</p>
 		</div>
 	</section>
 
@@ -166,8 +166,9 @@ powertheme --mode=toggle</pre>
 			<p>Each version of a theme can have its own icons, chosen in the window or from the command line, and a mode switch brings them along. Nothing changes unless you've applied icons with a theme, so icons you set separately stay where they are.</p>
 <pre>powertheme --light-icons=haiku --dark-icons=breeze-dark</pre>
 			<p>Making this work uncovered a catch. Linux icon themes usually tell light from dark with a small stylesheet and <code>currentColor</code>, which Power Theme's SVG renderer doesn't read, so both versions came out identical. Power Theme now writes those colours into each icon before drawing it. Before the fix, none of the roughly 200 icons differed between Breeze and Breeze Dark; now 8 do, including folders, programs and volumes.</p>
-			<p>That small number is the honest picture: dark icon themes mostly change their one-colour icons, so colourful folders and documents can look the same in both. Dark icon themes aren't bundled, so you install the one you want.</p>
-			<p class="status"><b>Finished and tested, not merged yet.</b></p>
+			<p>That small number is the honest picture: dark icon themes mostly change their one-colour icons, so colourful folders and documents can look the same in both.</p>
+			<p><b>Breeze Dark is a placeholder.</b> It's here as a proof of concept that the mechanism works, and Power Theme doesn't include it. A dark version of the Haiku icons is planned to take its place.</p>
+			<p class="status"><b>On <a href="https://github.com/idumych/power-theme">Power Theme's main branch</a>,</b> not in a release yet.</p>
 		</div>
 	</section>
 
@@ -231,6 +232,7 @@ powertheme --mode=toggle</pre>
 			<ul>
 				<li>Nothing here is in a release, and the Renku changes are awaiting review.</li>
 				<li>None of it has run on real hardware.</li>
+				<li>The dark version of the Haiku icons is still to come. Until then, Breeze Dark is only a stand-in.</li>
 				<li>Tracker keeps old row heights and text widths after a font change, and shows new folder icons only when it restarts.</li>
 				<li>While a schedule is on, its background process appears as a second Power Theme entry in the Deskbar.</li>
 				<li>Switching modes in Reactionary ME can leave small marks in title bars until they next redraw. The Haiku theme's decorator didn't show this.</li>
@@ -242,7 +244,7 @@ powertheme --mode=toggle</pre>
 
 	<footer>
 		<p>By <a href="https://github.com/idumych">idumych</a>, built with <a href="https://claude.com/claude-code">Claude Code</a>. See <a href="https://github.com/idumych/power-theme">Power Theme</a> and <a href="https://github.com/RenkuOS/Source">Renku OS</a>.</p>
-		<p>Haiku Dark uses DarkFlat's colours from haiku_darkstyle by unarix. The dark icons shown are Breeze Dark, from KDE (LGPL), which Power Theme doesn't include. This is an independent project, not affiliated with or endorsed by the Haiku project.</p>
+		<p>Haiku Dark uses DarkFlat's colours from haiku_darkstyle by unarix. The dark icons shown are Breeze Dark, from KDE (LGPL), used as a placeholder and not included in Power Theme. This is an independent project, not affiliated with or endorsed by the Haiku project.</p>
 	</footer>
 </div>
 <script>
