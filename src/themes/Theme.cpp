@@ -1089,6 +1089,10 @@ const Theme*
 find_theme(const ThemeList& themes, const char* name, theme_mode mode)
 {
 	const Theme* theme = NULL;
+	// themes with no VariantOf() would all match
+	if (name[0] == '\0')
+		return NULL;
+
 	for (int32 i = 0; i < themes.CountItems() && theme == NULL; i++) {
 		if (themes.ItemAt(i)->Name().ICompare(name) == 0)
 			theme = themes.ItemAt(i);
