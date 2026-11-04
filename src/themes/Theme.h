@@ -251,6 +251,14 @@ theme_mode	scheduled_mode_now(const ThemeSchedule& schedule);
 // "Light at 07:00, dark at 19:00, every day."
 BString		schedule_description(const ThemeSchedule& schedule);
 
+// Whether window borders that can draw a BeOS-style tab do, instead of a title
+// bar across the window.
+bool		beos_tabs();
+// Changes that, and reloads the window borders in use if they can draw one.
+status_t	set_beos_tabs(bool on, BString& log);
+// whether the window borders \a theme uses can draw one
+bool		has_beos_tabs(const Theme& theme);
+
 // What applying \a theme would do on this system, line by line: the
 // decorator and control look found, fonts, colours and wallpapers.
 void		describe_theme(const Theme& theme, BString& out);

@@ -84,6 +84,7 @@ private:
 			BMenuField*			fIconsField;
 			IconStripView*		fIconStrip;
 			BCheckBox*			fDecorator;
+			BCheckBox*			fBeOSTabs;
 			BCheckBox*			fControls;
 			BCheckBox*			fColors;
 			BCheckBox*			fFonts;

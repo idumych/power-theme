@@ -28,6 +28,10 @@ public:
 protected:
 	virtual	Decorator*			_AllocateDecorator(DesktopSettings& settings,
 									BRect rect, Desktop* desktop);
+
+private:
+			// read when the add-on loads: Power Theme reloads it to change this
+			bool				fBeOSTabs;
 };
 
 
@@ -49,7 +53,7 @@ public:
 
 								ReactionaryDecorator(
 									DesktopSettings& settings, BRect frame,
-									Desktop* desktop);
+									Desktop* desktop, bool beosTabs);
 	virtual						~ReactionaryDecorator();
 
 	virtual	void				Draw(BRect updateRect);
@@ -108,6 +112,13 @@ private:
 			bool				_HasResizeGrip() const;
 			Geometry			_Geometry() const;
 			void				_LayoutTabs(const Geometry& geometry);
+			void				_LayoutTabButtons(Decorator::Tab* tab,
+									const BRect& title,
+									const Geometry& geometry);
+			BRect				_TitleRect(const Decorator::Tab* tab) const;
+			float				_TabWidth(const Decorator::Tab* tab,
+									const Geometry& geometry) const;
+			void				_DrawTabFrame(BRect rect);
 
 			void				_DrawBevel(BRect rect, rgb_color topLeft,
 									rgb_color bottomRight);
@@ -117,6 +128,10 @@ private:
 			void				_DrawResizeGrip(BRect invalid);
 
 private:
+			// a tab as wide as the title on top of the frame, as on BeOS,
+			// instead of a title bar across the window
+			bool				fBeOSTabs;
+
 			rgb_color			fFocusTabColor;
 			rgb_color			fFocusTextColor;
 			rgb_color			fNonFocusTabColor;

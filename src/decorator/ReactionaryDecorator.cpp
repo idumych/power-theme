@@ -22,7 +22,11 @@
 #include <new>
 #include <stdio.h>
 
+#include <unistd.h>
+
+#include <FindDirectory.h>
 #include <GradientLinear.h>
+#include <Path.h>
 #include <Rect.h>
 #include <View.h>
 
@@ -136,10 +140,20 @@ offset_rect(BRect& rect, BPoint offset)
 //	#pragma mark - ReactionaryDecorAddOn
 
 
+// Power Theme's setting, in the user's settings: there if tabs are wanted
+static const char* kBeOSTabsSetting = "PowerTheme/beos tabs";
+
+
 ReactionaryDecorAddOn::ReactionaryDecorAddOn(image_id id, const char* name)
 	:
-	DecorAddOn(id, name)
+	DecorAddOn(id, name),
+	fBeOSTabs(false)
 {
+	BPath path;
+	if (find_directory(B_USER_SETTINGS_DIRECTORY, &path) == B_OK
+		&& path.Append(kBeOSTabsSetting) == B_OK) {
+		fBeOSTabs = access(path.Path(), F_OK) == 0;
+	}
 }
 
 
@@ -147,7 +161,8 @@ Decorator*
 ReactionaryDecorAddOn::_AllocateDecorator(DesktopSettings& settings,
 	BRect rect, Desktop* desktop)
 {
-	return new (std::nothrow) ReactionaryDecorator(settings, rect, desktop);
+	return new (std::nothrow) ReactionaryDecorator(settings, rect, desktop,
+		fBeOSTabs);
 }
 
 
@@ -155,9 +170,10 @@ ReactionaryDecorAddOn::_AllocateDecorator(DesktopSettings& settings,
 
 
 ReactionaryDecorator::ReactionaryDecorator(DesktopSettings& settings,
-	BRect rect, Desktop* desktop)
+	BRect rect, Desktop* desktop, bool beosTabs)
 	:
-	Decorator(settings, rect, desktop)
+	Decorator(settings, rect, desktop),
+	fBeOSTabs(beosTabs)
 {
 	STRACE(("ReactionaryDecorator: frame (%.1f,%.1f,%.1f,%.1f)\n",
 		rect.left, rect.top, rect.right, rect.bottom));
@@ -301,8 +317,9 @@ ReactionaryDecorator::_DoLayout()
 		case B_FLOATING_WINDOW_LOOK:
 		case kLeftTitledWindowLook:
 			fBorderWidth = (int32)geometry.border;
-			// the title bar and the line under it
-			top = geometry.border + geometry.titleHeight + 1;
+			// the title bar and the line under it, unless it's a tab on top
+			top = fBeOSTabs
+				? geometry.border : geometry.border + geometry.titleHeight + 1;
 			break;
 
 		case B_MODAL_WINDOW_LOOK:
@@ -444,7 +461,10 @@ ReactionaryDecorator::_DrawTab(Decorator::Tab* tab, BRect invalid)
 		return;
 
 	const bool focus = IsFocus(tab);
-	BRect bar(tabRect);
+	if (fBeOSTabs)
+		_DrawTabFrame(tabRect);
+
+	BRect bar(_TitleRect(tab));
 	if (tab != fTabList.ItemAt(0)) {
 		fDrawingEngine->StrokeLine(bar.LeftTop(), bar.LeftBottom(),
 			fFrameFace);
@@ -467,7 +487,7 @@ void
 ReactionaryDecorator::_DrawTitle(Decorator::Tab* tab, BRect rect)
 {
 	const Geometry geometry = _Geometry();
-	const BRect& tabRect = tab->tabRect;
+	const BRect tabRect = _TitleRect(tab);
 
 	// the title stops short of the leftmost button
 	float right = tabRect.right - geometry.buttonMargin;
@@ -479,7 +499,9 @@ ReactionaryDecorator::_DrawTitle(Decorator::Tab* tab, BRect rect)
 		right = tab->closeRect.left;
 	right -= geometry.titleInset;
 
-	const float left = tabRect.left + geometry.titleInset;
+	// on a BeOS-style tab, it starts after the close button
+	const float left = (fBeOSTabs && tab->closeRect.IsValid()
+		? tab->closeRect.right + 1 : tabRect.left) + geometry.titleInset;
 
 	tab->truncatedTitle = Title(tab);
 	fDrawState.Font().TruncateString(&tab->truncatedTitle, B_TRUNCATE_END,
@@ -566,8 +588,23 @@ bool
 ReactionaryDecorator::_SetTabLocation(Decorator::Tab* tab, float location,
 	bool isShifting, BRegion* updateRegion)
 {
-	// the title bar always spans the window
-	return false;
+	// a title bar always spans the window, and so do a stack's tabs
+	if (!fBeOSTabs || fTabList.CountItems() != 1 || !tab->tabRect.IsValid())
+		return false;
+
+	const float maxLocation = std::max(0.0f,
+		fBorderRect.Width() - tab->tabRect.Width());
+	location = std::max(0.0f, std::min(floorf(location), maxLocation));
+	if (location == tab->tabLocation)
+		return false;
+
+	if (updateRegion != NULL)
+		updateRegion->Include(tab->tabRect);
+	tab->tabLocation = location;
+	_LayoutTabs(_Geometry());
+	if (updateRegion != NULL)
+		updateRegion->Include(tab->tabRect);
+	return true;
 }
 
 
@@ -575,7 +612,14 @@ bool
 ReactionaryDecorator::_SetSettings(const BMessage& settings,
 	BRegion* updateRegion)
 {
-	return false;
+	bool modified = false;
+	float location;
+	for (int32 i = 0; i < fTabList.CountItems(); i++) {
+		if (settings.FindFloat("tab location", i, &location) != B_OK)
+			break;
+		modified |= SetTabLocation(i, location, updateRegion);
+	}
+	return modified;
 }
 
 
@@ -639,6 +683,7 @@ ReactionaryDecorator::_ResizeBy(BPoint offset, BRegion* dirty)
 		if (fTitleBarRect.IsValid())
 			dirty->Include(fTitleBarRect);
 		dirty->Include(fTopBorder);
+		dirty->Include(fLeftBorder);
 		dirty->Include(fRightBorder);
 		dirty->Include(fBottomBorder);
 		if (fResizeRect.IsValid())
@@ -702,6 +747,8 @@ ReactionaryDecorator::_GetFootprint(BRegion* region)
 		return;
 
 	region->Include(fBorderRect);
+	if (fBeOSTabs && fTitleBarRect.IsValid())
+		region->Include(fTitleBarRect);
 	region->Exclude(fFrame);
 
 	// the size grip covers the content's bottom right corner
@@ -782,8 +829,25 @@ ReactionaryDecorator::_LayoutTabs(const Geometry& geometry)
 		return;
 	}
 
-	fTitleBarRect.Set(fFrame.left, fFrame.top - 1 - geometry.titleHeight,
-		fFrame.right, fFrame.top - 2);
+	if (fBeOSTabs) {
+		// Above the frame, and over its top edge, so that they join up. A lone
+		// tab is as wide as its title; a stack's share the window's width.
+		fTitleBarRect.Set(fBorderRect.left,
+			fBorderRect.top - geometry.border - geometry.titleHeight,
+			fBorderRect.right, fBorderRect.top + 1);
+		if (count == 1) {
+			Decorator::Tab* tab = fTabList.ItemAt(0);
+			const float width = std::min(_TabWidth(tab, geometry),
+				fBorderRect.Width() + 1);
+			const float location = std::min(tab->tabLocation,
+				fBorderRect.Width() + 1 - width);
+			fTitleBarRect.left = fBorderRect.left + location;
+			fTitleBarRect.right = fTitleBarRect.left + width - 1;
+		}
+	} else {
+		fTitleBarRect.Set(fFrame.left, fFrame.top - 1 - geometry.titleHeight,
+			fFrame.right, fFrame.top - 2);
+	}
 
 	const float width = fTitleBarRect.Width() + 1;
 	for (int32 i = 0; i < count; i++) {
@@ -793,14 +857,21 @@ ReactionaryDecorator::_LayoutTabs(const Geometry& geometry)
 		tab->tabRect.left = fTitleBarRect.left + floorf(width * i / count);
 		tab->tabRect.right = fTitleBarRect.left
 			+ floorf(width * (i + 1) / count) - 1;
-		tab->tabOffset = (uint32)(tab->tabRect.left - fTitleBarRect.left);
-		tab->tabLocation = 0;
+		tab->tabOffset = (uint32)(tab->tabRect.left - fBorderRect.left);
+		if (!fBeOSTabs || count > 1)
+			tab->tabLocation = 0;
+
+		const BRect title = _TitleRect(tab);
+		if (fBeOSTabs) {
+			_LayoutTabButtons(tab, title, geometry);
+			continue;
+		}
 
 		BRect button(0, 0, geometry.buttonWidth - 1,
 			geometry.buttonHeight - 1);
-		button.OffsetTo(tab->tabRect.right - geometry.buttonMargin
+		button.OffsetTo(title.right - geometry.buttonMargin
 			- geometry.buttonWidth + 1,
-			tab->tabRect.top + floorf((geometry.titleHeight
+			title.top + floorf((geometry.titleHeight
 				- geometry.buttonHeight) / 2));
 
 		if ((tab->flags & B_NOT_CLOSABLE) == 0) {
@@ -821,7 +892,7 @@ ReactionaryDecorator::_LayoutTabs(const Geometry& geometry)
 			tab->minimizeRect.Set(0, 0, -1, -1);
 
 		// buttons that don't fit are left out
-		const float minimum = tab->tabRect.left + geometry.titleInset;
+		const float minimum = title.left + geometry.titleInset;
 		if (tab->minimizeRect.IsValid() && tab->minimizeRect.left < minimum)
 			tab->minimizeRect.Set(0, 0, -1, -1);
 		if (tab->zoomRect.IsValid() && tab->zoomRect.left < minimum)
@@ -829,6 +900,90 @@ ReactionaryDecorator::_LayoutTabs(const Geometry& geometry)
 		if (tab->closeRect.IsValid() && tab->closeRect.left < minimum)
 			tab->closeRect.Set(0, 0, -1, -1);
 	}
+}
+
+
+/*!	As on BeOS: close at the left end, zoom at the right, and no minimize. If they
+	don't both fit, zoom goes first.
+*/
+void
+ReactionaryDecorator::_LayoutTabButtons(Decorator::Tab* tab, const BRect& title,
+	const Geometry& geometry)
+{
+	BRect button(0, 0, geometry.buttonWidth - 1, geometry.buttonHeight - 1);
+	button.OffsetTo(title.left + geometry.buttonMargin,
+		title.top + floorf((geometry.titleHeight - geometry.buttonHeight) / 2));
+
+	tab->closeRect.Set(0, 0, -1, -1);
+	tab->zoomRect.Set(0, 0, -1, -1);
+	tab->minimizeRect.Set(0, 0, -1, -1);
+
+	if ((tab->flags & B_NOT_CLOSABLE) == 0 && button.right <= title.right)
+		tab->closeRect = button;
+
+	button.OffsetTo(title.right - geometry.buttonMargin - geometry.buttonWidth + 1,
+		button.top);
+	const float taken = tab->closeRect.IsValid()
+		? tab->closeRect.right : title.left;
+	if ((tab->flags & B_NOT_ZOOMABLE) == 0 && button.left > taken)
+		tab->zoomRect = button;
+}
+
+
+/*!	The part of a tab that's the title bar: all of it, or inside a BeOS-style
+	tab's own frame.
+*/
+BRect
+ReactionaryDecorator::_TitleRect(const Decorator::Tab* tab) const
+{
+	BRect title(tab->tabRect);
+	if (fBeOSTabs) {
+		const Geometry geometry = _Geometry();
+		title.left += geometry.border;
+		title.right -= geometry.border;
+		title.top += geometry.border;
+		title.bottom = title.top + geometry.titleHeight - 1;
+	}
+	return title;
+}
+
+
+//!	How wide a BeOS-style tab has to be, for its title and buttons.
+float
+ReactionaryDecorator::_TabWidth(const Decorator::Tab* tab,
+	const Geometry& geometry) const
+{
+	float width = 2 * geometry.border + 2 * geometry.titleInset;
+	if ((tab->flags & B_NOT_CLOSABLE) == 0)
+		width += geometry.buttonMargin + geometry.buttonWidth;
+	if ((tab->flags & B_NOT_ZOOMABLE) == 0)
+		width += geometry.buttonMargin + geometry.buttonWidth;
+	if (fDrawingEngine != NULL) {
+		width += ceilf(fDrawingEngine->StringWidth(tab->title.String(),
+			tab->title.Length(), fDrawState.Font()));
+	}
+	return width;
+}
+
+
+/*!	A BeOS-style tab's frame: the window frame's bevels up its sides and over the
+	top, open at the bottom to join the frame below.
+*/
+void
+ReactionaryDecorator::_DrawTabFrame(BRect rect)
+{
+	const BPoint bottomLeft = rect.LeftBottom();
+	const BPoint bottomRight = rect.RightBottom();
+	fDrawingEngine->FillRect(rect, fFrameFace);
+	fDrawingEngine->StrokeLine(bottomLeft, rect.LeftTop(), fFrameFace);
+	fDrawingEngine->StrokeLine(rect.LeftTop(), rect.RightTop(), fFrameFace);
+	fDrawingEngine->StrokeLine(rect.RightTop(), bottomRight, fFrameDarkShadow);
+	fDrawingEngine->StrokeLine(bottomLeft + BPoint(1, 0),
+		rect.LeftTop() + BPoint(1, 1), fFrameLight);
+	fDrawingEngine->StrokeLine(rect.LeftTop() + BPoint(1, 1),
+		rect.RightTop() + BPoint(-1, 1), fFrameLight);
+	fDrawingEngine->StrokeLine(rect.RightTop() + BPoint(-1, 1),
+		bottomRight + BPoint(-1, 0), fFrameShadow);
 }
 
 

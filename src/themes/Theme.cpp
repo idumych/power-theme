@@ -1326,6 +1326,68 @@ schedule_description(const ThemeSchedule& schedule)
 }
 
 
+static const char* kBeOSTabsName = "beos tabs";
+
+
+//! Only Reactionary's window borders can draw a BeOS-style tab so far.
+static bool
+draws_beos_tabs(DecorInfo* decor)
+{
+	if (decor == NULL || decor->Ref() == NULL)
+		return false;
+	BPath path(decor->Ref());
+	return path.Leaf() != NULL && strcmp(path.Leaf(), "Reactionary") == 0;
+}
+
+
+bool
+beos_tabs()
+{
+	BPath path;
+	return themes_settings_path(path, kBeOSTabsName) == B_OK
+		&& BEntry(path.Path()).Exists();
+}
+
+
+status_t
+set_beos_tabs(bool on, BString& log)
+{
+	BPath path;
+	status_t status = themes_settings_path(path, kBeOSTabsName);
+	if (status != B_OK)
+		return status;
+	BEntry entry(path.Path());
+	if (on == entry.Exists())
+		return B_OK;
+
+	if (on) {
+		BFile file(path.Path(), B_WRITE_ONLY | B_CREATE_FILE);
+		status = file.InitCheck();
+	} else
+		status = entry.Remove();
+	if (status != B_OK) {
+		log << "Can't change the window tabs: " << strerror(status) << ".\n";
+		return status;
+	}
+
+	// Add-ons read this as they load.
+	DecorInfoUtility decorators;
+	DecorInfo* current = decorators.CurrentDecorator();
+	if (draws_beos_tabs(current) && decorators.SetDecorator(current) != B_OK)
+		log << "Can't reload the window borders.\n";
+	return B_OK;
+}
+
+
+bool
+has_beos_tabs(const Theme& theme)
+{
+	DecorInfoUtility decorators;
+	return !theme.Decorator().IsEmpty()
+		&& draws_beos_tabs(find_decorator(decorators, theme.Decorator()));
+}
+
+
 theme_mode
 current_mode()
 {

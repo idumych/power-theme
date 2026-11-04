@@ -273,6 +273,11 @@ click **Build add-ons…** again.
   the same. It runs in the background, from a job in
   `~/config/settings/launch` at each login. A system started at night comes up
   dark, and a theme switched by hand stays until the next scheduled time.
+- **BeOS-style tabs**: **BeOS-style tabs** in the window, or `powertheme
+  --beos-tabs=on`, gives window borders that can draw one a tab as wide as the
+  title on top of the frame, with close on the left and zoom on the right, instead
+  of a title bar across the window, and shift-dragging a tab slides it. It's for any theme using those borders, and so
+  far that's Reactionary's. It stays on through a change of mode.
 - **Theme Manager themes**: themes made for
   [Theme Manager](https://github.com/HaikuArchives/HaikuThemeManager)
   (and BeOS and ZETA before it), such as the

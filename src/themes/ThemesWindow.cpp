@@ -49,6 +49,7 @@ enum {
 	kMsgThemeSelected	= 'thsl',
 	kMsgModeChosen		= 'mdch',
 	kMsgScheduleChanged	= 'schd',
+	kMsgBeOSTabs		= 'btab',
 	kMsgIconsChosen		= 'icch',
 	kMsgApply			= 'aply',
 	kMsgRevert			= 'rvrt',
@@ -543,6 +544,11 @@ ThemesWindow::ThemesWindow(BRect frame, const char* selected)
 
 	fDecorator = new BCheckBox("decorator", "Window borders",
 		new BMessage(kMsgPartChanged));
+	fBeOSTabs = new BCheckBox("beos tabs", "BeOS-style tabs",
+		new BMessage(kMsgBeOSTabs));
+	fBeOSTabs->SetToolTip("Gives these window borders a tab as wide as the title "
+		"on top of the frame, instead of a title bar across the window. "
+		"Shift-drag a tab to slide it. This takes effect at once.");
 	fControls = new BCheckBox("controls", "Controls",
 		new BMessage(kMsgPartChanged));
 	fColors = new BCheckBox("colors", "Colors", new BMessage(kMsgPartChanged));
@@ -592,6 +598,7 @@ ThemesWindow::ThemesWindow(BRect frame, const char* selected)
 				.AddGrid(B_USE_DEFAULT_SPACING, B_USE_SMALL_SPACING)
 					.Add(fDecorator, 0, 0)
 					.Add(fControls, 1, 0)
+					.Add(fBeOSTabs, 2, 0)
 					.Add(fColors, 0, 1)
 					.Add(fFonts, 1, 1)
 					.Add(fWallpaper, 0, 2)
@@ -699,6 +706,16 @@ ThemesWindow::MessageReceived(BMessage* message)
 		case kMsgScheduleChanged:
 			_ScheduleChanged();
 			break;
+
+		case kMsgBeOSTabs:
+		{
+			BString log;
+			set_beos_tabs(fBeOSTabs->Value() == B_CONTROL_ON, log);
+			log.Trim();
+			fStatus->SetText(log);
+			fStatus->SetToolTip(log);
+			break;
+		}
 
 		case kMsgThemeSwitched:
 		{
@@ -1107,12 +1124,16 @@ ThemesWindow::_ShowTheme(const Theme* theme)
 {
 	fPreview->SetTheme(theme);
 	if (theme == NULL) {
+		fBeOSTabs->SetEnabled(false);
 		fDescription->SetText("");
 		_UpdateButtons();
 		return;
 	}
 
 	fDescription->SetText(theme->Description());
+
+	fBeOSTabs->SetEnabled(!fBusy && has_beos_tabs(*theme));
+	fBeOSTabs->SetValue(beos_tabs() ? B_CONTROL_ON : B_CONTROL_OFF);
 
 	// parts whose add-ons or files aren't installed can't be applied
 	// (a version of a pair with icons chosen for it doesn't need its own)
@@ -1260,6 +1281,8 @@ ThemesWindow::_SetBusy(bool busy)
 		fProgress->Hide();
 	fModeField->SetEnabled(!busy);
 	fSchedule->SetEnabled(!busy);
+	const Theme* theme = _SelectedTheme();
+	fBeOSTabs->SetEnabled(!busy && theme != NULL && has_beos_tabs(*theme));
 	fLightAt->SetEnabled(!busy);
 	fDarkAt->SetEnabled(!busy);
 	fIconsField->SetEnabled(!busy);
