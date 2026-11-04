@@ -15,7 +15,8 @@ It comes with its own looks:
   with the [ClassicOS 2000](https://github.com/ClassicOS-Themes/ClassicOS-2000-Icons)
   icons;
 - **Smoke** window borders and controls in the style of ZETA's;
-- **Renku**, in the colours of the Renku OS website;
+- **Renku** and **Renku Light**, in the colours of the Renku OS website, with
+  dark and normal Haiku icons;
 - **Haiku Dark**, a black and yellow version of Haiku's look, with dark versions
   of Haiku's own icons;
 - and the Haiku, Gonx and four Flat themes.
@@ -79,11 +80,13 @@ picture at the top is Power Theme itself, under the stock Haiku theme.
 | | |
 |---|---|
 | ![Reactionary ME](docs/screenshots/reactionary-me.png) | ![Renku](docs/screenshots/renku.png) |
-| **Reactionary ME**: Windows ME window borders and controls, and the ClassicOS 2000 icons on folders and file types | **Renku**: Smoke window borders and flat controls in the Renku OS website's colours |
+| **Reactionary ME**: Windows ME window borders and controls, and the ClassicOS 2000 icons on folders and file types | **Renku**: Smoke window borders and flat controls in the Renku OS website's colours, with the dark Haiku icons |
+| ![Renku Light](docs/screenshots/renku-light.png) | ![DarkFlat](docs/screenshots/darkflat.png) |
+| **Renku Light**: the same on washi paper, with Haiku's own icons | **DarkFlat**, from haiku_darkstyle, with Haiku's Flat window borders and controls |
 | ![Smoke](docs/screenshots/smoke.png) | ![Gonx](docs/screenshots/gonx.png) |
 | **Smoke** window borders and controls, in the style of ZETA's, with the colours of the "smoke" Theme Manager theme | **Gonx**: Gonx's window borders and controls |
-| ![DarkFlat](docs/screenshots/darkflat.png) | ![The Power Theme window](docs/screenshots/themes-window.png) |
-| **DarkFlat**, from haiku_darkstyle, with Haiku's Flat window borders and controls | **Power Theme** under Renku: the theme list with a preview, the icon theme, and the parts to apply |
+| ![The Power Theme window](docs/screenshots/themes-window.png) | |
+| **Power Theme** under Renku: the theme list with a preview, the icon theme, and the parts to apply | |
 
 ![Build add-ons](docs/screenshots/build-add-ons.png)
 
@@ -247,8 +250,8 @@ click **Build add-ons…** again.
 - **Light and dark versions**: two themes are versions of the same one if their
   `theme.settings` say so, with `variant of = Flat` and `mode = dark` (or
   `light`). Each stays a complete theme in its own folder. **Flat** (LightFlat
-  and DarkFlat), **Haiku** (Haiku and Haiku Dark) and **Reactionary ME**
-  (with Reactionary ME Dark) come this way; other themes stay as they are until
+  and DarkFlat), **Haiku** (Haiku and Haiku Dark), **Renku** (Renku Light and Renku)
+  and **Reactionary ME** (with Reactionary ME Dark) come this way; other themes stay as they are until
   they have both. `powertheme --mode=dark` switches the theme in use, keeping
   the parts it was applied with.
 - **Light and dark icons**: each version of a theme has its own icons: what its

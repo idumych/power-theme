@@ -8,10 +8,12 @@
 # front page.
 
 name = Renku
+variant of = Renku
+mode = dark
 description = Renku OS's own colours: night blue and indigo, warm white text and fire orange window tabs and highlights, over a night sky with 連句 in outline. Smoke window borders and DarkFlat's flat controls.
 decorator = Smoke | FlatDecorator | Default
 control look = FlatControlLook | haiku
-icons = haiku
+icons = haiku-dark
 desktop color = #0C0D12
 deskbar = right top, expanded
 wallpaper = wallpaper.jpg

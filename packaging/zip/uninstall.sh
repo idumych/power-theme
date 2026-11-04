@@ -31,7 +31,7 @@ rm -f "$addons/decorators/Reactionary" "$addons/control_look/Reactionary" \
 	"$settings/deskbar/menu/Applications/Themes"
 rm -rf "$data/themes/Reactionary ME" "$data/themes/Haiku" "$data/themes/Gonx" \
 	"$data/themes/DarkFlat" "$data/themes/LightFlat" "$data/themes/MoonFlat" \
-	"$data/themes/OrangeFlat" "$data/themes/Renku" \
+	"$data/themes/OrangeFlat" "$data/themes/Renku" "$data/themes/Renku Light" \
 	"$data/themes/Haiku Dark" "$data/themes/Reactionary ME Dark" \
 	"$data/icons/ClassicOS2000" "$data/icons/breeze-dark" \
 	"$data/PowerTheme" "$settings/PowerTheme" "$data/Themes" "$settings/Themes"

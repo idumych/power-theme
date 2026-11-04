@@ -4,7 +4,10 @@
 orange in the top right, an indigo haze in the bottom left, and 連句
 ("renku") written top to bottom in outline down the right side.
 
-    python3 -I tools/make-renku-wallpaper.py <output.jpg> [width height]
+    python3 -I tools/make-renku-wallpaper.py [--light] <output.jpg> [width height]
+
+--light draws Renku Light's: the same on washi paper, the haze a warmer shade
+of it and the outline in indigo.
 
 Needs PIL and Noto Serif CJK (the outline is drawn with it; only the image
 is kept, not the font).
@@ -19,6 +22,8 @@ NIGHT = (0x0C, 0x0D, 0x12)
 FIRE = (0xFF, 0x6A, 0x13)
 HAZE = (0x1B, 0x21, 0x40)
 WASHI = (0xEF, 0xE9, 0xDD)
+WASHI_2 = (0xDD, 0xD4, 0xC2)
+INDIGO = (0x19, 0x1D, 0x2E)
 
 
 def glow(size, centre, radius, colour, strength, reach):
@@ -50,14 +55,19 @@ def font(size):
 
 
 def main():
-    out = sys.argv[1]
-    w, h = (int(sys.argv[2]), int(sys.argv[3])) if len(sys.argv) > 3 \
-        else (1920, 1080)
+    args = sys.argv[1:]
+    light = "--light" in args
+    if light:
+        args.remove("--light")
+    out = args[0]
+    w, h = (int(args[1]), int(args[2])) if len(args) > 2 else (1920, 1080)
+    paper, haze, ink, weight = (WASHI, WASHI_2, INDIGO, 26) if light \
+        else (NIGHT, HAZE, WASHI, 16)
 
-    image = Image.new("RGB", (w, h), NIGHT)
+    image = Image.new("RGB", (w, h), paper)
     for centre, radius, colour, strength, reach in (
             ((w * 0.8, h * 0.1), (w * 0.62, h * 0.55), FIRE, 0.16, 0.6),
-            ((0, h), (w * 0.47, h * 0.65), HAZE, 0.9, 0.65)):
+            ((0, h), (w * 0.47, h * 0.65), haze, 0.9, 0.65)):
         layer, mask = glow((w, h), centre, radius, colour, strength, reach)
         image.paste(layer, (0, 0), mask)
 
@@ -76,8 +86,8 @@ def main():
             stroke_width=stroke, stroke_fill=255)
         fill_draw.text((x, y + i * size), char, font=face, fill=255)
     outline = ImageChops.subtract(outline, fill)
-    image.paste(Image.new("RGB", (w, h), WASHI), (0, 0),
-        outline.point(lambda v: v * 16 // 255))
+    image.paste(Image.new("RGB", (w, h), ink), (0, 0),
+        outline.point(lambda v: v * weight // 255))
 
     image.save(out, quality=92)
 
