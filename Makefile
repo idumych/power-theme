@@ -63,6 +63,7 @@ FLAT := src/third_party/haiku-flat
 
 SMOKE_DECOR := $(BUILD)/Smoke
 SMOKE_LOOK := $(BUILD)/control_look/Smoke
+DANO_LOOK := $(BUILD)/control_look/Dano
 GONX := src/third_party/gonx
 GONX_LOOK := $(BUILD)/control_look/Gonx
 
@@ -72,7 +73,7 @@ GONX_LOOK := $(BUILD)/control_look/Gonx
 DECOR_SOURCE := $(BUILD)/data/PowerTheme
 
 all: $(DECOR) $(LOOK) $(THEMES) $(FLAT_DECOR) $(FLAT_LOOK) $(SMOKE_DECOR) \
-	$(SMOKE_LOOK) $(GONX_LOOK) decorator-source
+	$(SMOKE_LOOK) $(DANO_LOOK) $(GONX_LOOK) decorator-source
 
 decorator-source:
 	rm -rf $(DECOR_SOURCE)
@@ -82,6 +83,7 @@ decorator-source:
 		$(DECOR_SOURCE)/source/decorators/FlatDecorator \
 		$(DECOR_SOURCE)/source/control_looks/Reactionary \
 		$(DECOR_SOURCE)/source/control_looks/Smoke \
+		$(DECOR_SOURCE)/source/control_looks/Dano \
 		$(DECOR_SOURCE)/source/control_looks/Gonx \
 		$(DECOR_SOURCE)/source/control_looks/FlatControlLook
 	cp src/themes/build-decorators.sh $(DECOR_SOURCE)/
@@ -95,6 +97,7 @@ decorator-source:
 	cp $(FLAT)/decorator/* $(DECOR_SOURCE)/source/decorators/FlatDecorator/
 	cp src/controllook/* $(DECOR_SOURCE)/source/control_looks/Reactionary/
 	cp src/smoke/SmokeControlLook.* $(DECOR_SOURCE)/source/control_looks/Smoke/
+	cp src/dano/DanoControlLook.* $(DECOR_SOURCE)/source/control_looks/Dano/
 	cp $(GONX)/controllook/* $(GONX)/LICENSE \
 		$(DECOR_SOURCE)/source/control_looks/Gonx/
 	cp $(FLAT)/controllook/* $(DECOR_SOURCE)/source/control_looks/FlatControlLook/
@@ -137,6 +140,18 @@ $(SMOKE_LOOK): $(BUILD)/SmokeControlLook.o $(BUILD)/SmokeControlLook.rsrc
 	$(CXX) $(SYSROOT_FLAGS) -shared -s -o $@ $(BUILD)/SmokeControlLook.o \
 		-lbe -lstdc++
 	$(XRES) -o $@ $(BUILD)/SmokeControlLook.rsrc
+
+$(BUILD)/DanoControlLook.o: src/dano/DanoControlLook.cpp src/dano/DanoControlLook.h
+	@mkdir -p $(BUILD)
+	$(CXX) $(CXXFLAGS) -std=gnu++17 -I$(PRIVATE)/interface -c $< -o $@
+
+$(BUILD)/DanoControlLook.rsrc: src/dano/DanoControlLook.rdef
+
+$(DANO_LOOK): $(BUILD)/DanoControlLook.o $(BUILD)/DanoControlLook.rsrc
+	@mkdir -p $(dir $@)
+	$(CXX) $(SYSROOT_FLAGS) -shared -s -o $@ $(BUILD)/DanoControlLook.o \
+		-lbe -lstdc++
+	$(XRES) -o $@ $(BUILD)/DanoControlLook.rsrc
 
 # Haiku's Flat decorator and control look, for the Flat themes (Renku's
 # repositories don't have the haiku_extras package they come in).

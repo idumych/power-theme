@@ -25,6 +25,7 @@ fi
 rm -f "$addons/decorators/Reactionary" "$addons/control_look/Reactionary" \
 	"$addons/decorators/FlatDecorator" "$addons/control_look/FlatControlLook" \
 	"$addons/decorators/Smoke" "$addons/control_look/Smoke" \
+	"$addons/control_look/Dano" \
 	"$apps/PowerTheme" "$bin/powertheme" \
 	"$settings/deskbar/menu/Applications/Power Theme" \
 	"$apps/Themes" "$bin/Themes" "$bin/reactionary-theme" \

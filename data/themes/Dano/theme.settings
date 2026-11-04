@@ -1,0 +1,42 @@
+# BeOS R5.1 "Dano": its controls and colours, measured from screenshots of a
+# running system, with Haiku's own window borders and icons. Needs the Dano
+# control look.
+
+name = Dano
+description = The controls of BeOS R5.1 "Dano": white buttons with a soft shadow, a default button on a blue plate, menu fields with a blue tab, and an overflowing tick.
+control look = Dano
+icons = haiku
+desktop color = #336698
+color B_DESKTOP_COLOR = #336698
+wallpaper = none
+scroll bar arrows = double
+
+font plain = Noto Sans, Regular, 10
+font bold = Noto Sans, Bold, 11
+font menu = Noto Sans, Regular, 10
+
+color B_PANEL_BACKGROUND_COLOR = #D8D8D8
+color B_PANEL_TEXT_COLOR = #000000
+color B_DOCUMENT_BACKGROUND_COLOR = #FFFFFF
+color B_DOCUMENT_TEXT_COLOR = #000000
+color B_CONTROL_BACKGROUND_COLOR = #F4F4F4
+color B_CONTROL_TEXT_COLOR = #000000
+color B_CONTROL_BORDER_COLOR = #000000
+color B_CONTROL_HIGHLIGHT_COLOR = #7478BC
+color B_CONTROL_MARK_COLOR = #7478BC
+color B_KEYBOARD_NAVIGATION_COLOR = #A830B8
+color B_NAVIGATION_PULSE_COLOR = #A830B8
+color B_SHINE_COLOR = #FFFFFF
+color B_SHADOW_COLOR = #000000
+color B_MENU_BACKGROUND_COLOR = #D8D8D8
+color B_MENU_SELECTED_BACKGROUND_COLOR = #7478BC
+color B_MENU_ITEM_TEXT_COLOR = #000000
+color B_MENU_SELECTED_ITEM_TEXT_COLOR = #FFFFFF
+color B_MENU_SELECTED_BORDER_COLOR = #000000
+color B_LIST_BACKGROUND_COLOR = #FFFFFF
+color B_LIST_ITEM_TEXT_COLOR = #000000
+color B_LIST_SELECTED_BACKGROUND_COLOR = #989898
+color B_LIST_SELECTED_ITEM_TEXT_COLOR = #000000
+color B_STATUS_BAR_COLOR = #7478BC
+color B_TOOLTIP_BACKGROUND_COLOR = #FFFFE0
+color B_TOOLTIP_TEXT_COLOR = #000000

@@ -89,6 +89,7 @@ decorators:Gonx:decorators/Gonx:src/third_party/gonx/decorator:*Decorator.cpp:re
 decorators:FlatDecorator:decorators/FlatDecorator:src/third_party/haiku-flat/decorator:*Decorator.cpp:resources.rdef
 control_look:Reactionary:control_looks/Reactionary:src/controllook:*ControlLook.cpp:*ControlLook.rdef
 control_look:Smoke:control_looks/Smoke:src/smoke:*ControlLook.cpp:*ControlLook.rdef
+control_look:Dano:control_looks/Dano:src/dano:*ControlLook.cpp:*ControlLook.rdef
 control_look:Gonx:control_looks/Gonx:src/third_party/gonx/controllook:*ControlLook.cpp:*ControlLook.rdef
 control_look:FlatControlLook:control_looks/FlatControlLook:src/third_party/haiku-flat/controllook:*ControlLook.cpp:*ControlLook.rdef"
 

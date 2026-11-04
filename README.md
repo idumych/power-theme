@@ -19,6 +19,7 @@ It comes with its own looks:
   dark and normal Haiku icons;
 - **Haiku Dark**, a black and yellow version of Haiku's look, with dark versions
   of Haiku's own icons;
+- **Dano**, the controls of BeOS R5.1 "Dano", with Haiku's window borders;
 - and the Haiku, Gonx and four Flat themes.
 
 The Reactionary ME look is an independent, unofficial port. It is not
@@ -192,6 +193,12 @@ click **Build add-ons…** again.
   fonts (from Haiku's source) and Haiku's icons. It switches back to stock
   Haiku whatever you had before; **Revert** instead goes back to *your*
   look from before the first theme, customisations included.
+- **Dano** (`add-ons/control_look/Dano`, `data/themes/Dano`): the controls of
+  BeOS R5.1 "Dano", redrawn from screenshots of a running system: white buttons
+  with a soft shadow, a default button on a blue plate, menu fields with a blue
+  tab on the left, an overflowing tick and radio bullet, sunken grey sliders and
+  swept tabs. It also turns on double scroll bar arrows, as Dano has, until you
+  leave the theme. Its window borders are Haiku's own for now.
 - **The Gonx theme** (`data/themes/Gonx`): the look of
   [Gonx](https://github.com/idumych/gonx), with its colours, desktop colour
   and fonts over Haiku's defaults, and Haiku's icons. Power Theme builds
