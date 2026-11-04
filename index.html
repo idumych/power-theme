@@ -113,10 +113,10 @@ footer { border-top: 1px solid var(--line); padding: 24px 0 48px; color: var(--m
 	<p class="caption">Drag across the picture. One command switches between these two, with every window left open. The windows are the same ones, on Renku OS in a virtual machine.</p>
 
 	<section>
-		<h2>Get Power Theme 0.4</h2>
+		<h2>Get Power Theme 0.4.1</h2>
 		<div class="sheet">
-			<p>Light and dark versions, the daily schedule, Haiku Dark, Renku Light, the dark icons and BeOS-style tabs are in <a href="https://github.com/idumych/power-theme/releases/tag/v0.4">this release</a>, for Haiku R1/beta6 and later and Renku OS on x86_64.</p>
-			<pre>pkgman install ./powertheme-0.4-1-x86_64.hpkg</pre>
+			<p>Light and dark versions, the daily schedule, Haiku Dark, Renku Light, the dark icons and BeOS-style tabs are in <a href="https://github.com/idumych/power-theme/releases/tag/v0.4.1">this release</a>, for Haiku R1/beta6 and later and Renku OS on x86_64.</p>
+			<pre>pkgman install ./powertheme-0.4.1-1-x86_64.hpkg</pre>
 			<p>Then open Power Theme, click <b>Build add-ons…</b> once and apply a theme. The Renku changes described below are separate, and still in review.</p>
 		</div>
 	</section>
@@ -181,7 +181,7 @@ powertheme --mode=toggle</pre>
 			<p>Window borders can now draw a classic BeOS tab, even in a theme that wasn't made for one. It's as wide as the title and sits on top of the frame, with close on the left and zoom on the right. Shift-drag it to slide it along the window, and stacked windows share the width. Reactionary is the first to support this, here in its Windows ME look.</p>
 			<img src="img/beos-tabs.png" width="1024" height="768" alt="Windows in the Reactionary ME look with narrow tabs on top of their frames, and a BeOS-style tabs checkbox in Power Theme." loading="lazy" style="margin:18px 0 6px;border:1px solid var(--line)">
 <pre>powertheme --beos-tabs=on</pre>
-			<p class="status"><b>Released in <a href="https://github.com/idumych/power-theme/releases/tag/v0.4">Power Theme 0.4</a>.</b> It's optional, and needs <b>Build add-ons…</b> run again.</p>
+			<p class="status"><b>Released in <a href="https://github.com/idumych/power-theme/releases/tag/v0.4">Power Theme 0.4</a>.</b> It's optional, and needs <b>Build add-ons…</b> run again. A slid tab goes back to the start when window borders reload, until <a href="https://github.com/RenkuOS/Source/pull/297">#297</a> lands.</p>
 		</div>
 	</section>
 
@@ -290,7 +290,7 @@ powertheme --mode=toggle</pre>
 				<tr><td class="n">480 updates</td><td>System font changes, with app_server's font state checked for stability throughout.</td></tr>
 				<tr><td class="n">0 and 3 pixels</td><td>Difference between a window switched live and one started fresh, for Be and Flat. The comparison also caught a slider that was 1,559 pixels off, since fixed.</td></tr>
 				<tr><td class="n">Live switch</td><td>The schedule changed theme and icons at the set minute, with Power Theme open. It also caught up at start, kept a manual change and restarted after a reboot.</td></tr>
-				<tr><td class="n">The 0.4 package</td><td>Installed on Haiku R1/beta6 on a 16 GB disk and on a stock Renku nightly. Add-ons built on each, themes and BeOS-style tabs applied and reverted, with no crashes. On beta6 it also came through a reboot with them on.</td></tr>
+				<tr><td class="n">The 0.4.1 package</td><td>Installed on Haiku R1/beta6 on a 16 GB disk and on a stock Renku nightly. Add-ons built on each, themes and BeOS-style tabs applied and reverted, with no crashes. On beta6 it also came through a reboot with them on.</td></tr>
 				<tr><td class="n">Exact revert</td><td>After 20 rounds of applying and reverting icons, the file count stayed the same. A separate check found every icon restored exactly.</td></tr>
 				</tbody>
 			</table></div>
