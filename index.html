@@ -139,16 +139,30 @@ footer { border-top: 1px solid var(--line); padding: 24px 0 48px; color: var(--m
 	<section>
 		<h2>Light and dark versions</h2>
 		<div class="sheet">
-			<p>A theme can now say it's one version of another. The two appear as one row in Power Theme, with a <b>Mode</b> menu. Flat, Haiku, Renku and Reactionary ME come as pairs. Haiku Dark is black and yellow, like DarkFlat, and Renku pairs night blue and fire orange with a new light version on washi paper.</p>
-			<div class="pair">
-				<figure><img src="img/renku-light.png" width="1024" height="768" alt="The Renku Light theme: washi paper, orange window tabs and Haiku's icons." loading="lazy"><figcaption>Renku Light, with Haiku's icons.</figcaption></figure>
-				<figure><img src="img/renku-dark.png" width="1024" height="768" alt="The Renku theme: night blue windows, orange tabs and the dark Haiku icons." loading="lazy"><figcaption>Renku, with the dark Haiku icons.</figcaption></figure>
-			</div>
+			<p>A theme can now say it's one version of another. The two appear as one row in Power Theme, with a <b>Mode</b> menu. Flat, Haiku, Renku and Reactionary ME come as pairs, and Haiku Dark is black and yellow, like DarkFlat.</p>
 <pre>variant of = Haiku
 mode = dark
 
 powertheme --mode=toggle</pre>
 			<p class="status"><b>On <a href="https://github.com/idumych/power-theme">Power Theme's main branch</a>,</b> not in a release yet.</p>
+		</div>
+	</section>
+
+	<section>
+		<h2>The Renku theme</h2>
+		<div class="sheet">
+			<p>Renku OS's own look now comes in both modes, in the colours of its website. Renku is night blue and indigo with warm white text. Renku Light turns that over to washi paper and indigo ink. Both use fire orange for what's active or chosen, with Smoke window borders, flat controls and a wallpaper with 連句 ("renku") in outline. Renku uses the dark Haiku icons, and Renku Light uses Haiku's own.</p>
+			<div class="compare" style="margin-top:18px">
+				<img src="img/renku-light.png" width="1024" height="768" alt="The Renku Light theme: washi paper, orange window tabs and Haiku's icons." loading="lazy">
+				<img class="over" src="img/renku-dark.png" width="1024" height="768" alt="The Renku theme: night blue windows, orange tabs and the dark Haiku icons." loading="lazy">
+				<div class="bar"></div>
+				<span class="tag l">Renku</span>
+				<span class="tag r">Renku Light</span>
+				<input type="range" min="0" max="100" value="50" aria-label="Compare the Renku and Renku Light themes">
+			</div>
+			<p class="caption">Drag across the picture. These are from the test VM, with its fallback fonts in place of IBM Plex.</p>
+<pre>powertheme --apply=Renku --mode=light</pre>
+			<p class="status"><b>On <a href="https://github.com/idumych/power-theme">Power Theme's main branch</a>,</b> not in a release yet. The window borders and controls come from <b>Build add-ons…</b>, which builds them for your system.</p>
 		</div>
 	</section>
 
@@ -310,9 +324,10 @@ powertheme --mode=toggle</pre>
 	});
 	matchMedia("(prefers-color-scheme: dark)").addEventListener("change", label);
 
-	var compare = document.getElementById("compare");
-	compare.querySelector("input").addEventListener("input", function (event) {
-		compare.style.setProperty("--at", event.target.value + "%");
+	document.querySelectorAll(".compare").forEach(function (compare) {
+		compare.querySelector("input").addEventListener("input", function (event) {
+			compare.style.setProperty("--at", event.target.value + "%");
+		});
 	});
 })();
 </script>
