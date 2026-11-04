@@ -73,6 +73,7 @@ private:
 			bool				fIconChoiceChanged[2];
 			IconThemeList		fIconThemes;
 			bool				fBusy;
+			float				fHeightWithoutProgress;
 
 			BListView*			fThemeList;
 			PreviewView*		fPreview;

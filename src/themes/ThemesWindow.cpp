@@ -496,7 +496,8 @@ ThemesWindow::ThemesWindow(BRect frame, const char* selected)
 		B_AUTO_UPDATE_SIZE_LIMITS | B_QUIT_ON_WINDOW_CLOSE),
 	fMode(current_mode() == THEME_MODE_DARK
 		? THEME_MODE_DARK : THEME_MODE_LIGHT),
-	fBusy(false)
+	fBusy(false),
+	fHeightWithoutProgress(0)
 {
 	fIconChoiceChanged[0] = fIconChoiceChanged[1] = false;
 
@@ -614,12 +615,15 @@ ThemesWindow::ThemesWindow(BRect frame, const char* selected)
 			.End()
 		.End()
 		.Add(fProgress)
-		.AddGroup(B_HORIZONTAL)
-			.Add(fStatus, 1)
-			.Add(fRestartTracker)
-			.Add(fBuildDecorators)
-			.Add(fRevert)
-			.Add(fApply)
+		.AddGroup(B_VERTICAL, B_USE_SMALL_SPACING)
+			.Add(fStatus)
+			.AddGroup(B_HORIZONTAL)
+				.AddGlue()
+				.Add(fRestartTracker)
+				.Add(fBuildDecorators)
+				.Add(fRevert)
+				.Add(fApply)
+			.End()
 		.End()
 	.End();
 
@@ -1275,10 +1279,16 @@ ThemesWindow::_SetBusy(bool busy)
 {
 	fBusy = busy;
 	if (busy) {
+		// it takes room only while it shows
+		fHeightWithoutProgress = Bounds().Height();
 		fProgress->Reset();
 		fProgress->Show();
-	} else if (!fProgress->IsHidden())
+	} else if (!fProgress->IsHidden()) {
 		fProgress->Hide();
+		// the size limits still count it until this
+		Layout(false);
+		ResizeTo(Bounds().Width(), fHeightWithoutProgress);
+	}
 	fModeField->SetEnabled(!busy);
 	fSchedule->SetEnabled(!busy);
 	const Theme* theme = _SelectedTheme();
