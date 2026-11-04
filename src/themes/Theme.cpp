@@ -441,6 +441,7 @@ Theme::Theme()
 	fWallpaperMode(B_BACKGROUND_MODE_SCALED),
 	fDeskbarLocation(-1),
 	fDeskbarExpanded(true),
+	fScrollBarArrows(0),
 	fUITheme(false),
 	fHasDesktopColor(false)
 {
@@ -539,6 +540,12 @@ Theme::Load(const char* folder)
 			if (fields.CountStrings() > 1)
 				fDeskbarExpanded = trimmed(fields.StringAt(1)).ICompare(
 					"collapsed") != 0;
+		} else if (key == "scroll bar arrows") {
+			value.ToLower();
+			if (value == "double")
+				fScrollBarArrows = 2;
+			else if (value == "single")
+				fScrollBarArrows = 1;
 		} else if (key == "wallpaper mode") {
 			value.ToLower();
 			if (value == "centered" || value == "centred")
@@ -1011,6 +1018,26 @@ write_wallpaper(const BMessage& info, BString& log)
 
 
 static void
+save_scroll_bar_arrows(BMessage& look)
+{
+	scroll_bar_info info;
+	if (get_scroll_bar_info(&info) == B_OK)
+		look.AddBool("double arrows", info.double_arrows);
+}
+
+
+static void
+set_scroll_bar_arrows(bool doubled)
+{
+	scroll_bar_info info;
+	if (get_scroll_bar_info(&info) == B_OK && info.double_arrows != doubled) {
+		info.double_arrows = doubled;
+		set_scroll_bar_info(&info);
+	}
+}
+
+
+static void
 save_deskbar(BMessage& look)
 {
 	BDeskbar deskbar;
@@ -1080,6 +1107,7 @@ current_appearance(BMessage& look)
 
 	save_wallpaper(look);
 	save_deskbar(look);
+	save_scroll_bar_arrows(look);
 }
 
 
@@ -1536,12 +1564,24 @@ apply_appearance(const Theme& theme, uint32 parts, BString& log)
 			save_deskbar(previous);
 			changed = true;
 		}
+		if (!previous.HasBool("double arrows")) {
+			save_scroll_bar_arrows(previous);
+			changed = true;
+		}
 		if (changed)
 			save_message(kPreviousName, previous);
 	}
 
 	if ((parts & THEME_DESKBAR) != 0)
 		set_deskbar(theme.DeskbarLocation(), theme.DeskbarExpanded(), log);
+
+	// They go with the controls. A theme that says nothing brings back the
+	// setting from before any theme, so that one that does doesn't linger.
+	if ((requested & THEME_CONTROLS) != 0) {
+		set_scroll_bar_arrows(theme.ScrollBarArrows() != 0
+			? theme.ScrollBarArrows() == 2
+			: previous.GetBool("double arrows", false));
+	}
 
 	if ((parts & THEME_WALLPAPER) != 0)
 		set_wallpaper(theme, log);
@@ -1774,6 +1814,10 @@ revert_appearance(BString& log)
 		set_deskbar(location, previous.GetBool("deskbar expanded", true),
 			ignored);
 	}
+
+	bool doubled;
+	if (previous.FindBool("double arrows", &doubled) == B_OK)
+		set_scroll_bar_arrows(doubled);
 
 	BPath path;
 	if (themes_settings_path(path, kPreviousName) == B_OK)

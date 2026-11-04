@@ -16,6 +16,7 @@
  *   wallpaper = desktop.png
  *   wallpaper mode = scaled
  *   deskbar = right top, expanded
+ *   scroll bar arrows = double
  *   font plain = Noto Sans, Regular, 10
  *   font bold = Noto Sans Display | Noto Sans, Medium | Bold, 12
  *   color B_PANEL_BACKGROUND_COLOR = #D4D0C8
@@ -130,6 +131,10 @@ public:
 									{ return fDeskbarLocation; }
 			bool				DeskbarExpanded() const
 									{ return fDeskbarExpanded; }
+	// 2 or 1 at each end of a scroll bar; 0 if the theme doesn't say, which
+	// keeps the setting from before any theme
+			int32				ScrollBarArrows() const
+									{ return fScrollBarArrows; }
 			const BString&		Wallpaper() const { return fWallpaper; }
 				// "none", "default", or the image's full path
 			int32				WallpaperMode() const
@@ -170,6 +175,7 @@ private:
 			BMessage			fDesktopColors;
 			int32				fDeskbarLocation;
 			bool				fDeskbarExpanded;
+			int32				fScrollBarArrows;
 			bool				fUITheme;
 			bool				fHasDesktopColor;
 			rgb_color			fDesktopColor;
