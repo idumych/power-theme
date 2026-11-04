@@ -430,7 +430,9 @@ ReactionaryDecorator::_DrawFrame(BRect rect)
 	face.Exclude(fFrame);
 	if (fTitleBarRect.IsValid())
 		face.Exclude(fTitleBarRect);
-	fDrawingEngine->FillRegion(face, fFrameFace);
+	// FillRegion() doesn't clip, and would paint over windows in front of this
+	for (int32 i = 0; i < face.CountRects(); i++)
+		fDrawingEngine->FillRect(face.RectAt(i), fFrameFace);
 
 	if (_HasResizeGrip())
 		_DrawResizeGrip(rect);
@@ -617,7 +619,14 @@ ReactionaryDecorator::_SetSettings(const BMessage& settings,
 	for (int32 i = 0; i < fTabList.CountItems(); i++) {
 		if (settings.FindFloat("tab location", i, &location) != B_OK)
 			break;
-		modified |= SetTabLocation(i, location, updateRegion);
+		// a title bar keeps the place of the tab it may become again
+		if (!fBeOSTabs && fTabList.CountItems() == 1) {
+			fTabList.ItemAt(i)->tabLocation = std::max(0.0f, floorf(location));
+			fTabList.ItemAt(i)->tabOffset
+				= (uint32)fTabList.ItemAt(i)->tabLocation;
+			continue;
+		}
+		modified |= SetTabLocation(i, location, false, updateRegion);
 	}
 	return modified;
 }
@@ -857,8 +866,11 @@ ReactionaryDecorator::_LayoutTabs(const Geometry& geometry)
 		tab->tabRect.left = fTitleBarRect.left + floorf(width * i / count);
 		tab->tabRect.right = fTitleBarRect.left
 			+ floorf(width * (i + 1) / count) - 1;
-		tab->tabOffset = (uint32)(tab->tabRect.left - fBorderRect.left);
-		if (!fBeOSTabs || count > 1)
+		if (fBeOSTabs || count > 1)
+			tab->tabOffset = (uint32)(tab->tabRect.left - fBorderRect.left);
+		else
+			tab->tabOffset = (uint32)tab->tabLocation;
+		if (count > 1)
 			tab->tabLocation = 0;
 
 		const BRect title = _TitleRect(tab);
