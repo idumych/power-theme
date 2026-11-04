@@ -10,6 +10,8 @@
  *   decorator = Reactionary
  *   control look = Reactionary
  *   icons = ClassicOS2000
+ *   variant of = Reactionary
+ *   mode = light
  *   desktop color = #3A6EA5
  *   wallpaper = desktop.png
  *   wallpaper mode = scaled
@@ -28,6 +30,10 @@
  * (the image's top left corner at the screen's). "deskbar" places the
  * Deskbar: top, bottom, left top, right top, left bottom or right bottom,
  * optionally followed by ", expanded" or ", collapsed".
+ *
+ * A theme can be one version of another: "variant of = Flat" and "mode =
+ * dark". Two themes that say they are the same theme's light and dark versions
+ * are shown as one, and can be switched between with apply_mode().
  *
  * Themes made for Theme Manager (HaikuThemeManager, and BeOS and ZETA
  * before it) are read too, from the "UIThemes" folders it uses; see
@@ -64,6 +70,13 @@ enum {
 };
 
 
+enum theme_mode {
+	THEME_MODE_UNKNOWN = 0,
+	THEME_MODE_LIGHT,
+	THEME_MODE_DARK
+};
+
+
 struct ThemeFont {
 	BString		which;
 		// "plain", "bold", "fixed" or "menu"
@@ -89,6 +102,11 @@ public:
 			const BString&		Decorator() const { return fDecorator; }
 			const BString&		ControlLook() const { return fControlLook; }
 			const BString&		Icons() const { return fIcons; }
+			// which theme this is a version of, if any
+			const BString&		VariantOf() const { return fVariantOf; }
+			// what it says it is, or else what its colours make it: light
+			// text on a darker panel is dark
+			theme_mode			Mode() const;
 			bool				HasWallpaper() const
 									{ return !fWallpaper.IsEmpty()
 										|| !fBackground.IsEmpty(); }
@@ -132,6 +150,8 @@ private:
 			BString				fDecorator;
 			BString				fControlLook;
 			BString				fIcons;
+			BString				fVariantOf;
+			theme_mode			fMode;
 			BString				fWallpaper;
 			int32				fWallpaperMode;
 			BString				fPreview;
@@ -153,9 +173,35 @@ typedef BObjectList<Theme, true> ThemeList;
 // every installed theme, sorted by name; user folders win over system ones
 void		find_themes(ThemeList& themes);
 
+// The other mode: light for dark, and dark for light.
+theme_mode	opposite_mode(theme_mode mode);
+// "light", "dark" or "unknown", and back
+const char*	mode_name(theme_mode mode);
+theme_mode	mode_from_name(const char* name);
+
+// The version of \a theme in \a mode: \a theme itself if that's its mode, or
+// the theme with the same VariantOf() in that mode. NULL if there's none.
+const Theme* find_variant(const ThemeList& themes, const Theme& theme,
+				theme_mode mode);
+// By name, or by the name of what it's a version of, in \a mode if that isn't
+// THEME_MODE_UNKNOWN. A family's light version comes first otherwise.
+const Theme* find_theme(const ThemeList& themes, const char* name,
+				theme_mode mode = THEME_MODE_UNKNOWN);
+
 // Applies \a parts of \a theme other than icons; saves the look in use
 // first if nothing is saved yet. Messages for the user go to \a log.
 status_t	apply_appearance(const Theme& theme, uint32 parts, BString& log);
+
+// The theme in use's mode, or THEME_MODE_UNKNOWN without one.
+theme_mode	current_mode();
+
+// Switches the theme in use to its version in \a mode, with the same parts as
+// when it was applied. This is what anything choosing a mode should call,
+// whatever it goes by. Icons stay as they are. \a applied gets the name of the
+// theme applied, and stays empty if it was in that mode already. Returns an
+// error, with a line for the user in \a log, if no theme is in use or it has no
+// version in that mode.
+status_t	apply_mode(theme_mode mode, BString& log, BString* applied = NULL);
 
 // What applying \a theme would do on this system, line by line: the
 // decorator and control look found, fonts, colours and wallpapers.

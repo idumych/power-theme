@@ -19,6 +19,7 @@
 #include <getopt.h>
 #include <stdio.h>
 #include <string.h>
+#include <strings.h>
 #include <unistd.h>
 
 #include <AboutWindow.h>
@@ -89,6 +90,9 @@ usage(FILE* out)
 		"  -p, --parts=LIST      with --apply, only these parts: decorator,\n"
 		"                        controls, colors, fonts, icons, wallpaper,\n"
 		"                        deskbar\n"
+		"  -m, --mode=MODE       switch the theme in use to its light or dark\n"
+		"                        version, or toggle between them; with --apply,\n"
+		"                        apply that version (light or dark)\n"
 		"  -i, --icons=ID        use only the icon theme in folder ID;\n"
 		"                        \"haiku\" puts Haiku's own icons back\n"
 		"  -r, --revert          go back to the look from before any theme\n"
@@ -186,6 +190,7 @@ command_line(int argc, char** argv)
 		{ "revert", no_argument, NULL, 'r' },
 		{ "status", no_argument, NULL, 's' },
 		{ "show", required_argument, NULL, 'w' },
+		{ "mode", required_argument, NULL, 'm' },
 		{ "restart-tracker", no_argument, NULL, 't' },
 		{ "build-decorators", no_argument, NULL, 'b' },
 		{ "install-tools", no_argument, NULL, 'T' },
@@ -199,9 +204,10 @@ command_line(int argc, char** argv)
 	bool list = false, revert = false, status = false, restart = false;
 	bool build = false, installTools = false;
 	const char* show = NULL;
+	const char* mode = NULL;
 
 	int option;
-	while ((option = getopt_long(argc, argv, "la:p:i:rstw:bh", kOptions, NULL))
+	while ((option = getopt_long(argc, argv, "la:p:m:i:rstw:bh", kOptions, NULL))
 			!= -1) {
 		switch (option) {
 			case 'l': list = true; break;
@@ -211,6 +217,7 @@ command_line(int argc, char** argv)
 				if (parts == 0)
 					return 2;
 				break;
+			case 'm': mode = optarg; break;
 			case 'i': icons = optarg; break;
 			case 'r': revert = true; break;
 			case 's': status = true; break;
@@ -224,8 +231,21 @@ command_line(int argc, char** argv)
 	}
 	if (optind < argc
 		|| (!list && !apply && !icons && !revert && !status && !restart
-			&& !show && !build)) {
+			&& !show && !build && !mode)) {
 		usage(stderr);
+		return 2;
+	}
+
+	const bool toggle = mode != NULL && strcasecmp(mode, "toggle") == 0;
+	const theme_mode wantedMode = mode != NULL ? mode_from_name(mode)
+		: THEME_MODE_UNKNOWN;
+	if (mode != NULL && !toggle && wantedMode == THEME_MODE_UNKNOWN) {
+		fprintf(stderr, "powertheme: the mode is light, dark or toggle, not "
+			"\"%s\"\n", mode);
+		return 2;
+	}
+	if (toggle && apply != NULL) {
+		fprintf(stderr, "powertheme: --apply takes --mode=light or dark\n");
 		return 2;
 	}
 
@@ -289,6 +309,10 @@ command_line(int argc, char** argv)
 			BStringList missing;
 			themes.ItemAt(i)->Missing(&missing);
 			BString note;
+			if (!themes.ItemAt(i)->VariantOf().IsEmpty()) {
+				note << " (" << mode_name(themes.ItemAt(i)->Mode())
+					<< " version of " << themes.ItemAt(i)->VariantOf() << ")";
+			}
 			if (!missing.IsEmpty())
 				note << " (not installed: " << missing.Join(", ") << ")";
 			printf("  %s%s%s\n", themes.ItemAt(i)->Name().String(),
@@ -312,12 +336,38 @@ command_line(int argc, char** argv)
 		get_current(currentTheme, currentIcons);
 		printf("theme: %s\n", currentTheme.IsEmpty()
 			? "(none)" : currentTheme.String());
+		printf("mode: %s\n", mode_name(current_mode()));
 		printf("icons: %s\n", currentIcons.IsEmpty()
 			? "(Haiku's own)" : currentIcons.String());
 		printf("previous look saved: %s\n",
 			has_saved_appearance() ? "yes" : "no");
 		printf("previous icons saved: %s\n",
 			has_saved_icons() ? "yes" : "no");
+		return 0;
+	}
+
+	if (mode != NULL && apply == NULL) {
+		theme_mode target = wantedMode;
+		if (toggle) {
+			target = opposite_mode(current_mode());
+			if (target == THEME_MODE_UNKNOWN) {
+				fprintf(stderr, "powertheme: can't tell whether the theme in "
+					"use is light or dark\n");
+				return 1;
+			}
+		}
+
+		BString log, applied;
+		status_t result = apply_mode(target, log, &applied);
+		print_log(log);
+		if (result != B_OK)
+			return 1;
+		if (applied.IsEmpty())
+			printf("The theme in use is %s already.\n", mode_name(target));
+		else {
+			printf("\"%s\" applied. %s\n", applied.String(),
+				running_applications_note());
+		}
 		return 0;
 	}
 
@@ -334,14 +384,15 @@ command_line(int argc, char** argv)
 	if (apply != NULL) {
 		ThemeList themes;
 		find_themes(themes);
-		const Theme* theme = NULL;
-		for (int32 i = 0; i < themes.CountItems(); i++) {
-			if (themes.ItemAt(i)->Name().ICompare(apply) == 0)
-				theme = themes.ItemAt(i);
-		}
+		const Theme* theme = find_theme(themes, apply, wantedMode);
 		if (theme == NULL) {
-			fprintf(stderr, "powertheme: no theme is called \"%s\" (see "
-				"--list)\n", apply);
+			if (mode != NULL && find_theme(themes, apply) != NULL) {
+				fprintf(stderr, "powertheme: \"%s\" has no %s version\n", apply,
+					mode);
+			} else {
+				fprintf(stderr, "powertheme: no theme is called \"%s\" (see "
+					"--list)\n", apply);
+			}
 			return 1;
 		}
 

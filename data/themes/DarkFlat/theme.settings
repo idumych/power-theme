@@ -3,6 +3,8 @@
 # From haiku_darkstyle by unarix (github.com/unarix/haiku_darkstyle, MIT).
 
 name = DarkFlat
+variant of = Flat
+mode = dark
 description = Dark and flat: charcoal panels and lists, yellow window tabs and scroll bar thumbs, over a night sky. From haiku_darkstyle by unarix.
 decorator = FlatDecorator | Default
 control look = FlatControlLook | haiku

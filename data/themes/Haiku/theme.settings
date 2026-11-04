@@ -4,6 +4,8 @@
 # ServerConfig.h).
 
 name = Haiku
+variant of = Haiku
+mode = light
 description = Haiku's own look: yellow window tabs, the built-in controls, the default colors and fonts, and Haiku's icons.
 decorator = Default
 control look = haiku

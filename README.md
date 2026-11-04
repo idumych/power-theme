@@ -174,6 +174,8 @@ click **Build add-ons…** again.
     icon theme with
     any theme. Parts whose add-ons or files aren't installed are shown as
     such and left out.
+  - Shows a theme's light and dark versions as one, with a **Mode** menu, and
+    switches between them with the parts you applied (see below).
   - Saves your look and icons the first time, so **Revert** always gets
     back to them, whatever was applied in between.
   - **Build add-ons…** compiles the window decorators and control looks
@@ -192,9 +194,17 @@ click **Build add-ons…** again.
     set aside if app_server doesn't take it. The same from a Terminal:
     `powertheme --build-decorators
     [--install-tools]` (`src/themes/build-decorators.sh`).
-  - `powertheme --list`, `--apply=NAME [--parts=…]`, `--icons=ID|haiku`,
+  - `powertheme --list`, `--apply=NAME [--parts=…] [--mode=light|dark]`,
+    `--mode=light|dark|toggle`, `--icons=ID|haiku`,
     `--revert`, `--status`, `--show=NAME`, `--restart-tracker` and
     `--build-decorators` do the same from a Terminal.
+- **Light and dark versions**: two themes are versions of the same one if their
+  `theme.settings` say so, with `variant of = Flat` and `mode = dark` (or
+  `light`). Each stays a complete theme in its own folder. **Flat** (LightFlat
+  and DarkFlat) and **Haiku** (Haiku and Haiku Dark) come this way; other themes
+  stay as they are until they have both. `powertheme --mode=dark` switches the
+  theme in use, keeping the parts it was applied with and your icons, so a
+  script can run it at set times. Nothing switches by itself yet.
 - **Theme Manager themes**: themes made for
   [Theme Manager](https://github.com/HaikuArchives/HaikuThemeManager)
   (and BeOS and ZETA before it), such as the
@@ -223,7 +233,8 @@ click **Build add-ons…** again.
 
 ## Limitations
 
-- Only the light "Windows ME" variant is ported. The theme's dark and dim
+- Only the light "Windows ME" variant of Reactionary is ported, so it has no
+  dark mode yet. The theme's dark and dim
   colour schemes, cursors and wallpaper are not.
 - Icons change for file types and some folders only. Applications keep
   their own icons, which are part of them. The Trash keeps Tracker's icon
@@ -276,6 +287,7 @@ should run on (Haiku R1/beta6), against that system's own headers.
 - DarkFlat, LightFlat, MoonFlat, OrangeFlat themes and their wallpaper
   from [haiku_darkstyle](https://github.com/unarix/haiku_darkstyle) by
   nhtello (unarix), MIT licence (in each theme's folder).
+  Haiku Dark uses DarkFlat's colours.
 - FlatDecorator and FlatControlLook from Haiku (as in Renku OS's source),
   MIT licence, Haiku, Inc.; FlatControlLook by nhtello.
 - Smoke's look follows ZETA's Smoke decorator and controls (yellowTAB,

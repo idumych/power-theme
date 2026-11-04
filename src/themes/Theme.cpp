@@ -241,6 +241,26 @@ get_current(BString& theme, BString& icons)
 }
 
 
+static void
+set_current_parts(uint32 parts)
+{
+	BMessage current;
+	load_message(kCurrentName, current);
+	current.RemoveName("parts");
+	current.AddUInt32("parts", parts);
+	save_message(kCurrentName, current);
+}
+
+
+static uint32
+get_current_parts()
+{
+	BMessage current;
+	load_message(kCurrentName, current);
+	return current.GetUInt32("parts", THEME_ALL);
+}
+
+
 status_t
 find_build_script(BString& path)
 {
@@ -358,12 +378,31 @@ restart_tracker()
 
 Theme::Theme()
 	:
+	fMode(THEME_MODE_UNKNOWN),
 	fWallpaperMode(B_BACKGROUND_MODE_SCALED),
 	fDeskbarLocation(-1),
 	fDeskbarExpanded(true),
 	fUITheme(false),
 	fHasDesktopColor(false)
 {
+}
+
+
+theme_mode
+Theme::Mode() const
+{
+	if (fMode != THEME_MODE_UNKNOWN)
+		return fMode;
+
+	rgb_color panel, text;
+	if (fColors.FindColor(ui_color_name(B_PANEL_BACKGROUND_COLOR), &panel)
+			!= B_OK
+		|| fColors.FindColor(ui_color_name(B_PANEL_TEXT_COLOR), &text)
+			!= B_OK) {
+		return THEME_MODE_UNKNOWN;
+	}
+	return text.Brightness() > panel.Brightness()
+		? THEME_MODE_DARK : THEME_MODE_LIGHT;
 }
 
 
@@ -409,6 +448,10 @@ Theme::Load(const char* folder)
 
 		if (key == "name")
 			fName = value;
+		else if (key == "variant of")
+			fVariantOf = value;
+		else if (key == "mode")
+			fMode = mode_from_name(value);
 		else if (key == "description")
 			fDescription = value;
 		else if (key == "decorator")
@@ -986,9 +1029,150 @@ has_saved_appearance()
 }
 
 
+theme_mode
+opposite_mode(theme_mode mode)
+{
+	switch (mode) {
+		case THEME_MODE_LIGHT:
+			return THEME_MODE_DARK;
+		case THEME_MODE_DARK:
+			return THEME_MODE_LIGHT;
+		default:
+			return THEME_MODE_UNKNOWN;
+	}
+}
+
+
+const char*
+mode_name(theme_mode mode)
+{
+	switch (mode) {
+		case THEME_MODE_LIGHT:
+			return "light";
+		case THEME_MODE_DARK:
+			return "dark";
+		default:
+			return "unknown";
+	}
+}
+
+
+theme_mode
+mode_from_name(const char* name)
+{
+	if (strcasecmp(name, "light") == 0)
+		return THEME_MODE_LIGHT;
+	if (strcasecmp(name, "dark") == 0)
+		return THEME_MODE_DARK;
+	return THEME_MODE_UNKNOWN;
+}
+
+
+const Theme*
+find_variant(const ThemeList& themes, const Theme& theme, theme_mode mode)
+{
+	if (theme.Mode() == mode)
+		return &theme;
+	if (theme.VariantOf().IsEmpty())
+		return NULL;
+
+	for (int32 i = 0; i < themes.CountItems(); i++) {
+		const Theme* other = themes.ItemAt(i);
+		if (other->VariantOf() == theme.VariantOf() && other->Mode() == mode)
+			return other;
+	}
+	return NULL;
+}
+
+
+const Theme*
+find_theme(const ThemeList& themes, const char* name, theme_mode mode)
+{
+	const Theme* theme = NULL;
+	for (int32 i = 0; i < themes.CountItems() && theme == NULL; i++) {
+		if (themes.ItemAt(i)->Name().ICompare(name) == 0)
+			theme = themes.ItemAt(i);
+	}
+	for (int32 i = 0; i < themes.CountItems() && theme == NULL; i++) {
+		if (themes.ItemAt(i)->VariantOf().ICompare(name) == 0)
+			theme = themes.ItemAt(i);
+	}
+	if (theme == NULL)
+		return NULL;
+
+	if (mode != THEME_MODE_UNKNOWN)
+		return find_variant(themes, *theme, mode);
+	if (theme->Name().ICompare(name) == 0)
+		return theme;
+
+	const Theme* light = find_variant(themes, *theme, THEME_MODE_LIGHT);
+	return light != NULL ? light : theme;
+}
+
+
+theme_mode
+current_mode()
+{
+	BString name, icons;
+	get_current(name, icons);
+	if (name.IsEmpty())
+		return THEME_MODE_UNKNOWN;
+
+	ThemeList themes;
+	find_themes(themes);
+	const Theme* theme = find_theme(themes, name);
+	return theme != NULL ? theme->Mode() : THEME_MODE_UNKNOWN;
+}
+
+
+status_t
+apply_mode(theme_mode mode, BString& log, BString* applied)
+{
+	BString name, icons;
+	get_current(name, icons);
+	if (name.IsEmpty()) {
+		log << "No theme is in use, so there's nothing to switch.\n";
+		return B_ERROR;
+	}
+
+	ThemeList themes;
+	find_themes(themes);
+	const Theme* current = find_theme(themes, name);
+	if (current == NULL) {
+		log << "The theme \"" << name << "\" isn't installed any more.\n";
+		return B_ENTRY_NOT_FOUND;
+	}
+	if (current->Mode() == mode)
+		return B_OK;
+
+	const Theme* theme = find_variant(themes, *current, mode);
+	if (theme == NULL) {
+		log << "\"" << name << "\" has no " << mode_name(mode)
+			<< " version.\n";
+		return B_ENTRY_NOT_FOUND;
+	}
+
+	// What isn't installed in this version shouldn't be left out of the
+	// other one when switching back.
+	const uint32 parts = get_current_parts();
+	BStringList missing;
+	const uint32 available = parts & ~theme->Missing(&missing);
+	if (!missing.IsEmpty()) {
+		log << "Not installed, so left out: " << missing.Join(", ") << ".\n";
+	}
+
+	status_t status = apply_appearance(*theme, available, log);
+	set_current_parts(parts);
+	if (status == B_OK && applied != NULL)
+		*applied = theme->Name();
+	return status;
+}
+
+
 status_t
 apply_appearance(const Theme& theme, uint32 parts, BString& log)
 {
+	const uint32 requested = parts;
 	parts &= theme.Parts();
 
 	BMessage previous;
@@ -1083,6 +1267,7 @@ apply_appearance(const Theme& theme, uint32 parts, BString& log)
 	}
 
 	set_current(theme.Name(), NULL);
+	set_current_parts(requested & ~THEME_ICONS);
 	return B_OK;
 }
 
@@ -1113,6 +1298,9 @@ describe_theme(const Theme& theme, BString& out)
 	out << "format: " << (theme.IsUITheme() ? "Theme Manager" : "Power Theme")
 		<< "\n";
 	out << "folder: " << theme.Folder() << "\n";
+	out << "mode: " << mode_name(theme.Mode()) << "\n";
+	if (!theme.VariantOf().IsEmpty())
+		out << "version of: " << theme.VariantOf() << "\n";
 
 	if (!theme.Decorator().IsEmpty()) {
 		DecorInfoUtility decorators;

@@ -45,18 +45,26 @@ private:
 			void				_LoadThemes(const char* selected);
 			void				_UpdateLabels();
 			void				_SelectTheme(int32 index);
+			void				_ShowTheme(const Theme* theme);
+			void				_SelectMode(theme_mode mode);
+			BString				_RowName(const Theme* theme) const;
+			const Theme*		_SelectedTheme() const;
 			void				_SelectIcons(const char* id);
 			BString				_ChosenIcons() const;
 			void				_SetBusy(bool busy);
 			void				_UpdateButtons();
 
 			ThemeList			fThemes;
+			// what the list shows: one theme of each light and dark pair
+			BObjectList<const Theme, false> fRows;
+			theme_mode			fMode;
 			IconThemeList		fIconThemes;
 			bool				fBusy;
 
 			BListView*			fThemeList;
 			PreviewView*		fPreview;
 			DescriptionView*	fDescription;
+			BMenuField*			fModeField;
 			BMenuField*			fIconsField;
 			IconStripView*		fIconStrip;
 			BCheckBox*			fDecorator;

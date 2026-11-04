@@ -1,0 +1,59 @@
+# Haiku's own look in black and yellow: the default window decorator and the
+# built-in controls, with DarkFlat's colours (from haiku_darkstyle by unarix,
+# MIT) and desktop colour, and Haiku's fonts and icons.
+
+name = Haiku Dark
+variant of = Haiku
+mode = dark
+description = Haiku's own look in black and yellow: the built-in controls with charcoal panels and yellow window tabs, the default fonts and Haiku's icons.
+decorator = Default
+control look = haiku
+icons = haiku
+wallpaper = default
+deskbar = right top, expanded
+desktop color = #0E0E0E
+
+font plain = Noto Sans, Regular, 12
+font bold = Noto Sans, Bold, 12
+font fixed = Noto Sans Mono, Regular, 12
+font menu = Noto Sans, Regular, 12
+
+color B_PANEL_BACKGROUND_COLOR = #353535
+color B_MENU_BACKGROUND_COLOR = #353535
+color B_WINDOW_TAB_COLOR = #EDC746
+color B_KEYBOARD_NAVIGATION_COLOR = #646464
+color B_DESKTOP_COLOR = #0E0E0E
+color B_MENU_SELECTED_BACKGROUND_COLOR = #353535
+color B_MENU_ITEM_TEXT_COLOR = #D2D2D2
+color B_MENU_SELECTED_ITEM_TEXT_COLOR = #D2D2D2
+color B_MENU_SELECTED_BORDER_COLOR = #353535
+color B_PANEL_TEXT_COLOR = #D2D2D2
+color B_DOCUMENT_BACKGROUND_COLOR = #404040
+color B_DOCUMENT_TEXT_COLOR = #D2D2D2
+color B_CONTROL_BACKGROUND_COLOR = #4D4D4D
+color B_CONTROL_TEXT_COLOR = #D2D2D2
+color B_CONTROL_BORDER_COLOR = #353535
+color B_CONTROL_HIGHLIGHT_COLOR = #353535
+color B_NAVIGATION_PULSE_COLOR = #353535
+color B_SHINE_COLOR = #353535
+color B_SHADOW_COLOR = #353535
+color B_TOOLTIP_BACKGROUND_COLOR = #353535
+color B_TOOLTIP_TEXT_COLOR = #D2D2D2
+color B_WINDOW_TEXT_COLOR = #353535
+color B_WINDOW_INACTIVE_TAB_COLOR = #353535
+color B_WINDOW_INACTIVE_TEXT_COLOR = #D2D2D2
+color B_WINDOW_BORDER_COLOR = #353535
+color B_WINDOW_INACTIVE_BORDER_COLOR = #353535
+color B_CONTROL_MARK_COLOR = #565656
+color B_LIST_BACKGROUND_COLOR = #1E1E1E
+color B_LIST_SELECTED_BACKGROUND_COLOR = #141414
+color B_LIST_ITEM_TEXT_COLOR = #D2D2D2
+color B_LIST_SELECTED_ITEM_TEXT_COLOR = #D2D2D2
+color B_SCROLL_BAR_THUMB_COLOR = #CEAB34
+color B_LINK_TEXT_COLOR = #6A70D4
+color B_LINK_HOVER_COLOR = #6698CB
+color B_LINK_VISITED_COLOR = #91709B
+color B_LINK_ACTIVE_COLOR = #798ECB
+color B_STATUS_BAR_COLOR = #3296FF
+color B_SUCCESS_COLOR = #35B135
+color B_FAILURE_COLOR = #BA3535

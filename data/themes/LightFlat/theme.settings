@@ -3,6 +3,8 @@
 # From haiku_darkstyle by unarix (github.com/unarix/haiku_darkstyle, MIT).
 
 name = LightFlat
+variant of = Flat
+mode = light
 description = Light and flat: pale rose-grey panels, white fields and yellow window tabs, over a night sky. From haiku_darkstyle by unarix.
 decorator = FlatDecorator | Default
 control look = FlatControlLook | haiku

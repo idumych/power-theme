@@ -43,6 +43,7 @@
 
 enum {
 	kMsgThemeSelected	= 'thsl',
+	kMsgModeChosen		= 'mdch',
 	kMsgIconsChosen		= 'icch',
 	kMsgApply			= 'aply',
 	kMsgRevert			= 'rvrt',
@@ -423,6 +424,8 @@ ThemesWindow::ThemesWindow(BRect frame, const char* selected)
 	:
 	BWindow(frame, "Power Theme", B_TITLED_WINDOW,
 		B_AUTO_UPDATE_SIZE_LIMITS | B_QUIT_ON_WINDOW_CLOSE),
+	fMode(current_mode() == THEME_MODE_DARK
+		? THEME_MODE_DARK : THEME_MODE_LIGHT),
 	fBusy(false)
 {
 	fThemeList = new BListView("themes");
@@ -434,6 +437,16 @@ ThemesWindow::ThemesWindow(BRect frame, const char* selected)
 
 	fPreview = new PreviewView();
 	fDescription = new DescriptionView();
+
+	BPopUpMenu* modeMenu = new BPopUpMenu("mode");
+	const theme_mode modes[] = { THEME_MODE_LIGHT, THEME_MODE_DARK };
+	for (int32 i = 0; i < 2; i++) {
+		BMessage* message = new BMessage(kMsgModeChosen);
+		message->AddInt32("mode", modes[i]);
+		modeMenu->AddItem(new BMenuItem(
+			modes[i] == THEME_MODE_LIGHT ? "Light" : "Dark", message));
+	}
+	fModeField = new BMenuField("mode", "Mode:", modeMenu);
 
 	BPopUpMenu* iconsMenu = new BPopUpMenu("icons");
 	fIconsField = new BMenuField("icons", "Icons:", iconsMenu);
@@ -482,6 +495,7 @@ ThemesWindow::ThemesWindow(BRect frame, const char* selected)
 			.Add(themeScroll, 1)
 			.AddGroup(B_VERTICAL, B_USE_DEFAULT_SPACING, 3)
 				.Add(previewBox)
+				.Add(fModeField)
 				.Add(fIconsField)
 				.Add(fIconStrip)
 				.AddGrid(B_USE_DEFAULT_SPACING, B_USE_SMALL_SPACING)
@@ -507,6 +521,8 @@ ThemesWindow::ThemesWindow(BRect frame, const char* selected)
 	fApply->MakeDefault(true);
 	fProgress->Hide();
 	fRestartTracker->Hide();
+	fModeField->Hide();
+	modeMenu->SetTargetForItems(this);
 
 	_LoadThemes(selected);
 	_UpdateButtons();
@@ -529,6 +545,16 @@ ThemesWindow::MessageReceived(BMessage* message)
 			_SelectTheme(fThemeList->CurrentSelection());
 			break;
 
+		case kMsgModeChosen:
+		{
+			int32 mode;
+			if (message->FindInt32("mode", &mode) == B_OK) {
+				_SelectMode((theme_mode)mode);
+				_ShowTheme(_SelectedTheme());
+			}
+			break;
+		}
+
 		case kMsgIconsChosen:
 		{
 			const char* id;
@@ -548,7 +574,7 @@ ThemesWindow::MessageReceived(BMessage* message)
 			Job* job = new Job;
 			job->window = BMessenger(this);
 			job->parts = 0;
-			Theme* theme = fThemes.ItemAt(fThemeList->CurrentSelection());
+			const Theme* theme = _SelectedTheme();
 			if (theme != NULL) {
 				job->themeName = theme->Name();
 				if (fDecorator->Value() == B_CONTROL_ON)
@@ -629,8 +655,9 @@ ThemesWindow::MessageReceived(BMessage* message)
 		case kMsgDecoratorsBuilt:
 		{
 			// window borders that weren't installed may be now
-			Theme* theme = fThemes.ItemAt(fThemeList->CurrentSelection());
+			const Theme* theme = _SelectedTheme();
 			BString name = theme != NULL ? theme->Name() : BString();
+			fRows.MakeEmpty();
 			fThemes.MakeEmpty();
 			for (int32 i = fThemeList->CountItems() - 1; i >= 0; i--)
 				delete fThemeList->RemoveItem(i);
@@ -666,12 +693,11 @@ ThemesWindow::MessageReceived(BMessage* message)
 				fStatus->SetText(first);
 				fStatus->SetToolTip(log);
 			} else {
-				fStatus->SetText(message->GetBool("reverted", false)
-					? "Your previous look is back. Restart applications to "
-						"see it everywhere."
-					: "Done. Restart applications to see the new controls "
-						"and fonts in them.");
-				fStatus->SetToolTip((const char*)NULL);
+				BString status(message->GetBool("reverted", false)
+					? "Your previous look is back. " : "Done. ");
+				status << running_applications_note();
+				fStatus->SetText(status);
+				fStatus->SetToolTip(status);
 			}
 			// Tracker keeps a few icons, folders' among them, until it
 			// restarts
@@ -707,7 +733,7 @@ ThemesWindow::QuitRequested()
 
 	BMessage settings;
 	settings.AddRect("frame", Frame());
-	Theme* theme = fThemes.ItemAt(fThemeList->CurrentSelection());
+	const Theme* theme = _SelectedTheme();
 	if (theme != NULL)
 		settings.AddString("theme", theme->Name());
 	BPath path;
@@ -726,12 +752,44 @@ ThemesWindow::_LoadThemes(const char* selected)
 	find_themes(fThemes);
 	find_icon_themes(fIconThemes);
 
-	int32 select = 0;
+	// A pair of light and dark themes gets one row.
 	for (int32 i = 0; i < fThemes.CountItems(); i++) {
 		const Theme* theme = fThemes.ItemAt(i);
-		fThemeList->AddItem(new BStringItem(theme->Name()));
-		if (selected != NULL && theme->Name() == selected)
+		bool listed = false;
+		for (int32 row = 0; row < fRows.CountItems() && !listed; row++)
+			listed = _RowName(fRows.ItemAt(row)) == _RowName(theme);
+		if (!listed)
+			fRows.AddItem(theme);
+	}
+	for (int32 i = 1; i < fRows.CountItems(); i++) {
+		const Theme* theme = fRows.ItemAt(i);
+		int32 to = i;
+		while (to > 0 && _RowName(fRows.ItemAt(to - 1)).ICompare(
+				_RowName(theme)) > 0) {
+			to--;
+		}
+		if (to != i)
+			fRows.MoveItem(i, to);
+	}
+
+	int32 select = 0;
+	for (int32 i = 0; i < fRows.CountItems(); i++) {
+		const Theme* theme = fRows.ItemAt(i);
+		fThemeList->AddItem(new BStringItem(_RowName(theme)));
+
+		const Theme* light = find_variant(fThemes, *theme, THEME_MODE_LIGHT);
+		const Theme* dark = find_variant(fThemes, *theme, THEME_MODE_DARK);
+		if (selected == NULL)
+			continue;
+		if (theme->Name() == selected)
 			select = i;
+		else if (light != NULL && light->Name() == selected) {
+			select = i;
+			fMode = THEME_MODE_LIGHT;
+		} else if (dark != NULL && dark->Name() == selected) {
+			select = i;
+			fMode = THEME_MODE_DARK;
+		}
 	}
 
 	BMenu* menu = fIconsField->Menu();
@@ -768,12 +826,13 @@ ThemesWindow::_UpdateLabels()
 	BString currentTheme, currentIcons;
 	get_current(currentTheme, currentIcons);
 
-	for (int32 i = 0; i < fThemes.CountItems(); i++) {
+	const Theme* current = find_theme(fThemes, currentTheme);
+	for (int32 i = 0; i < fRows.CountItems(); i++) {
 		BStringItem* item = dynamic_cast<BStringItem*>(fThemeList->ItemAt(i));
 		if (item == NULL)
 			continue;
-		BString label(fThemes.ItemAt(i)->Name());
-		if (fThemes.ItemAt(i)->Name() == currentTheme)
+		BString label(_RowName(fRows.ItemAt(i)));
+		if (current != NULL && _RowName(current) == _RowName(fRows.ItemAt(i)))
 			label << " (in use)";
 		item->SetText(label);
 	}
@@ -815,7 +874,73 @@ ThemesWindow::_UpdateLabels()
 void
 ThemesWindow::_SelectTheme(int32 index)
 {
-	const Theme* theme = fThemes.ItemAt(index);
+	const Theme* theme = fRows.ItemAt(index);
+
+	// A pair in use opens on the version in use.
+	if (theme != NULL) {
+		BString currentTheme, currentIcons;
+		get_current(currentTheme, currentIcons);
+		const Theme* current = find_theme(fThemes, currentTheme);
+		if (current != NULL && _RowName(current) == _RowName(theme)
+			&& current->Mode() != THEME_MODE_UNKNOWN) {
+			fMode = current->Mode();
+		}
+	}
+
+	const bool paired = theme != NULL
+		&& find_variant(fThemes, *theme, THEME_MODE_LIGHT) != NULL
+		&& find_variant(fThemes, *theme, THEME_MODE_DARK) != NULL;
+	if (paired && fModeField->IsHidden())
+		fModeField->Show();
+	else if (!paired && !fModeField->IsHidden())
+		fModeField->Hide();
+
+	_SelectMode(fMode);
+	_ShowTheme(_SelectedTheme());
+}
+
+
+void
+ThemesWindow::_SelectMode(theme_mode mode)
+{
+	fMode = mode;
+	BMenuItem* item = fModeField->Menu()->ItemAt(
+		mode == THEME_MODE_DARK ? 1 : 0);
+	if (item != NULL)
+		item->SetMarked(true);
+}
+
+
+/*!	The name a theme is listed under: for one of a pair of light and dark
+	themes, what they are versions of.
+*/
+BString
+ThemesWindow::_RowName(const Theme* theme) const
+{
+	if (!theme->VariantOf().IsEmpty()
+		&& find_variant(fThemes, *theme, THEME_MODE_LIGHT) != NULL
+		&& find_variant(fThemes, *theme, THEME_MODE_DARK) != NULL) {
+		return theme->VariantOf();
+	}
+	return theme->Name();
+}
+
+
+const Theme*
+ThemesWindow::_SelectedTheme() const
+{
+	const Theme* row = fRows.ItemAt(fThemeList->CurrentSelection());
+	if (row == NULL)
+		return NULL;
+
+	const Theme* theme = find_variant(fThemes, *row, fMode);
+	return theme != NULL ? theme : row;
+}
+
+
+void
+ThemesWindow::_ShowTheme(const Theme* theme)
+{
 	fPreview->SetTheme(theme);
 	if (theme == NULL) {
 		fDescription->SetText("");
@@ -913,6 +1038,7 @@ ThemesWindow::_SetBusy(bool busy)
 		fProgress->Show();
 	} else if (!fProgress->IsHidden())
 		fProgress->Hide();
+	fModeField->SetEnabled(!busy);
 	fIconsField->SetEnabled(!busy);
 	_UpdateButtons();
 }
