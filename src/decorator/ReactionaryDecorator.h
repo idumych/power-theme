@@ -121,6 +121,15 @@ private:
 			rgb_color			fFocusTextColor;
 			rgb_color			fNonFocusTabColor;
 			rgb_color			fNonFocusTextColor;
+
+			// The frame, from the window border colour. On a dark one, its
+			// bevels are derived from it, instead of Windows' fixed greys.
+			rgb_color			fFrameFace;
+			rgb_color			fFrameLight;
+			rgb_color			fFrameShadow;
+			rgb_color			fFrameDarkShadow;
+			rgb_color			fFrameEdge;
+			rgb_color			fInactiveGradientEnd;
 };
 
 

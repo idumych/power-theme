@@ -46,7 +46,6 @@
 // frame, lit from the top left, and title bar gradients ending in light blue
 // (active) or light grey (inactive). The buttons are the colour scheme's
 // D4D0C8 button face.
-static const rgb_color kFrameFace = { 192, 192, 192, 255 };
 static const rgb_color kButtonFace = { 212, 208, 200, 255 };
 static const rgb_color kLight = { 255, 255, 255, 255 };
 static const rgb_color kShadow = { 128, 128, 128, 255 };
@@ -56,6 +55,18 @@ static const rgb_color kActiveGradientEnd = { 166, 202, 240, 255 };
 static const rgb_color kInactiveGradientEnd = { 192, 192, 192, 255 };
 
 static const float kResizeKnobSize = 18.0;
+
+
+//! \a color with \a amount (0 to 1) of \a other mixed in.
+static rgb_color
+mix_color(const rgb_color& color, const rgb_color& other, float amount)
+{
+	rgb_color mixed = color;
+	mixed.red = (uint8)(color.red + (other.red - color.red) * amount);
+	mixed.green = (uint8)(color.green + (other.green - color.green) * amount);
+	mixed.blue = (uint8)(color.blue + (other.blue - color.blue) * amount);
+	return mixed;
+}
 
 
 // Button glyphs, from the decoration's 16 x 14 button bitmaps.
@@ -257,6 +268,21 @@ ReactionaryDecorator::UpdateColors(DesktopSettings& settings)
 	fFocusTextColor = settings.UIColor(B_WINDOW_TEXT_COLOR);
 	fNonFocusTabColor = settings.UIColor(B_WINDOW_INACTIVE_TAB_COLOR);
 	fNonFocusTextColor = settings.UIColor(B_WINDOW_INACTIVE_TEXT_COLOR);
+
+	fFrameFace = settings.UIColor(B_WINDOW_BORDER_COLOR);
+	if (fFrameFace.Brightness() < 128) {
+		fFrameLight = mix_color(fFrameFace, kLight, 0.25f);
+		fFrameShadow = mix_color(fFrameFace, kBlack, 0.4f);
+		fFrameDarkShadow = kBlack;
+		fFrameEdge = mix_color(fFrameFace, kLight, 0.12f);
+		fInactiveGradientEnd = mix_color(fFrameFace, kLight, 0.3f);
+	} else {
+		fFrameLight = kLight;
+		fFrameShadow = kShadow;
+		fFrameDarkShadow = kDarkShadow;
+		fFrameEdge = kButtonFace;
+		fInactiveGradientEnd = kInactiveGradientEnd;
+	}
 }
 
 
@@ -373,21 +399,21 @@ ReactionaryDecorator::_DrawFrame(BRect rect)
 	if (fTopTab->look == B_BORDERED_WINDOW_LOOK) {
 		// Menus and tool tips. A menu's raised edge is two pixels: this
 		// outer one, and the inner one the control look draws.
-		_DrawBevel(fBorderRect, kButtonFace, kDarkShadow);
+		_DrawBevel(fBorderRect, fFrameEdge, fFrameDarkShadow);
 		return;
 	}
 
 	BRect outer(fBorderRect);
-	_DrawBevel(outer, kFrameFace, kDarkShadow);
+	_DrawBevel(outer, fFrameFace, fFrameDarkShadow);
 	outer.InsetBy(1, 1);
-	_DrawBevel(outer, kLight, kShadow);
+	_DrawBevel(outer, fFrameLight, fFrameShadow);
 	outer.InsetBy(1, 1);
 
 	BRegion face(outer);
 	face.Exclude(fFrame);
 	if (fTitleBarRect.IsValid())
 		face.Exclude(fTitleBarRect);
-	fDrawingEngine->FillRegion(face, kFrameFace);
+	fDrawingEngine->FillRegion(face, fFrameFace);
 
 	if (_HasResizeGrip())
 		_DrawResizeGrip(rect);
@@ -421,13 +447,13 @@ ReactionaryDecorator::_DrawTab(Decorator::Tab* tab, BRect invalid)
 	BRect bar(tabRect);
 	if (tab != fTabList.ItemAt(0)) {
 		fDrawingEngine->StrokeLine(bar.LeftTop(), bar.LeftBottom(),
-			kFrameFace);
+			fFrameFace);
 		bar.left++;
 	}
 
 	BGradientLinear gradient;
 	gradient.AddColor(focus ? fFocusTabColor : fNonFocusTabColor, 0);
-	gradient.AddColor(focus ? kActiveGradientEnd : kInactiveGradientEnd, 255);
+	gradient.AddColor(focus ? kActiveGradientEnd : fInactiveGradientEnd, 255);
 	gradient.SetStart(bar.LeftTop());
 	gradient.SetEnd(bar.RightTop());
 	fDrawingEngine->FillRect(bar & invalid, gradient);
@@ -889,7 +915,7 @@ ReactionaryDecorator::_DrawResizeGrip(BRect invalid)
 	if (!grip.IsValid() || !invalid.Intersects(grip))
 		return;
 
-	fDrawingEngine->FillRect(grip, kButtonFace);
+	fDrawingEngine->FillRect(grip, fFrameEdge);
 
 	const int32 size = (int32)std::min(grip.Width(), grip.Height()) + 1;
 	for (int32 dy = 0; dy < size; dy++) {
@@ -905,7 +931,7 @@ ReactionaryDecorator::_DrawResizeGrip(BRect invalid)
 			if (!grip.Contains(point))
 				continue;
 			// counted from the corner out: grey, grey, white, a gap
-			fDrawingEngine->StrokePoint(point, phase == 2 ? kLight : kShadow);
+			fDrawingEngine->StrokePoint(point, phase == 2 ? fFrameLight : fFrameShadow);
 		}
 	}
 }

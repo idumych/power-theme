@@ -201,10 +201,10 @@ click **Build add-ons…** again.
 - **Light and dark versions**: two themes are versions of the same one if their
   `theme.settings` say so, with `variant of = Flat` and `mode = dark` (or
   `light`). Each stays a complete theme in its own folder. **Flat** (LightFlat
-  and DarkFlat) and **Haiku** (Haiku and Haiku Dark) come this way; other themes
-  stay as they are until they have both. `powertheme --mode=dark` switches the
-  theme in use, keeping the parts it was applied with and your icons, so a
-  script can run it at set times. Nothing switches by itself yet.
+  and DarkFlat), **Haiku** (Haiku and Haiku Dark) and **Reactionary ME**
+  (with Reactionary ME Dark) come this way; other themes stay as they are until
+  they have both. `powertheme --mode=dark` switches the theme in use, keeping
+  the parts it was applied with and your icons.
 - **Theme Manager themes**: themes made for
   [Theme Manager](https://github.com/HaikuArchives/HaikuThemeManager)
   (and BeOS and ZETA before it), such as the
@@ -233,8 +233,8 @@ click **Build add-ons…** again.
 
 ## Limitations
 
-- Only the light "Windows ME" variant of Reactionary is ported, so it has no
-  dark mode yet. The theme's dark and dim
+- The light "Windows ME" and dark "WinME-Dark" variants of Reactionary are
+  ported. The theme's dim
   colour schemes, cursors and wallpaper are not.
 - Icons change for file types and some folders only. Applications keep
   their own icons, which are part of them. The Trash keeps Tracker's icon
@@ -277,8 +277,8 @@ should run on (Haiku R1/beta6), against that system's own headers.
 
 ## Credits
 
-- Reactionary ME global theme, "Windows ME" window decoration and colour
-  schemes by Die4Ever (GPL 3+), forked from Reactionary Plus (phob1an),
+- Reactionary ME global theme, "Windows ME" window decoration and "Windows ME"
+  and "WinME-Dark" colour schemes by Die4Ever (GPL 3+), forked from Reactionary Plus (phob1an),
   Windows Classic hidpi (pixelocdguy) and Windows Classic colours.
 - ClassicOS 2000 icons by the ClassicOS contributors
   ([licence](https://github.com/ClassicOS-Themes/ClassicOS-2000-Icons/blob/main/LICENSE):

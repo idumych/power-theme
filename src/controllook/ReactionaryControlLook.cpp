@@ -65,6 +65,63 @@ face_color()
 }
 
 
+//! \a color with \a amount (0 to 1) of \a other mixed in.
+static rgb_color
+mix_color(const rgb_color& color, const rgb_color& other, float amount)
+{
+	rgb_color mixed = color;
+	mixed.red = (uint8)(color.red + (other.red - color.red) * amount);
+	mixed.green = (uint8)(color.green + (other.green - color.green) * amount);
+	mixed.blue = (uint8)(color.blue + (other.blue - color.blue) * amount);
+	return mixed;
+}
+
+
+//! Light text on a darker panel: Windows' fixed greys won't do there.
+static bool
+is_dark()
+{
+	return ui_color(B_PANEL_TEXT_COLOR).Brightness()
+		> face_color().Brightness();
+}
+
+
+static rgb_color
+highlight_color()
+{
+	return is_dark() ? mix_color(face_color(), kWhite, 0.25f) : kWhite;
+}
+
+
+static rgb_color
+shadow_color()
+{
+	return is_dark() ? mix_color(face_color(), kBlack, 0.4f) : kShadow;
+}
+
+
+static rgb_color
+dark_shadow_color()
+{
+	return is_dark() ? kBlack : kDarkShadow;
+}
+
+
+//! The inside of check boxes and radio buttons.
+static rgb_color
+field_color()
+{
+	return ui_color(B_CONTROL_BACKGROUND_COLOR);
+}
+
+
+static rgb_color
+focus_color()
+{
+	return ui_color(B_CONTROL_TEXT_COLOR);
+}
+
+
 /*!	\a color, or the view's low colour (failing that, the face) where a
 	control passes its transparent view colour.
 */
@@ -145,8 +202,8 @@ static void
 draw_raised(BView* view, BRect& rect, const rgb_color& face,
 	uint32 borders = BControlLook::B_ALL_BORDERS)
 {
-	draw_bevel(view, rect, kWhite, kDarkShadow, borders);
-	draw_bevel(view, rect, face, kShadow, borders);
+	draw_bevel(view, rect, highlight_color(), dark_shadow_color(), borders);
+	draw_bevel(view, rect, face, shadow_color(), borders);
 }
 
 
@@ -157,8 +214,8 @@ static void
 draw_raised_window(BView* view, BRect& rect, const rgb_color& face,
 	uint32 borders = BControlLook::B_ALL_BORDERS)
 {
-	draw_bevel(view, rect, face, kDarkShadow, borders);
-	draw_bevel(view, rect, kWhite, kShadow, borders);
+	draw_bevel(view, rect, face, dark_shadow_color(), borders);
+	draw_bevel(view, rect, highlight_color(), shadow_color(), borders);
 }
 
 
@@ -167,8 +224,8 @@ static void
 draw_sunken(BView* view, BRect& rect, const rgb_color& face,
 	uint32 borders = BControlLook::B_ALL_BORDERS)
 {
-	draw_bevel(view, rect, kShadow, kWhite, borders);
-	draw_bevel(view, rect, kDarkShadow, face, borders);
+	draw_bevel(view, rect, shadow_color(), highlight_color(), borders);
+	draw_bevel(view, rect, dark_shadow_color(), face, borders);
 }
 
 
@@ -251,8 +308,8 @@ draw_control_arrow(BView* view, BRect rect, uint32 direction,
 	const rgb_color& color, bool disabled, int32 depth = 0)
 {
 	if (disabled) {
-		draw_arrow(view, rect.OffsetByCopy(1, 1), direction, kWhite, depth);
-		draw_arrow(view, rect, direction, kShadow, depth);
+		draw_arrow(view, rect.OffsetByCopy(1, 1), direction, highlight_color(), depth);
+		draw_arrow(view, rect, direction, shadow_color(), depth);
 	} else
 		draw_arrow(view, rect, direction, color, depth);
 }
@@ -434,7 +491,7 @@ ReactionaryControlLook::DrawMenuFieldBackground(BView* view, BRect& rect,
 		return;
 
 	view->PushState();
-	view->SetHighColor((flags & B_DISABLED) != 0 ? face_color() : kWhite);
+	view->SetHighColor((flags & B_DISABLED) != 0 ? face_color() : field_color());
 	view->FillRect(rect);
 	view->PopState();
 	inset_by_borders(rect, 1, borders);
@@ -469,7 +526,7 @@ ReactionaryControlLook::DrawMenuBackground(BView* view, BRect& rect,
 	// Menus are raised like windows, in two pixels: the window decorator
 	// draws the outer one round the menu's window, this is the inner one.
 	view->PushState();
-	draw_bevel(view, rect, kWhite, kShadow, borders);
+	draw_bevel(view, rect, highlight_color(), shadow_color(), borders);
 	view->SetHighColor(base);
 	view->FillRect(rect);
 	view->PopState();
@@ -491,7 +548,7 @@ ReactionaryControlLook::DrawMenuItemBackground(BView* view, BRect& rect,
 		// so they are set to the menu's normal ones on purpose.
 		const rgb_color face = ui_color(B_MENU_BACKGROUND_COLOR);
 		BRect inner(rect);
-		draw_bevel(view, inner, kShadow, kWhite);
+		draw_bevel(view, inner, shadow_color(), highlight_color());
 		view->SetHighColor(face);
 		view->FillRect(inner);
 		view->SetLowColor(face);
@@ -525,7 +582,7 @@ ReactionaryControlLook::DrawStatusBar(BView* view, BRect& rect,
 	// Windows' progress bar: a thin sunken edge, and blocks of the bar
 	// colour with gaps of the face colour between them.
 	view->PushState();
-	draw_bevel(view, rect, kShadow, kWhite);
+	draw_bevel(view, rect, shadow_color(), highlight_color());
 	view->SetHighColor(base);
 	view->FillRect(rect);
 
@@ -559,14 +616,14 @@ ReactionaryControlLook::DrawCheckBox(BView* view, BRect& rect,
 
 	view->PushState();
 	draw_sunken(view, rect, face_color());
-	view->SetHighColor(disabled || clicked ? face_color() : kWhite);
+	view->SetHighColor(disabled || clicked ? face_color() : field_color());
 	view->FillRect(rect);
 
 	if ((flags & (B_ACTIVATED | B_PARTIALLY_ACTIVATED)) != 0) {
 		// a partly set box shows a grey mark
 		rgb_color mark = ui_color(B_CONTROL_TEXT_COLOR);
 		if (disabled || (flags & B_PARTIALLY_ACTIVATED) != 0)
-			mark = kShadow;
+			mark = shadow_color();
 
 		const float size = std::min(rect.Width(), rect.Height()) + 1;
 		const float pixel = std::max(1.0f, floorf(size / 9));
@@ -631,11 +688,11 @@ ReactionaryControlLook::DrawRadioButton(BView* view, BRect& rect,
 			const bool upper = x + y <= 10;
 			rgb_color color;
 			if (!shape[1][y][x])
-				color = upper ? kShadow : kWhite;
+				color = upper ? shadow_color() : highlight_color();
 			else if (!shape[2][y][x])
-				color = upper ? kDarkShadow : face;
+				color = upper ? dark_shadow_color() : face;
 			else
-				color = disabled || clicked ? face : kWhite;
+				color = disabled || clicked ? face : field_color();
 			view->SetHighColor(color);
 			fill_pixel(view, origin.x + x * pixel, origin.y + y * pixel, pixel);
 		}
@@ -643,7 +700,7 @@ ReactionaryControlLook::DrawRadioButton(BView* view, BRect& rect,
 
 	if ((flags & (B_ACTIVATED | B_PARTIALLY_ACTIVATED)) != 0) {
 		// a round 4 x 4 dot
-		view->SetHighColor(disabled ? kShadow : ui_color(B_CONTROL_TEXT_COLOR));
+		view->SetHighColor(disabled ? shadow_color() : ui_color(B_CONTROL_TEXT_COLOR));
 		for (int32 y = 4; y < 8; y++) {
 			for (int32 x = 4; x < 8; x++) {
 				if ((x == 4 || x == 7) && (y == 4 || y == 7))
@@ -688,13 +745,13 @@ ReactionaryControlLook::DrawScrollBarBorder(BView* view, BRect rect,
 			line.InsetBy(1, 1);
 
 		if (fabsf(frame.left - line.left) < 0.5f)
-			left = fancy ? kDarkShadow : kShadow;
+			left = fancy ? dark_shadow_color() : shadow_color();
 		if (fabsf(frame.top - line.top) < 0.5f)
-			top = fancy ? kDarkShadow : kShadow;
+			top = fancy ? dark_shadow_color() : shadow_color();
 		if (fabsf(frame.right - line.right) < 0.5f)
-			right = fancy ? base : kShadow;
+			right = fancy ? base : shadow_color();
 		if (fabsf(frame.bottom - line.bottom) < 0.5f)
-			bottom = fancy ? base : kShadow;
+			bottom = fancy ? base : shadow_color();
 	}
 
 	view->PushState();
@@ -724,7 +781,7 @@ ReactionaryControlLook::DrawScrollBarButton(BView* view, BRect rect,
 	BRect inner(rect);
 	if (down) {
 		// pressed: flat, with a grey edge, and the arrow moves
-		view->SetHighColor(kShadow);
+		view->SetHighColor(shadow_color());
 		view->StrokeRect(inner);
 		inner.InsetBy(1, 1);
 	} else
@@ -765,7 +822,7 @@ ReactionaryControlLook::DrawScrollBarBackground(BView* view, BRect& rect,
 	// the track: white and face pixels in a checkerboard
 	view->PushState();
 	view->SetDrawingMode(B_OP_COPY);
-	view->SetHighColor(kWhite);
+	view->SetHighColor(highlight_color());
 	view->SetLowColor(base);
 	view->FillRect(rect, B_MIXED_COLORS);
 	view->PopState();
@@ -813,7 +870,7 @@ ReactionaryControlLook::DrawScrollViewFrame(BView* view, BRect& rect,
 	if (borderStyle == B_FANCY_BORDER)
 		draw_sunken(view, rect, base, borders);
 	else if (borderStyle == B_PLAIN_BORDER)
-		draw_bevel(view, rect, kShadow, kShadow, borders);
+		draw_bevel(view, rect, shadow_color(), shadow_color(), borders);
 
 	if (horizontalScrollBarFrame.IsValid() && verticalScrollBarFrame.IsValid()
 		&& scrollCorner.IsValid()) {
@@ -907,7 +964,7 @@ ReactionaryControlLook::DrawSliderThumb(BView* view, BRect& rect,
 	view->SetHighColor(face_color());
 	view->FillRect(knob);
 	if ((flags & (B_FOCUSED | B_DISABLED)) == B_FOCUSED)
-		draw_focus_rect(view, knob.InsetByCopy(1, 1), kBlack);
+		draw_focus_rect(view, knob.InsetByCopy(1, 1), focus_color());
 	view->PopState();
 
 	rect = knob;
@@ -969,32 +1026,32 @@ ReactionaryControlLook::DrawSliderTriangle(BView* view, BRect& rect,
 	if (horizontal) {
 		const BPoint tip((frame.left + frame.right) / 2, frame.bottom);
 		view->AddLine(frame.LeftTop(), BPoint(frame.right - 1, frame.top),
-			kWhite);
-		view->AddLine(frame.LeftTop(), box.LeftBottom(), kWhite);
-		view->AddLine(box.LeftBottom(), BPoint(floorf(tip.x), tip.y), kWhite);
-		view->AddLine(frame.RightTop(), box.RightBottom(), kDarkShadow);
+			highlight_color());
+		view->AddLine(frame.LeftTop(), box.LeftBottom(), highlight_color());
+		view->AddLine(box.LeftBottom(), BPoint(floorf(tip.x), tip.y), highlight_color());
+		view->AddLine(frame.RightTop(), box.RightBottom(), dark_shadow_color());
 		view->AddLine(box.RightBottom(), BPoint(ceilf(tip.x), tip.y),
-			kDarkShadow);
+			dark_shadow_color());
 		view->AddLine(BPoint(frame.right - 1, frame.top + 1),
-			BPoint(box.right - 1, box.bottom), kShadow);
+			BPoint(box.right - 1, box.bottom), shadow_color());
 		view->AddLine(BPoint(box.right - 1, box.bottom + 1),
-			BPoint(ceilf(tip.x), tip.y - 1), kShadow);
+			BPoint(ceilf(tip.x), tip.y - 1), shadow_color());
 	} else {
 		const BPoint tip(frame.left, (frame.top + frame.bottom) / 2);
 		view->AddLine(box.LeftTop(), BPoint(frame.right - 1, frame.top),
-			kWhite);
-		view->AddLine(box.LeftTop(), BPoint(tip.x, floorf(tip.y)), kWhite);
-		view->AddLine(frame.RightTop(), frame.RightBottom(), kDarkShadow);
-		view->AddLine(box.LeftBottom(), frame.RightBottom(), kDarkShadow);
+			highlight_color());
+		view->AddLine(box.LeftTop(), BPoint(tip.x, floorf(tip.y)), highlight_color());
+		view->AddLine(frame.RightTop(), frame.RightBottom(), dark_shadow_color());
+		view->AddLine(box.LeftBottom(), frame.RightBottom(), dark_shadow_color());
 		view->AddLine(box.LeftBottom(), BPoint(tip.x, ceilf(tip.y)),
-			kDarkShadow);
+			dark_shadow_color());
 		view->AddLine(BPoint(box.left + 1, box.bottom - 1),
-			BPoint(frame.right - 1, frame.bottom - 1), kShadow);
+			BPoint(frame.right - 1, frame.bottom - 1), shadow_color());
 	}
 	view->EndLineArray();
 
 	if ((flags & (B_FOCUSED | B_DISABLED)) == B_FOCUSED)
-		draw_focus_rect(view, box.InsetByCopy(2, 2), kBlack);
+		draw_focus_rect(view, box.InsetByCopy(2, 2), focus_color());
 
 	view->PopState();
 }
@@ -1020,19 +1077,19 @@ ReactionaryControlLook::DrawTabFrame(BView* view, BRect& rect,
 		switch (side) {
 			default:
 			case BTabView::kTopSide:
-				view->SetHighColor(kWhite);
+				view->SetHighColor(highlight_color());
 				view->StrokeLine(rect.LeftBottom(), rect.RightBottom());
 				break;
 			case BTabView::kBottomSide:
-				view->SetHighColor(kDarkShadow);
+				view->SetHighColor(dark_shadow_color());
 				view->StrokeLine(rect.LeftTop(), rect.RightTop());
 				break;
 			case BTabView::kLeftSide:
-				view->SetHighColor(kWhite);
+				view->SetHighColor(highlight_color());
 				view->StrokeLine(rect.RightTop(), rect.RightBottom());
 				break;
 			case BTabView::kRightSide:
-				view->SetHighColor(kDarkShadow);
+				view->SetHighColor(dark_shadow_color());
 				view->StrokeLine(rect.LeftTop(), rect.LeftBottom());
 				break;
 		}
@@ -1082,7 +1139,7 @@ ReactionaryControlLook::DrawBorder(BView* view, BRect& rect,
 	} else if (borderStyle == B_FANCY_BORDER)
 		draw_sunken(view, rect, base, borders);
 	else
-		draw_bevel(view, rect, kShadow, kShadow, borders);
+		draw_bevel(view, rect, shadow_color(), shadow_color(), borders);
 	view->PopState();
 }
 
@@ -1093,7 +1150,7 @@ ReactionaryControlLook::DrawRaisedBorder(BView* view, BRect& rect,
 	uint32 borders)
 {
 	view->PushState();
-	draw_bevel(view, rect, kWhite, kShadow, borders);
+	draw_bevel(view, rect, highlight_color(), shadow_color(), borders);
 	view->PopState();
 }
 
@@ -1108,11 +1165,11 @@ ReactionaryControlLook::DrawGroupFrame(BView* view, BRect& rect,
 	const rgb_color base = solid(_base, view);
 	view->PushState();
 	if (dynamic_cast<BTabView*>(view) != NULL) {
-		draw_bevel(view, rect, kWhite, kDarkShadow, borders);
-		draw_bevel(view, rect, base, kShadow, borders);
+		draw_bevel(view, rect, highlight_color(), dark_shadow_color(), borders);
+		draw_bevel(view, rect, base, shadow_color(), borders);
 	} else {
-		draw_bevel(view, rect, kShadow, kWhite, borders);
-		draw_bevel(view, rect, kWhite, kShadow, borders);
+		draw_bevel(view, rect, shadow_color(), highlight_color(), borders);
+		draw_bevel(view, rect, highlight_color(), shadow_color(), borders);
 	}
 	draw_bevel(view, rect, base, base, borders);
 	view->PopState();
@@ -1131,7 +1188,7 @@ ReactionaryControlLook::DrawTextControlBorder(BView* view, BRect& rect,
 	view->PushState();
 	if ((flags & B_DISABLED) == 0 && (flags & B_INVALID) != 0) {
 		const rgb_color failure = ui_color(B_FAILURE_COLOR);
-		draw_bevel(view, rect, kShadow, kWhite, borders);
+		draw_bevel(view, rect, shadow_color(), highlight_color(), borders);
 		draw_bevel(view, rect, failure, failure, borders);
 	} else
 		draw_sunken(view, rect, base, borders);
@@ -1162,9 +1219,9 @@ ReactionaryControlLook::DrawLabel(BView* view, const char* label,
 
 	view->PushState();
 	view->SetDrawingMode(B_OP_OVER);
-	view->SetHighColor(kWhite);
+	view->SetHighColor(highlight_color());
 	view->DrawString(label, BPoint(where.x + 1, where.y + 1));
-	view->SetHighColor(kShadow);
+	view->SetHighColor(shadow_color());
 	view->DrawString(label, where);
 	view->PopState();
 }
@@ -1239,9 +1296,9 @@ ReactionaryControlLook::_DrawButtonFrame(BView* view, BRect& rect,
 		if (is_flat(flags))
 			draw_bevel(view, edge, behind, behind, borders);
 		else if (pressed)
-			draw_bevel(view, edge, kShadow, kWhite, borders);
+			draw_bevel(view, edge, shadow_color(), highlight_color(), borders);
 		else
-			draw_bevel(view, edge, kWhite, kShadow, borders);
+			draw_bevel(view, edge, highlight_color(), shadow_color(), borders);
 		draw_bevel(view, edge, behind, behind, borders);
 		view->PopState();
 		inset_by_borders(rect, 2, borders);
@@ -1257,7 +1314,7 @@ ReactionaryControlLook::_DrawButtonFrame(BView* view, BRect& rect,
 	if (pressed) {
 		if ((flags & B_DEFAULT_BUTTON) == 0)
 			draw_bevel(view, rect, kBlack, kBlack, borders);
-		draw_bevel(view, rect, kShadow, kShadow, borders);
+		draw_bevel(view, rect, shadow_color(), shadow_color(), borders);
 		if ((flags & B_DEFAULT_BUTTON) != 0)
 			draw_bevel(view, rect, face, face, borders);
 	} else
@@ -1328,7 +1385,7 @@ ReactionaryControlLook::_DrawMenuFieldBackground(BView* view, BRect& rect,
 	const rgb_color face = face_color();
 
 	view->PushState();
-	view->SetHighColor(disabled ? face : kWhite);
+	view->SetHighColor(disabled ? face : field_color());
 	view->FillRect(rect);
 
 	BRect text(rect);
@@ -1416,26 +1473,26 @@ ReactionaryControlLook::_DrawTab(BView* view, BRect& rect,
 	view->FillRect(area(1, top + 1, length - 2, bottom));
 
 	// the lit side and the rounded corner next to it
-	view->SetHighColor(kWhite);
+	view->SetHighColor(highlight_color());
 	view->FillRect(area(0, top + 2, 0, bottom));
 	view->FillRect(area(1, top + 1, 1, top + 1));
 
 	// the outer edge
 	if (outerLit) {
-		view->SetHighColor(kWhite);
+		view->SetHighColor(highlight_color());
 		view->FillRect(area(2, top, length - 2, top));
 	} else {
-		view->SetHighColor(kDarkShadow);
+		view->SetHighColor(dark_shadow_color());
 		view->FillRect(area(2, top, length - 2, top));
-		view->SetHighColor(kShadow);
+		view->SetHighColor(shadow_color());
 		view->FillRect(area(2, top + 1, length - 2, top + 1));
 	}
 
 	// the shaded side
-	view->SetHighColor(kDarkShadow);
+	view->SetHighColor(dark_shadow_color());
 	view->FillRect(area(length, top + 2, length, bottom));
 	view->FillRect(area(length - 1, top + 1, length - 1, top + 1));
-	view->SetHighColor(kShadow);
+	view->SetHighColor(shadow_color());
 	view->FillRect(area(length - 1, top + 2, length - 1, bottom));
 
 	view->PopState();

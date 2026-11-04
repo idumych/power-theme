@@ -3,6 +3,8 @@
 # An independent port, not affiliated with the theme's authors.
 
 name = Reactionary ME
+variant of = Reactionary ME
+mode = light
 description = Windows ME style windows and controls: grey bevelled frames, navy to light blue title bars, white sunken fields and dithered scroll bars, with the ClassicOS 2000 icons.
 decorator = Reactionary
 control look = Reactionary
