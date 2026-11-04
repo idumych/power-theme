@@ -170,6 +170,7 @@ powertheme --mode=toggle</pre>
 			<p>Haiku Dark uses dark versions of Haiku's own icons, with the same shapes. Each colour moves onto a hand-picked ramp with deep shadows and bright highlights, folders turn a rich burnt orange, and a thin white outline lifts each icon off a dark background. Power Theme recolours the running system's icons when it applies them, so new file types and system updates are covered, and Revert restores the originals exactly.</p>
 			<figure style="margin:18px 0 6px"><img src="img/dark-icons.png" width="1086" height="176" alt="A row of Haiku's icons above the same icons in the dark palette, on a dark grey background." loading="lazy" style="border:1px solid var(--line)"><figcaption>Haiku's icons, and the dark versions below them.</figcaption></figure>
 			<figure style="margin:18px 0 6px"><img src="img/dark-tracker.png" width="810" height="260" alt="A Tracker window under Haiku Dark showing folders, documents and packages in the dark palette." loading="lazy" style="border:1px solid var(--line)"><figcaption>In Tracker under Haiku Dark.</figcaption></figure>
+			<p>The outlines may look a little jagged in these screenshots, which are low-resolution captures that your browser may scale. The icons are vector graphics, so on a running system they're drawn smoothly at whatever size they're shown.</p>
 			<p>Dark icon themes from elsewhere, such as Breeze Dark, can be installed and chosen too. Power Theme now reads the stylesheet colours they rely on, which its SVG renderer used to ignore.</p>
 			<p class="status"><b>On <a href="https://github.com/idumych/power-theme">Power Theme's main branch</a>,</b> not in a release yet.</p>
 		</div>
@@ -266,7 +267,7 @@ powertheme --mode=toggle</pre>
 				<li>None of it has run on real hardware.</li>
 				<li>Until the Tracker changes land, open windows show some new icons only after Tracker restarts.</li>
 				<li>Application icons don't change at all, as they're part of the applications, so they keep their original colours next to the dark icons.</li>
-				<li>Tracker crashed in its Attributes menu code in 2 of 12 tests that restarted it and then resized a window by script, with Haiku's icons and the dark ones alike, and in none of 12 without the resize. It looks like a timing bug in Tracker, but that isn't confirmed.</li>
+				<li>Tracker sometimes crashes in its Attributes menu code when a script resizes a window just after a restart, with Haiku's icons or the dark ones, and with or without the Tracker changes. The cause is unknown.</li>
 				<li>ZSnake's app_server change (#280) hasn't run on a built image yet, and one crash of a test Deskbar on closing its menu was seen once.</li>
 								<li>While a schedule is on, its background process appears as a second Power Theme entry in the Deskbar.</li>
 				<li>Switching modes in Reactionary ME can leave small marks in title bars until they next redraw. The Haiku theme's decorator didn't show this.</li>
