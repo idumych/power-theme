@@ -53,6 +53,16 @@ These pictures are from a Renku OS build with the pending changes below, which i
 why the windows change in place and the Deskbar logo is light. The test app at the
 top left of the first pictures shows how an application can follow the mode.
 
+## BeOS-style tabs
+
+![Reactionary ME with BeOS-style tabs](docs/screenshots/beos-tabs.png)
+
+Window borders that can draw one can have a BeOS-style tab instead of a title bar
+across the window, whatever the theme. It's as wide as the title, with close on the
+left and zoom on the right, and shift-dragging it slides it along the window. So far
+that's Reactionary's borders; turn it on with **BeOS-style tabs** in the window, or
+`powertheme --beos-tabs=on`. Run **Build add-ons…** after updating to get it.
+
 ## What needs pending Renku OS changes
 
 Power Theme works without these changes, including Haiku Dark, its icons and the
