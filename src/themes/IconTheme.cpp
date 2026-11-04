@@ -6,12 +6,15 @@
  *
  * SVG icons are drawn with nanosvg (third_party/nanosvg), which knows no
  * filters: elements with one (usually a blurred shadow) are left out
- * rather than drawn unblurred.
+ * rather than drawn unblurred. It knows no stylesheets or "currentColor"
+ * either, which is how an icon theme's dark version usually differs from its
+ * light one, so those colours are written into the icon before it is drawn.
  */
 
 
 #include "IconTheme.h"
 
+#include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -107,6 +110,105 @@ strip_filters(BString& svg)
 }
 
 
+/*!	The value of the "color" property or attribute in \a text, which may be a
+	tag or a stylesheet rule. Others that end the same, such as "stop-color",
+	don't count, and neither does "currentColor" itself.
+*/
+static BString
+color_property(const BString& text)
+{
+	for (int32 at = text.FindFirst("color"); at >= 0;
+			at = text.FindFirst("color", at + 5)) {
+		const char before = at > 0 ? text[at - 1] : ' ';
+		if (isalnum(before) || before == '-' || before == '_')
+			continue;
+
+		int32 value = at + 5;
+		while (value < text.Length() && isspace(text[value]))
+			value++;
+		if (value >= text.Length()
+			|| (text[value] != ':' && text[value] != '='))
+			continue;
+		value++;
+		while (value < text.Length()
+			&& (isspace(text[value]) || text[value] == '"'))
+			value++;
+
+		int32 end = value;
+		while (end < text.Length() && (isalnum(text[end]) || text[end] == '#'))
+			end++;
+		BString color;
+		text.CopyInto(color, value, end - value);
+		if (!color.IsEmpty() && color.ICompare("currentColor") != 0)
+			return color;
+	}
+	return "";
+}
+
+
+//!	The colour the stylesheet in \a svg gives the class \a name, if any.
+static BString
+stylesheet_color(const BString& svg, const BString& name)
+{
+	const int32 rule = svg.FindFirst(BString(".") << name);
+	if (rule < 0)
+		return "";
+	const int32 open = svg.FindFirst('{', rule);
+	const int32 close = open >= 0 ? svg.FindFirst('}', open) : -1;
+	if (close < 0)
+		return "";
+	BString body;
+	svg.CopyInto(body, open + 1, close - open - 1);
+	return color_property(body);
+}
+
+
+/*!	Writes out "currentColor": the element's own colour if it has one, or that
+	of its stylesheet class. Freedesktop icon themes use the stylesheet's
+	ColorScheme-Text and others of the kind to tell light from dark.
+*/
+static void
+resolve_current_color(BString& svg)
+{
+	int32 start = 0;
+	while ((start = svg.FindFirst('<', start)) >= 0) {
+		int32 end = svg.FindFirst('>', start);
+		if (end < 0)
+			break;
+		BString tag;
+		svg.CopyInto(tag, start, end - start + 1);
+		if (tag.FindFirst("currentColor") < 0) {
+			start = end + 1;
+			continue;
+		}
+
+		BString color = color_property(tag);
+		const int32 classAt = tag.FindFirst("ColorScheme-");
+		if (color.IsEmpty() && classAt >= 0) {
+			int32 classEnd = classAt;
+			while (classEnd < tag.Length()
+				&& (isalnum(tag[classEnd]) || tag[classEnd] == '-'))
+				classEnd++;
+			BString name;
+			tag.CopyInto(name, classAt, classEnd - classAt);
+			color = stylesheet_color(svg, name);
+		}
+		// inherited from a group, as far as can be told without a tree
+		if (color.IsEmpty())
+			color = stylesheet_color(svg, "ColorScheme-Text");
+		if (color.IsEmpty()) {
+			start = end + 1;
+			continue;
+		}
+
+		tag.ReplaceAll("currentColor", color);
+		svg.Remove(start, end - start + 1);
+		svg.Insert(tag, start);
+		start += tag.Length();
+	}
+}
+
+
 static bool
 load_svg(const char* path, int size, IconImage& image)
 {
@@ -121,6 +223,7 @@ load_svg(const char* path, int size, IconImage& image)
 	ssize_t bytesRead = file.Read(buffer, fileSize);
 	text.UnlockBuffer(bytesRead > 0 ? bytesRead : 0);
 	strip_filters(text);
+	resolve_current_color(text);
 
 	// nanosvg parses in place
 	char* copy = strdup(text.String());
