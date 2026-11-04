@@ -104,7 +104,7 @@ footer { border-top: 1px solid var(--line); padding: 24px 0 48px; color: var(--m
 
 	<div class="compare" id="compare">
 		<img src="img/haiku-light.png" width="1024" height="768" alt="Power Theme, a test app and the Deskbar in the light Haiku theme.">
-		<img class="over" src="img/haiku-dark.png" width="1024" height="768" alt="The same windows in the black and yellow Haiku Dark theme, with a dark icon theme.">
+		<img class="over" src="img/haiku-dark.png" width="1024" height="768" alt="The same windows in the black and yellow Haiku Dark theme, with the dark Haiku icons.">
 		<div class="bar"></div>
 		<span class="tag l">Haiku Dark</span>
 		<span class="tag r">Haiku</span>
@@ -154,7 +154,7 @@ powertheme --mode=toggle</pre>
 			<p>Pick a time for light and a time for dark, and the theme in use follows them every day. A computer started at night comes up dark, and a theme you switch by hand stays until the next scheduled time.</p>
 			<div class="pair">
 				<figure><img src="img/controls-light.png" width="388" height="265" alt="Mode, Light icons, the parts of a theme and the daily schedule, in the light theme." loading="lazy"><figcaption>The new controls in Haiku.</figcaption></figure>
-				<figure><img src="img/controls-dark.png" width="388" height="265" alt="The same controls in Haiku Dark, with Breeze Dark as the dark icons." loading="lazy"><figcaption>In Haiku Dark, with Breeze Dark standing in for its icons.</figcaption></figure>
+				<figure><img src="img/controls-dark.png" width="388" height="265" alt="The same controls in Haiku Dark, with the dark Haiku icons." loading="lazy"><figcaption>In Haiku Dark, with its dark icons.</figcaption></figure>
 			</div>
 <pre>powertheme --schedule=07:00,19:00</pre>
 			<p class="status"><b>On <a href="https://github.com/idumych/power-theme">Power Theme's main branch</a>,</b> not in a release yet.</p>
@@ -165,16 +165,13 @@ powertheme --mode=toggle</pre>
 		<h2>Dark icons</h2>
 		<div class="sheet">
 			<p>Each version of a theme can have its own icons, chosen in the window or from the command line, and a mode switch brings them along. Nothing changes unless you've applied icons with a theme, so icons you set separately stay where they are.</p>
-<pre>powertheme --light-icons=haiku --dark-icons=breeze-dark</pre>
-			<p>Making this work uncovered a catch. Linux icon themes usually tell light from dark with a small stylesheet and <code>currentColor</code>, which Power Theme's SVG renderer doesn't read, so both versions came out identical. Power Theme now writes those colours into each icon before drawing it. Before the fix, none of the roughly 200 icons differed between Breeze and Breeze Dark; now 8 do, including folders, programs and volumes.</p>
-			<p>That small number is the honest picture: dark icon themes mostly change their one-colour icons, so colourful folders and documents can look the same in both.</p>
-			<p><b>Breeze Dark is a placeholder.</b> It comes with Power Theme today as a proof of concept, and themes don't use it unless you pick it.</p>
-			<p class="status"><b>On <a href="https://github.com/idumych/power-theme">Power Theme's main branch</a>,</b> not in a release yet.</p>
+<pre>powertheme --light-icons=haiku --dark-icons=haiku-dark</pre>
 			<h3>Haiku icons (dark)</h3>
-			<p>This is what replaces it: dark versions of Haiku's own icons, with the same shapes. Each colour moves onto a hand-picked ramp with deep shadows and bright highlights, folders turn a rich burnt orange, and a thin white outline lifts each icon off a dark background. Power Theme recolours the running system's icons when it applies them, so new file types and system updates are covered, and Revert restores the originals exactly.</p>
+			<p>Haiku Dark uses dark versions of Haiku's own icons, with the same shapes. Each colour moves onto a hand-picked ramp with deep shadows and bright highlights, folders turn a rich burnt orange, and a thin white outline lifts each icon off a dark background. Power Theme recolours the running system's icons when it applies them, so new file types and system updates are covered, and Revert restores the originals exactly.</p>
 			<figure style="margin:18px 0 6px"><img src="img/dark-icons.png" width="1086" height="176" alt="A row of Haiku's icons above the same icons in the dark palette, on a dark grey background." loading="lazy" style="border:1px solid var(--line)"><figcaption>Haiku's icons, and the dark versions below them.</figcaption></figure>
 			<figure style="margin:18px 0 6px"><img src="img/dark-tracker.png" width="810" height="260" alt="A Tracker window under Haiku Dark showing folders, documents and packages in the dark palette." loading="lazy" style="border:1px solid var(--line)"><figcaption>In Tracker under Haiku Dark.</figcaption></figure>
-			<p class="status"><b>Built and tested, not merged yet.</b></p>
+			<p>Dark icon themes from elsewhere, such as Breeze Dark, can be installed and chosen too. Power Theme now reads the stylesheet colours they rely on, which its SVG renderer used to ignore.</p>
+			<p class="status"><b>On <a href="https://github.com/idumych/power-theme">Power Theme's main branch</a>,</b> not in a release yet.</p>
 		</div>
 	</section>
 
@@ -267,7 +264,8 @@ powertheme --mode=toggle</pre>
 			<ul>
 				<li>Nothing here is in a release, and the Renku changes are awaiting review.</li>
 				<li>None of it has run on real hardware.</li>
-				<li>Until the Tracker changes land, open windows show some new icons only after Tracker restarts. Application icons don't change at all, as they're part of the applications.</li>
+				<li>Until the Tracker changes land, open windows show some new icons only after Tracker restarts.</li>
+				<li>Application icons don't change at all, as they're part of the applications, so they keep their original colours next to the dark icons.</li>
 				<li>Tracker crashed in its Attributes menu code in 2 of 12 tests that restarted it and then resized a window by script, with Haiku's icons and the dark ones alike, and in none of 12 without the resize. It looks like a timing bug in Tracker, but that isn't confirmed.</li>
 				<li>ZSnake's app_server change (#280) hasn't run on a built image yet, and one crash of a test Deskbar on closing its menu was seen once.</li>
 								<li>While a schedule is on, its background process appears as a second Power Theme entry in the Deskbar.</li>
@@ -280,7 +278,7 @@ powertheme --mode=toggle</pre>
 
 	<footer>
 		<p>By <a href="https://github.com/idumych">idumych</a>, built with <a href="https://claude.com/claude-code">Claude Code</a>. See <a href="https://github.com/idumych/power-theme">Power Theme</a> and <a href="https://github.com/RenkuOS/Source">Renku OS</a>.</p>
-		<p>Haiku Dark uses DarkFlat's colours from haiku_darkstyle by unarix. The dark icons shown are Breeze Dark, from KDE (LGPL), included as a placeholder. This is an independent project, not affiliated with or endorsed by the Haiku project.</p>
+		<p>Haiku Dark uses DarkFlat's colours from haiku_darkstyle by unarix. This is an independent project, not affiliated with or endorsed by the Haiku project.</p>
 	</footer>
 </div>
 <script>
