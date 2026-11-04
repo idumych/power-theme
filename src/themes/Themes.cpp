@@ -114,7 +114,8 @@ usage(FILE* out)
 		"                        \"keep\" to leave the icons alone. Switching modes\n"
 		"                        then changes the icons too\n"
 		"  -i, --icons=ID        use only the icon theme in folder ID;\n"
-		"                        \"haiku\" puts Haiku's own icons back\n"
+		"                        \"haiku\" puts Haiku's own icons back, and\n"
+		"                        \"haiku-dark\" uses dark versions of them\n"
 		"  -r, --revert          go back to the look from before any theme\n"
 		"  -s, --status          show what is in use\n"
 		"  -w, --show=NAME       show what applying the theme NAME would do\n"
@@ -177,6 +178,18 @@ apply_icons(const char* id)
 		revert_icons(log);
 		print_log(log);
 		printf("Haiku's own icons are back.\n");
+		return 0;
+	}
+
+	if (is_dark_haiku(id)) {
+		int32 changed;
+		status_t status = apply_dark_haiku_icons(log, changed);
+		print_log(log);
+		if (status != B_OK)
+			return 1;
+		printf("Dark versions of Haiku's icons set on %" B_PRId32 " file types "
+			"and folders. Folders show theirs after Tracker restarts "
+			"(powertheme --restart-tracker).\n", changed);
 		return 0;
 	}
 
@@ -308,7 +321,7 @@ set_mode_icons(theme_mode mode, const char* id)
 	}
 
 	const bool keep = strcasecmp(id, "keep") == 0;
-	if (!keep && !is_haiku(id)) {
+	if (!keep && !is_haiku(id) && !is_dark_haiku(id)) {
 		IconTheme* icons = load_icon_theme(id);
 		if (icons == NULL) {
 			fprintf(stderr, "powertheme: the icon theme \"%s\" isn't "
@@ -506,7 +519,8 @@ command_line(int argc, char** argv)
 		} else
 			printf("schedule: off\n");
 		printf("icons: %s\n", currentIcons.IsEmpty()
-			? "(Haiku's own)" : currentIcons.String());
+			? "(Haiku's own)" : is_dark_haiku(currentIcons)
+				? "(dark versions of Haiku's)" : currentIcons.String());
 		ThemeList themes;
 		find_themes(themes);
 		const Theme* current = find_theme(themes, currentTheme);

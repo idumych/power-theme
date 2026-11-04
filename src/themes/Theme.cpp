@@ -55,6 +55,8 @@ static const char* kBackgroundImageSet = "be:bgndimginfoset";
 static const char* kCurrentName = "current";
 static const char* kThemeIconsName = "theme icons";
 static const char* kKeepIcons = "keep";
+// how long Tracker gets to hear of new icons
+static const bigtime_t kIconsSettleTime = 500000;
 
 // Every system colour. Not all values in between are colours, and
 // ui_color_name() complains about the others.
@@ -126,6 +128,16 @@ bool
 is_haiku(const char* value)
 {
 	return value != NULL && strcasecmp(value, "haiku") == 0;
+}
+
+
+const char* const kDarkHaikuIcons = "haiku-dark";
+
+
+bool
+is_dark_haiku(const char* value)
+{
+	return value != NULL && strcasecmp(value, kDarkHaikuIcons) == 0;
 }
 
 
@@ -676,7 +688,8 @@ Theme::Missing(BStringList* what, uint32 parts) const
 			what->Add(BString("the control look \"") << fControlLook << "\"");
 	}
 
-	if ((parts & THEME_ICONS) != 0 && !fIcons.IsEmpty() && !is_haiku(fIcons)) {
+	if ((parts & THEME_ICONS) != 0 && !fIcons.IsEmpty() && !is_haiku(fIcons)
+		&& !is_dark_haiku(fIcons)) {
 		IconTheme* icons = load_icon_theme(fIcons);
 		if (icons == NULL) {
 			missing |= THEME_ICONS;
@@ -1343,12 +1356,15 @@ apply_icons_of(const Theme& theme, BString& log)
 	if (is_haiku(wanted))
 		return revert_icons(log) == B_OK;
 
+	int32 changed;
+	if (is_dark_haiku(wanted))
+		return apply_dark_haiku_icons(log, changed) == B_OK;
+
 	IconTheme* icons = load_icon_theme(wanted);
 	if (icons == NULL) {
 		log << "The icon theme \"" << wanted << "\" isn't installed.\n";
 		return false;
 	}
-	int32 changed;
 	const status_t status = apply_icon_theme(*icons, log, changed);
 	delete icons;
 	return status == B_OK;
@@ -1399,6 +1415,16 @@ apply_mode(theme_mode mode, BString& log, BString* applied, bool* iconsChanged)
 	if (theme->Decorator() == current->Decorator())
 		available &= ~THEME_DECORATOR;
 
+	// Icons first: Tracker notes that they changed, but only shows it when it
+	// next redraws, which the new colours make it do.
+	if (icons_follow_mode()) {
+		const bool changed = apply_icons_of(*theme, log);
+		if (iconsChanged != NULL)
+			*iconsChanged = changed;
+		if (changed)
+			snooze(kIconsSettleTime);
+	}
+
 	status_t status = apply_appearance(*theme, available, log);
 	set_current_parts(parts);
 	if (status != B_OK)
@@ -1406,11 +1432,6 @@ apply_mode(theme_mode mode, BString& log, BString* applied, bool* iconsChanged)
 
 	if (applied != NULL)
 		*applied = theme->Name();
-	if (icons_follow_mode()) {
-		const bool changed = apply_icons_of(*theme, log);
-		if (iconsChanged != NULL)
-			*iconsChanged = changed;
-	}
 
 	// an open window should show what is in use now; the command line also goes
 	// by this signature, but doesn't read its messages

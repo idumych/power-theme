@@ -31,6 +31,12 @@ typedef std::function<void(float progress, const char* what)> ProgressHook;
 status_t	apply_icon_theme(const IconTheme& theme, BString& log,
 				int32& changed, const ProgressHook& progress = ProgressHook());
 
+// Sets dark versions of Haiku's own icons (see DarkIcons.h) on the file types
+// and folders that have one, leaving applications' icons, which are part of
+// them. It starts from Haiku's, so anything an icon theme set goes first.
+status_t	apply_dark_haiku_icons(BString& log, int32& changed,
+				const ProgressHook& progress = ProgressHook());
+
 // Puts back every icon changed by any icon theme.
 status_t	revert_icons(BString& log);
 

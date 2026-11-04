@@ -24,6 +24,7 @@
  * first that is installed is used. Every key is optional; what a theme leaves out stays as it is. "icons"
  * names an icon theme folder (see IconTheme.h). "control look = haiku"
  * is Haiku's built-in look, and "icons = haiku" Haiku's own icons.
+ * "icons = haiku-dark" is dark versions of them (see DarkIcons.h).
  * "wallpaper" is an image in the theme's folder (or a full path), "none"
  * for none, or "default" for the one Tracker sets up on a new system;
  * "wallpaper mode" is scaled (the default), centered, tiled or manual
@@ -284,6 +285,10 @@ status_t	find_build_script(BString& path);
 
 // whether a theme's "control look" or "icons" value means Haiku's own
 bool		is_haiku(const char* value);
+
+// what "icons" is for dark versions of Haiku's own, and whether it's that
+extern const char* const kDarkHaikuIcons;
+bool		is_dark_haiku(const char* value);
 
 // "#RRGGBB" to a colour
 bool		parse_color(const char* text, rgb_color& color);

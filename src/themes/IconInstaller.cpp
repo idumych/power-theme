@@ -23,6 +23,7 @@
 #include <Path.h>
 #include <StringList.h>
 
+#include "DarkIcons.h"
 #include "HVIFEncoder.h"
 #include "IconTheme.h"
 #include "Theme.h"
@@ -470,6 +471,116 @@ apply_icon_theme(const IconTheme& theme, BString& log, int32& changed,
 			<< theme.Name() << "\" has none for them.\n";
 	}
 	set_current(NULL, theme.ID());
+	if (progress)
+		progress(1.0f, "");
+	return B_OK;
+}
+
+
+status_t
+apply_dark_haiku_icons(BString& log, int32& changed,
+	const ProgressHook& progress)
+{
+	changed = 0;
+	status_t status = revert_icons(log);
+	if (status != B_OK)
+		return status;
+
+	std::vector<IconTarget> targets;
+	std::vector<std::vector<uint8_t> > icons;
+
+	// every type with an icon, broad ones like "image" included, as those
+	// stand in for the types with none
+	BMessage types;
+	BMimeType::GetInstalledSupertypes(&types);
+	BMimeType::GetInstalledTypes(&types);
+	const char* typeNames[] = { "super_types", "types" };
+	for (int32 n = 0; n < 2; n++) {
+		const char* name;
+		for (int32 i = 0; types.FindString(typeNames[n], i, &name) == B_OK; i++) {
+			BMimeType type(name);
+			// an application: what's shown is the icon in its file
+			entry_ref hint;
+			if (type.GetAppHint(&hint) == B_OK)
+				continue;
+
+			uint8* data = NULL;
+			size_t size = 0;
+			BString app;
+			if (type.GetIcon(&data, &size) != B_OK || data == NULL) {
+				if (!app_with_icon_for(name, app)
+					|| BMimeType(app).GetIconForType(name, &data, &size) != B_OK
+					|| data == NULL) {
+					continue;
+				}
+			}
+			std::vector<uint8_t> dark;
+			const bool made = make_dark_icon(data, size, dark);
+			delete[] data;
+			if (!made)
+				continue;
+
+			IconTarget target;
+			target.isType = true;
+			target.target = name;
+			targets.push_back(target);
+			icons.push_back(dark);
+		}
+	}
+
+	// the folders with icons of their own
+	std::vector<IconTarget> mapped;
+	status = load_icon_map(mapped, log);
+	if (status != B_OK)
+		return status;
+	for (size_t i = 0; i < mapped.size(); i++) {
+		if (mapped[i].isType)
+			continue;
+		BNode node(mapped[i].target);
+		attr_info info;
+		if (node.GetAttrInfo(kNodeIconAttribute, &info) != B_OK
+			|| info.size <= 0 || info.size >= 1024 * 1024) {
+			continue;
+		}
+		std::vector<uint8_t> data(info.size);
+		std::vector<uint8_t> dark;
+		if (node.ReadAttr(kNodeIconAttribute, info.type, 0, &data[0], info.size)
+				!= info.size
+			|| !make_dark_icon(&data[0], data.size(), dark)) {
+			continue;
+		}
+		targets.push_back(mapped[i]);
+		icons.push_back(dark);
+	}
+
+	BMessage backup;
+	for (size_t i = 0; i < targets.size(); i++) {
+		if (progress) {
+			progress(0.5f * i / targets.size(), targets[i].target.String());
+		}
+		BMessage entry;
+		record(targets[i], entry);
+		backup.AddMessage(backup_key(targets[i]), &entry);
+	}
+	status = save_backup(backup);
+	if (status != B_OK) {
+		log << "Can't save the icons in use, so none were changed: "
+			<< strerror(status) << ".\n";
+		return status;
+	}
+
+	for (size_t i = 0; i < targets.size(); i++) {
+		if (progress) {
+			progress(0.5f + 0.5f * i / targets.size(),
+				targets[i].target.String());
+		}
+		if (set_icon(targets[i], icons[i]) == B_OK)
+			changed++;
+		else
+			log << "Can't set the icon of " << targets[i].target << ".\n";
+	}
+
+	set_current(NULL, kDarkHaikuIcons);
 	if (progress)
 		progress(1.0f, "");
 	return B_OK;

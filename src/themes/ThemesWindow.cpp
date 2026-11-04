@@ -11,6 +11,7 @@
 #include <stdio.h>
 
 #include <algorithm>
+#include <vector>
 
 #include <Application.h>
 #include <Bitmap.h>
@@ -37,8 +38,10 @@
 #include <TextControl.h>
 #include <TextView.h>
 #include <TranslationUtils.h>
+#include <fs_attr.h>
 
 #include "BuildWindow.h"
+#include "DarkIcons.h"
 #include "IconInstaller.h"
 
 
@@ -59,6 +62,7 @@ enum {
 // the icons menu's first two choices
 static const char* kKeepIcons = "";
 static const char* kHaikuIcons = "-";
+static const char* kDarkIcons = "-dark";
 
 
 //! What the icons menu calls icons that theme_icons() calls \a icons.
@@ -67,6 +71,8 @@ menu_icons(const BString& icons, const IconThemeList& installed)
 {
 	if (is_haiku(icons))
 		return kHaikuIcons;
+	if (is_dark_haiku(icons))
+		return kDarkIcons;
 	for (int32 i = 0; i < installed.CountItems(); i++) {
 		if (installed.ItemAt(i)->ID() == icons)
 			return icons;
@@ -83,6 +89,8 @@ theme_icons_of(const BString& id)
 		return "keep";
 	if (id == kHaikuIcons)
 		return "haiku";
+	if (id == kDarkIcons)
+		return kDarkHaikuIcons;
 	return id;
 }
 
@@ -300,10 +308,10 @@ public:
 		Invalidate();
 	}
 
-	/*!	Haiku's own icons for the same kinds of files, from the system's
-		MIME database, which icon themes leave alone.
+	/*!	Haiku's own icons for the same kinds of files, or dark versions of
+		them, from the system's MIME database, which icon themes leave alone.
 	*/
-	void SetHaikuIcons()
+	void SetHaikuIcons(bool dark)
 	{
 		_Clear();
 		// each with a fallback: many types take their icon from their
@@ -328,9 +336,23 @@ public:
 				BString type(kTypes[i][t]);
 				BPath path(database.Path(), type.ToLower());
 				BNode node(path.Path());
-				found = node.InitCheck() == B_OK
-					&& BIconUtils::GetVectorIcon(&node, "META:ICON", bitmap)
-						== B_OK;
+				attr_info info;
+				if (node.InitCheck() != B_OK
+					|| node.GetAttrInfo("META:ICON", &info) != B_OK
+					|| info.size <= 0 || info.size >= 1024 * 1024) {
+					continue;
+				}
+				std::vector<uint8_t> data(info.size);
+				if (node.ReadAttr("META:ICON", info.type, 0, &data[0],
+						info.size) != info.size) {
+					continue;
+				}
+				std::vector<uint8_t> darkData;
+				if (dark && !make_dark_icon(&data[0], data.size(), darkData))
+					continue;
+				const std::vector<uint8_t>& icon = dark ? darkData : data;
+				found = BIconUtils::GetVectorIcon(&icon[0], icon.size(), bitmap)
+					== B_OK;
 			}
 			if (found)
 				fBitmaps.AddItem(bitmap);
@@ -402,7 +424,16 @@ ThemesWindow::_ApplyThread(void* data)
 	int32 changed = 0;
 	if (job->icons == kHaikuIcons)
 		revert_icons(log);
-	else if (job->icons != kKeepIcons) {
+	else if (job->icons == kDarkIcons) {
+		BMessenger window = job->window;
+		apply_dark_haiku_icons(log, changed,
+			[&window](float progress, const char* what) {
+				BMessage message(kMsgProgress);
+				message.AddFloat("progress", progress);
+				message.AddString("what", what);
+				window.SendMessage(&message);
+			});
+	} else if (job->icons != kKeepIcons) {
 		IconTheme* icons = load_icon_theme(job->icons);
 		if (icons == NULL)
 			log << "The icon theme \"" << job->icons << "\" isn't installed.\n";
@@ -925,6 +956,9 @@ ThemesWindow::_LoadThemes(const char* selected)
 	BMessage* haiku = new BMessage(kMsgIconsChosen);
 	haiku->AddString("id", kHaikuIcons);
 	menu->AddItem(new BMenuItem("Haiku icons", haiku));
+	BMessage* darkHaiku = new BMessage(kMsgIconsChosen);
+	darkHaiku->AddString("id", kDarkIcons);
+	menu->AddItem(new BMenuItem("Haiku icons (dark)", darkHaiku));
 	if (!fIconThemes.IsEmpty())
 		menu->AddSeparatorItem();
 	for (int32 i = 0; i < fIconThemes.CountItems(); i++) {
@@ -976,6 +1010,8 @@ ThemesWindow::_UpdateLabels()
 			label = "Keep the current icons";
 		else if (strcmp(id, kHaikuIcons) == 0)
 			label = "Haiku icons";
+		else if (strcmp(id, kDarkIcons) == 0)
+			label = "Haiku icons (dark)";
 		else {
 			for (int32 t = 0; t < fIconThemes.CountItems(); t++) {
 				if (fIconThemes.ItemAt(t)->ID() == id)
@@ -983,6 +1019,7 @@ ThemesWindow::_UpdateLabels()
 			}
 		}
 		if ((strcmp(id, kHaikuIcons) == 0 && currentIcons.IsEmpty())
+			|| (strcmp(id, kDarkIcons) == 0 && is_dark_haiku(currentIcons))
 			|| (strcmp(id, kKeepIcons) != 0 && currentIcons == id))
 			label << " (in use)";
 		item->SetLabel(label);
@@ -1192,8 +1229,8 @@ ThemesWindow::_SelectIcons(const char* id)
 		if (fIconThemes.ItemAt(i)->ID() == id)
 			theme = fIconThemes.ItemAt(i);
 	}
-	if (strcmp(id, kHaikuIcons) == 0)
-		fIconStrip->SetHaikuIcons();
+	if (strcmp(id, kHaikuIcons) == 0 || strcmp(id, kDarkIcons) == 0)
+		fIconStrip->SetHaikuIcons(strcmp(id, kDarkIcons) == 0);
 	else
 		fIconStrip->SetIconTheme(theme);
 	_UpdateButtons();
