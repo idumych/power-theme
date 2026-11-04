@@ -139,7 +139,11 @@ footer { border-top: 1px solid var(--line); padding: 24px 0 48px; color: var(--m
 	<section>
 		<h2>Light and dark versions</h2>
 		<div class="sheet">
-			<p>A theme can now say it's one version of another. The two appear as one row in Power Theme, with a <b>Mode</b> menu. Flat, Haiku and Reactionary ME come as pairs, and Haiku Dark is black and yellow, like DarkFlat.</p>
+			<p>A theme can now say it's one version of another. The two appear as one row in Power Theme, with a <b>Mode</b> menu. Flat, Haiku, Renku and Reactionary ME come as pairs. Haiku Dark is black and yellow, like DarkFlat, and Renku pairs night blue and fire orange with a new light version on washi paper.</p>
+			<div class="pair">
+				<figure><img src="img/renku-light.png" width="1024" height="768" alt="The Renku Light theme: washi paper, orange window tabs and Haiku's icons." loading="lazy"><figcaption>Renku Light, with Haiku's icons.</figcaption></figure>
+				<figure><img src="img/renku-dark.png" width="1024" height="768" alt="The Renku theme: night blue windows, orange tabs and the dark Haiku icons." loading="lazy"><figcaption>Renku, with the dark Haiku icons.</figcaption></figure>
+			</div>
 <pre>variant of = Haiku
 mode = dark
 
@@ -167,7 +171,7 @@ powertheme --mode=toggle</pre>
 			<p>Each version of a theme can have its own icons, chosen in the window or from the command line, and a mode switch brings them along. Nothing changes unless you've applied icons with a theme, so icons you set separately stay where they are.</p>
 <pre>powertheme --light-icons=haiku --dark-icons=haiku-dark</pre>
 			<h3>Haiku icons (dark)</h3>
-			<p>Haiku Dark uses dark versions of Haiku's own icons, with the same shapes. Each colour moves onto a hand-picked ramp with deep shadows and bright highlights, folders turn a rich burnt orange, and a thin, soft white outline lifts each icon off a dark background, kept even at small sizes. Power Theme recolours the running system's icons when it applies them, so new file types and system updates are covered, and Revert restores the originals exactly.</p>
+			<p>Haiku Dark and Renku use dark versions of Haiku's own icons, with the same shapes. Each colour moves onto a hand-picked ramp with deep shadows and bright highlights, folders turn a rich burnt orange, and a thin, soft white outline lifts each icon off a dark background, kept even at small sizes. Power Theme recolours the running system's icons when it applies them, so new file types and system updates are covered, and Revert restores the originals exactly.</p>
 			<figure style="margin:18px 0 6px"><img src="img/dark-icons.png" width="1086" height="176" alt="A row of Haiku's icons above the same icons in the dark palette, on a dark grey background." loading="lazy" style="border:1px solid var(--line)"><figcaption>Haiku's icons, and the dark versions below them.</figcaption></figure>
 			<figure style="margin:18px 0 6px"><img src="img/dark-tracker.png" width="810" height="260" alt="A Tracker window under Haiku Dark showing folders, documents and packages in the dark palette." loading="lazy" style="border:1px solid var(--line)"><figcaption>In Tracker under Haiku Dark.</figcaption></figure>
 			<p>Dark icon themes from elsewhere, such as Breeze Dark, can be installed and chosen too. Power Theme now reads the stylesheet colours they rely on, which its SVG renderer used to ignore.</p>
