@@ -16,6 +16,8 @@ It comes with its own looks:
   icons;
 - **Smoke** window borders and controls in the style of ZETA's;
 - **Renku**, in the colours of the Renku OS website;
+- **Haiku Dark**, a black and yellow version of Haiku's look, with dark versions
+  of Haiku's own icons;
 - and the Haiku, Gonx and four Flat themes.
 
 The Reactionary ME look is an independent, unofficial port. It is not
@@ -24,6 +26,49 @@ Reactionary, Reactionary Plus or the themes they build on, or the
 ClassicOS project. It is a new implementation drawn to match the KDE
 theme. Colours and the title bar button glyphs come from the theme's
 files; the code shares nothing with them.
+
+## Haiku Dark
+
+| | |
+|---|---|
+| ![Haiku Dark](docs/screenshots/haiku-dark.png) | ![Haiku](docs/screenshots/haiku-light.png) |
+| **Haiku Dark** | **Haiku**, one mode switch away |
+
+Haiku Dark and Haiku are the light and dark versions of one theme, so they share
+a row in Power Theme with a **Mode** menu, and can switch by the time of day.
+Haiku Dark's icons are Haiku's own, recoloured when the theme is applied: the same
+shapes, in deeper colours, with a thin soft white outline.
+
+![Haiku's icons above their dark versions](docs/screenshots/dark-icons.png)
+
+![Dark icons in Tracker under Haiku Dark](docs/screenshots/dark-tracker.png)
+
+```
+powertheme --apply=Haiku --mode=dark
+powertheme --schedule=07:00,19:00
+```
+
+These pictures are from a Renku OS build with the pending changes below, which is
+why the windows change in place and the Deskbar logo is light. The test app at the
+top left of the first pictures shows how an application can follow the mode.
+
+## What needs pending Renku OS changes
+
+Everything in Power Theme works on current Renku OS and Haiku R1/beta6, including
+Haiku Dark, its icons and the schedule. A few things only happen in place, or at
+all, with changes still in review. Power Theme checks for the first two and says
+what to do if they're missing. The
+[Power Theme: Live Themes page](https://idumych.github.io/power-theme/) shows all of
+this work, with what's finished, tested and still open.
+
+| What | Without them | Needs |
+|---|---|---|
+| Running applications change their controls | Restart them | [#284](https://github.com/RenkuOS/Source/pull/284), [#285](https://github.com/RenkuOS/Source/pull/285) |
+| Running applications change their fonts | Restart them | [#286](https://github.com/RenkuOS/Source/pull/286), [#287](https://github.com/RenkuOS/Source/pull/287) |
+| Open Tracker windows show new file type icons | Some wait for Tracker to restart | [#292](https://github.com/RenkuOS/Source/pull/292) |
+| Open Tracker windows fit a new font | Restart Tracker | [#293](https://github.com/RenkuOS/Source/pull/293), with #286 and #287 |
+| The Deskbar logo is light on dark menus | It stays navy | [#288](https://github.com/RenkuOS/Source/pull/288) |
+| Applications can ask whether the desktop is dark, such as to swap their artwork | They can't, with a standard call | [#289](https://github.com/RenkuOS/Source/pull/289) |
 
 ## Screenshots
 
@@ -261,7 +306,9 @@ click **Build add-ons…** again.
   (Tracker resets it whenever the Trash fills or empties), disks keep the
   icons their drivers give them, and alerts keep Haiku's.
 - Tracker shows the new folder icons only once it restarts: Power Theme
-  offers to restart it (`powertheme --restart-tracker`).
+  offers to restart it (`powertheme --restart-tracker`). A
+  [pending change](https://github.com/RenkuOS/Source/pull/292) makes most of them
+  show at once.
 - Icons with many colours lose a few to fit Haiku's vector icon format
   (255 colours and shapes in all); designs that still don't fit are left
   out, largest first. SVG icons are drawn with nanosvg, which leaves out
