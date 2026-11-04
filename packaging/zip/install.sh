@@ -157,8 +157,6 @@ for theme in "$here"/data/themes/*; do
 done
 rm -rf "$data/icons/ClassicOS2000"
 cp -R "$here/data/icons/ClassicOS2000" "$data/icons/"
-rm -rf "$data/icons/breeze-dark"
-cp -R "$here/data/icons/breeze-dark" "$data/icons/"
 cp "$here/data/PowerTheme/icon-map" "$data/PowerTheme/icon-map"
 # what Power Theme's "Build add-ons" needs: the script, the add-ons'
 # source and the app_server headers

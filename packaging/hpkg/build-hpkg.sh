@@ -44,7 +44,6 @@ ln -s ../../../../apps/PowerTheme \
 cp -R "$root/data/themes/." "$work/data/themes/"
 # keeps the icon theme's aliases as symbolic links
 cp -R "$icons" "$work/data/icons/ClassicOS2000"
-cp -R "$root/data/icons/." "$work/data/icons/"
 cp -R "$build/data/PowerTheme" "$work/data/PowerTheme"
 cp "$root/data/PowerTheme/icon-map" "$work/data/PowerTheme/icon-map"
 cp "$root/README.md" "$root/LICENSE" "$root/packaging/zip/INSTALL.txt" \
@@ -59,7 +58,7 @@ description		"Power Theme switches the desktop between themes, and back: window 
 borders, controls, colours, fonts, wallpaper, the Deskbar's place and \
 freedesktop icon themes. It reads Theme Manager themes too. It comes with \
 the Reactionary ME (Windows ME), Smoke (in the style of ZETA), Renku, \
-Gonx, Haiku and four Flat themes, the ClassicOS 2000 icons and Breeze Dark. The window \
+Gonx, Haiku and four Flat themes and the ClassicOS 2000 icons. The window \
 borders and controls are built on your own system by Power Theme's \
 'Build add-ons...' (they use private parts of app_server and libbe, so they \
 must match the exact system build); it offers to install the compiler."

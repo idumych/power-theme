@@ -211,12 +211,14 @@ click **Build add-ons…** again.
   icons** in the window (which menu you see follows **Mode**, and **Apply** keeps
   both), or with `--light-icons` and `--dark-icons`. Switching modes then changes
   the icons too. **Keep the current icons** leaves them alone, and so do icons
-  set apart from a theme with `--icons`. **Breeze Dark** comes with Power Theme
-  to choose from, standing in until there's a dark version of the Haiku icons;
-  the themes themselves still name their usual icons. Others, such as
-  Papirus-Dark, go in `~/config/non-packaged/data/icons`. Dark icon themes mostly
-  differ in their one-colour icons, so colourful folders and documents may look
-  the same as in the light version.
+  set apart from a theme with `--icons`.
+- **Haiku icons (dark)**: dark versions of Haiku's own icons, and what Haiku Dark
+  uses (`icons = haiku-dark`). Power Theme recolours the icons of the running
+  system when it applies them, so new file types and system updates are covered:
+  a chosen palette of deeper colours and a thin white outline, on the same
+  shapes. Icon themes with dark versions, such as Breeze Dark or Papirus-Dark,
+  can go in `~/config/non-packaged/data/icons`; they mostly differ in their
+  one-colour icons.
 - **Switching by the time of day**: `powertheme --schedule=07:00,19:00` switches
   the theme in use to its light version at 07:00 and its dark one at 19:00,
   every day, until `--schedule=off`; **Switch mode every day** in the window does
@@ -264,6 +266,7 @@ click **Build add-ons…** again.
   (255 colours and shapes in all); designs that still don't fit are left
   out, largest first. SVG icons are drawn with nanosvg, which leaves out
   elements with filters (usually blurred shadows).
+- Dark icons can't reach application icons, which stay as they are.
 - Tracker shows a scheduled change of folder icons at its next restart, as it
   does any other; Power Theme doesn't restart it behind your back.
 - Windows have no icon in the title bar: app_server decorators have no
@@ -304,9 +307,6 @@ should run on (Haiku R1/beta6), against that system's own headers.
   ([licence](https://github.com/ClassicOS-Themes/ClassicOS-2000-Icons/blob/main/LICENSE):
   redistribution permitted). Brand icons in the set are trademarks of
   their owners.
-- Breeze Dark icons from KDE's [breeze-icons](https://invent.kde.org/frameworks/breeze-icons),
-  GNU LGPL (in `data/icons/breeze-dark`). The icons Power Theme uses, unchanged,
-  made with `tools/build-breeze-dark.py`.
 - DarkFlat, LightFlat, MoonFlat, OrangeFlat themes and their wallpaper
   from [haiku_darkstyle](https://github.com/unarix/haiku_darkstyle) by
   nhtello (unarix), MIT licence (in each theme's folder).

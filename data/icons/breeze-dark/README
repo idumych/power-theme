@@ -1,9 +1,0 @@
-Breeze Dark, from KDE's breeze-icons 6.31.0
-(https://invent.kde.org/frameworks/breeze-icons), under the GNU LGPL: see
-COPYING-ICONS and COPYING.LIB.
-
-This is a part of the theme, made with tools/build-breeze-dark.py: the icons
-Power Theme uses, at their plain sizes, with those Breeze Dark inherits from
-Breeze. The icons themselves are unchanged.
-
-It stands in until Power Theme has a dark version of the Haiku icons.
