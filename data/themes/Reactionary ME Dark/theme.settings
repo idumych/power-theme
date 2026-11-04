@@ -12,6 +12,7 @@ icons = ClassicOS2000
 wallpaper = none
 deskbar = bottom, expanded
 desktop color = #3A6EA5
+color B_DESKTOP_COLOR = #3A6EA5
 
 font plain = Noto Sans, Regular, 10
 font bold = Noto Sans, Bold, 10
