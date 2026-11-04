@@ -63,6 +63,7 @@ h2 {
 .sheet { background: var(--panel); border: 1px solid var(--line); padding: 24px; }
 .sheet > :first-child { margin-top: 0; }
 .sheet > :last-child { margin-bottom: 0; }
+h3 { margin: 26px 0 8px; font-size: 1.05rem; }
 .status { font-size: 14px; color: var(--muted); }
 .status b { color: var(--text); }
 .pair { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; margin: 20px 0 6px; }
@@ -98,7 +99,7 @@ footer { border-top: 1px solid var(--line); padding: 24px 0 48px; color: var(--m
 
 	<header>
 		<h1>Change the theme. Keep your apps open.</h1>
-		<p>Changing a theme on Renku OS used to mean restarting your applications to see all of it. This work makes controls and fonts change in place, gives themes light and dark versions that can switch by the time of day, and lets apps follow along.</p>
+		<p>Changing a theme on Renku OS used to mean restarting your applications to see all of it. This work makes controls and fonts change in place, gives themes light and dark versions that can switch by the time of day, lets apps follow along, and revives a menu effect from BeOS.</p>
 	</header>
 
 	<div class="compare" id="compare">
@@ -167,8 +168,13 @@ powertheme --mode=toggle</pre>
 <pre>powertheme --light-icons=haiku --dark-icons=breeze-dark</pre>
 			<p>Making this work uncovered a catch. Linux icon themes usually tell light from dark with a small stylesheet and <code>currentColor</code>, which Power Theme's SVG renderer doesn't read, so both versions came out identical. Power Theme now writes those colours into each icon before drawing it. Before the fix, none of the roughly 200 icons differed between Breeze and Breeze Dark; now 8 do, including folders, programs and volumes.</p>
 			<p>That small number is the honest picture: dark icon themes mostly change their one-colour icons, so colourful folders and documents can look the same in both.</p>
-			<p><b>Breeze Dark is a placeholder.</b> It comes with Power Theme as a proof of concept, ready to choose from the icons menu, and themes don't use it unless you pick it. A dark version of the Haiku icons is planned to take its place.</p>
+			<p><b>Breeze Dark is a placeholder.</b> It comes with Power Theme today as a proof of concept, and themes don't use it unless you pick it.</p>
 			<p class="status"><b>On <a href="https://github.com/idumych/power-theme">Power Theme's main branch</a>,</b> not in a release yet.</p>
+			<h3>Haiku icons (dark)</h3>
+			<p>This is what replaces it: dark versions of Haiku's own icons, with the same shapes. Each colour moves onto a hand-picked ramp with deep shadows and bright highlights, folders turn a rich burnt orange, and a thin white outline lifts each icon off a dark background. Power Theme recolours the running system's icons when it applies them, so new file types and system updates are covered, and Revert restores the originals exactly.</p>
+			<figure style="margin:18px 0 6px"><img src="img/dark-icons.png" width="1086" height="176" alt="A row of Haiku's icons above the same icons in the dark palette, on a dark grey background." loading="lazy" style="border:1px solid var(--line)"><figcaption>Haiku's icons, and the dark versions below them.</figcaption></figure>
+			<figure style="margin:18px 0 6px"><img src="img/dark-tracker.png" width="810" height="260" alt="A Tracker window under Haiku Dark showing folders, documents and packages in the dark palette." loading="lazy" style="border:1px solid var(--line)"><figcaption>In Tracker under Haiku Dark.</figcaption></figure>
+			<p class="status"><b>Built and tested, not merged yet.</b></p>
 		</div>
 	</section>
 
@@ -203,6 +209,19 @@ powertheme --mode=toggle</pre>
 	</section>
 
 	<section>
+		<h2>ZSnake menus</h2>
+		<div class="sheet">
+			<p>BeOS 5.1 (Dano) hid a menu effect called ZSnake in its Menu preferences: the selection becomes one outlined path from a menu's item, along the open submenu's edge, to the submenu's selected item. This brings it to Renku, drawn as Dano drew it and compared pixel for pixel with screenshots of Dano. Menus with it off look as they did before.</p>
+			<img src="img/zsnake-four-levels.png" width="580" height="360" alt="A popup menu four levels deep, with each selected item joined to its submenu." loading="lazy" style="margin:20px 0 6px;border:1px solid var(--line)">
+			<div class="pair">
+				<figure><img src="img/zsnake-deskbar.png" width="470" height="470" alt="The Deskbar's menu open, with its button in the selection colour and the path running into a submenu." loading="lazy"><figcaption>The Deskbar's button takes the selection colour, so the path starts there.</figcaption></figure>
+				<figure><img src="img/zsnake-appearance.png" width="515" height="507" alt="Appearance's Look and feel tab, with a checkbox to join submenus to the item they open from." loading="lazy"><figcaption>A switch in Appearance, off by default.</figcaption></figure>
+			</div>
+			<p class="status"><b>In review:</b> <a href="https://github.com/RenkuOS/Source/pull/279">#279</a> is ready, and <a href="https://github.com/RenkuOS/Source/pull/280">#280</a> and <a href="https://github.com/RenkuOS/Source/pull/281">#281</a> are drafts stacked on it.</p>
+		</div>
+	</section>
+
+	<section>
 		<h2>Older systems still work</h2>
 		<div class="sheet">
 			<p>Power Theme checks the running system for these changes. Where they aren't there, it applies themes as before and asks you to restart your apps, instead of promising something the system can't do. Light and dark versions and the schedule work there too.</p>
@@ -232,7 +251,9 @@ powertheme --mode=toggle</pre>
 			<ul>
 				<li>Nothing here is in a release, and the Renku changes are awaiting review.</li>
 				<li>None of it has run on real hardware.</li>
-				<li>The dark version of the Haiku icons is still to come. Until then, Breeze Dark is only a stand-in.</li>
+				<li>Open Tracker windows show some of the new icons from a mode switch, such as those for folders and plain text, only after Tracker restarts. Application icons don't change at all, as they're part of the applications.</li>
+				<li>Tracker crashed in its Attributes menu code in 2 of 12 tests that restarted it and then resized a window by script, with Haiku's icons and the dark ones alike, and in none of 12 without the resize. It looks like a timing bug in Tracker, but that isn't confirmed.</li>
+				<li>ZSnake's app_server change (#280) hasn't run on a built image yet, and one crash of a test Deskbar on closing its menu was seen once.</li>
 				<li>Tracker keeps old row heights and text widths after a font change, and shows new folder icons only when it restarts.</li>
 				<li>While a schedule is on, its background process appears as a second Power Theme entry in the Deskbar.</li>
 				<li>Switching modes in Reactionary ME can leave small marks in title bars until they next redraw. The Haiku theme's decorator didn't show this.</li>
