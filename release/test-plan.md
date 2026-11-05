@@ -40,10 +40,11 @@ approved one (dark folders with a thin soft-white outline), not inverted.
 ### beos-tabs
 Steps: `powertheme --apply="Reactionary ME"`, `--beos-tabs=on`, open a window and
 take a screenshot; `--beos-tabs=off` and take another.
-PASS when: with the option on, the title bar is a tab narrower than the window
-with the close button on its left and the zoom button on its right, and no
-minimize button; off, a full-width title bar comes back. {p}-tabs.txt records
-both measured widths.
+Then the same with "Expose" and "Platinum", shift-dragging the tab along the window.
+PASS when: with the option on, each theme's title bar is a tab narrower than the
+window with the close button on its left and the zoom button on its right, and no
+minimize button, and it slides; off, a full-width title bar comes back. {p}-tabs.txt
+records both measured widths for each.
 
 ### schedule
 Steps: with a theme that has both versions in use, `powertheme --schedule=` with
@@ -83,6 +84,27 @@ PASS when: {p}-tidy.txt says "new application loads control look: Tidy" and "win
 borders: Tidy", and shows the pair switching: "theme: Tidy Dark" with mode: dark, and
 back with mode: light. The screenshots show the rounded tab with its title in the
 middle, slim scroll bars, and in the dark one, marks that can be seen in check boxes.
+
+### expose
+Steps: `powertheme --apply=Haiku --parts=decorator,controls`, `--apply=Expose`,
+read `decorator_settings`; start StyledEdit and list its images; `--mode=dark`, `--status`;
+`--mode=light`, `--status`; screenshots of a Tracker window in both.
+PASS when: {p}-expose.txt says "window borders: Expose" and "new application loads
+control look: Expose", and shows the pair switching: "theme: Expose Dark" with mode:
+dark, and back with mode: light. The screenshots show the dark split title bar with
+its title on the left, buttons on the right and a red close button; dark glass
+controls with slate selections in the dark one, and soft grey buttons, orange-topped
+tabs and a round slider thumb in the light one.
+
+### platinum
+Steps: `powertheme --apply=Haiku --parts=decorator,controls`, `--apply=Platinum`,
+start StyledEdit, list its images and read `decorator_settings`; screenshot of a
+Tracker window and an inactive window.
+PASS when: {p}-platinum.txt says "window borders: Platinum" and "new application
+loads control look: Platinum". The screenshots show a wide bevelled frame with a
+striped title bar, the close button on the left and two on the right, lavender
+scroll bars, an inactive window flat with no stripes or buttons, and lilac folders.
+Files with different types show different icons from NineIcons Redux.
 
 ### revert
 Steps: note every icon attribute in `mime_db` and the colours before any theme;

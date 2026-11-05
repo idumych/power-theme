@@ -68,6 +68,12 @@ TIDY_DECOR := $(BUILD)/Tidy
 TIDY_LOOK := $(BUILD)/control_look/Tidy
 GONX := src/third_party/gonx
 GONX_LOOK := $(BUILD)/control_look/Gonx
+EXPOSE := src/third_party/expose
+EXPOSE_DECOR := $(BUILD)/Expose
+EXPOSE_LOOK := $(BUILD)/control_look/Expose
+PLATINUM := src/third_party/platinum
+PLATINUM_DECOR := $(BUILD)/Platinum
+PLATINUM_LOOK := $(BUILD)/control_look/Platinum
 
 # What Power Theme needs to build the add-ons (decorators, control looks) on a
 # user's system, laid
@@ -76,6 +82,7 @@ DECOR_SOURCE := $(BUILD)/data/PowerTheme
 
 all: $(DECOR) $(LOOK) $(THEMES) $(FLAT_DECOR) $(FLAT_LOOK) $(SMOKE_DECOR) \
 	$(SMOKE_LOOK) $(DANO_LOOK) $(TIDY_DECOR) $(TIDY_LOOK) $(GONX_LOOK) \
+	$(EXPOSE_DECOR) $(EXPOSE_LOOK) $(PLATINUM_DECOR) $(PLATINUM_LOOK) \
 	decorator-source
 
 decorator-source:
@@ -83,12 +90,16 @@ decorator-source:
 	mkdir -p $(DECOR_SOURCE)/source/decorators/Reactionary \
 		$(DECOR_SOURCE)/source/decorators/Smoke \
 		$(DECOR_SOURCE)/source/decorators/Tidy \
+		$(DECOR_SOURCE)/source/decorators/Expose \
+		$(DECOR_SOURCE)/source/decorators/Platinum \
 		$(DECOR_SOURCE)/source/decorators/Gonx \
 		$(DECOR_SOURCE)/source/decorators/FlatDecorator \
 		$(DECOR_SOURCE)/source/control_looks/Reactionary \
 		$(DECOR_SOURCE)/source/control_looks/Smoke \
 		$(DECOR_SOURCE)/source/control_looks/Dano \
 		$(DECOR_SOURCE)/source/control_looks/Tidy \
+		$(DECOR_SOURCE)/source/control_looks/Expose \
+		$(DECOR_SOURCE)/source/control_looks/Platinum \
 		$(DECOR_SOURCE)/source/control_looks/Gonx \
 		$(DECOR_SOURCE)/source/control_looks/FlatControlLook
 	cp src/themes/build-decorators.sh $(DECOR_SOURCE)/
@@ -106,6 +117,14 @@ decorator-source:
 	cp src/tidy/TidyDecorator.* src/tidy/resources.rdef \
 		$(DECOR_SOURCE)/source/decorators/Tidy/
 	cp src/tidy/TidyControlLook.* $(DECOR_SOURCE)/source/control_looks/Tidy/
+	cp $(EXPOSE)/decorator/* $(EXPOSE)/LICENSE $(EXPOSE)/README \
+		$(DECOR_SOURCE)/source/decorators/Expose/
+	cp $(EXPOSE)/controllook/* $(EXPOSE)/LICENSE $(EXPOSE)/README \
+		$(DECOR_SOURCE)/source/control_looks/Expose/
+	cp $(PLATINUM)/decorator/* $(PLATINUM)/LICENSE $(PLATINUM)/README \
+		$(DECOR_SOURCE)/source/decorators/Platinum/
+	cp $(PLATINUM)/controllook/* $(PLATINUM)/LICENSE $(PLATINUM)/README \
+		$(DECOR_SOURCE)/source/control_looks/Platinum/
 	cp $(GONX)/controllook/* $(GONX)/LICENSE \
 		$(DECOR_SOURCE)/source/control_looks/Gonx/
 	cp $(FLAT)/controllook/* $(DECOR_SOURCE)/source/control_looks/FlatControlLook/
@@ -184,6 +203,54 @@ $(TIDY_LOOK): $(BUILD)/TidyControlLook.o $(BUILD)/TidyControlLook.rsrc
 	$(CXX) $(SYSROOT_FLAGS) -shared -s -o $@ $(BUILD)/TidyControlLook.o \
 		-lbe -lstdc++
 	$(XRES) -o $@ $(BUILD)/TidyControlLook.rsrc
+
+# Expose, after Mark Whittaker's themes. GPL, unlike the rest; see its README.
+$(BUILD)/ExposeDecorator.o: $(EXPOSE)/decorator/ExposeDecorator.cpp $(EXPOSE)/decorator/ExposeDecorator.h $(EXPOSE)/decorator/ExposeButtons.h
+	@mkdir -p $(BUILD)
+	$(CXX) $(CXXFLAGS) $(DECOR_INCLUDES) -c $< -o $@
+
+$(BUILD)/ExposeDecorator.rsrc: $(EXPOSE)/decorator/resources.rdef
+
+$(EXPOSE_DECOR): $(BUILD)/ExposeDecorator.o $(BUILD)/ExposeDecorator.rsrc
+	$(CXX) $(SYSROOT_FLAGS) -shared -s -o $@ $(BUILD)/ExposeDecorator.o \
+		-lbe $(APP_SERVER) -lstdc++
+	$(XRES) -o $@ $(BUILD)/ExposeDecorator.rsrc
+
+$(BUILD)/ExposeControlLook.o: $(EXPOSE)/controllook/ExposeControlLook.cpp $(EXPOSE)/controllook/ExposeControlLook.h $(EXPOSE)/controllook/ExposeMarks.h
+	@mkdir -p $(BUILD)
+	$(CXX) $(CXXFLAGS) -std=gnu++17 -I$(PRIVATE)/interface -c $< -o $@
+
+$(BUILD)/ExposeControlLook.rsrc: $(EXPOSE)/controllook/ExposeControlLook.rdef
+
+$(EXPOSE_LOOK): $(BUILD)/ExposeControlLook.o $(BUILD)/ExposeControlLook.rsrc
+	@mkdir -p $(dir $@)
+	$(CXX) $(SYSROOT_FLAGS) -shared -s -o $@ $(BUILD)/ExposeControlLook.o \
+		-lbe -lstdc++
+	$(XRES) -o $@ $(BUILD)/ExposeControlLook.rsrc
+
+# Platinum, after Niels's KDE theme. GPL, unlike the rest; see its README.
+$(BUILD)/PlatinumDecorator.o: $(PLATINUM)/decorator/PlatinumDecorator.cpp $(PLATINUM)/decorator/PlatinumDecorator.h $(PLATINUM)/decorator/PlatinumButtons.h
+	@mkdir -p $(BUILD)
+	$(CXX) $(CXXFLAGS) $(DECOR_INCLUDES) -c $< -o $@
+
+$(BUILD)/PlatinumDecorator.rsrc: $(PLATINUM)/decorator/resources.rdef
+
+$(PLATINUM_DECOR): $(BUILD)/PlatinumDecorator.o $(BUILD)/PlatinumDecorator.rsrc
+	$(CXX) $(SYSROOT_FLAGS) -shared -s -o $@ $(BUILD)/PlatinumDecorator.o \
+		-lbe $(APP_SERVER) -lstdc++
+	$(XRES) -o $@ $(BUILD)/PlatinumDecorator.rsrc
+
+$(BUILD)/PlatinumControlLook.o: $(PLATINUM)/controllook/PlatinumControlLook.cpp $(PLATINUM)/controllook/PlatinumControlLook.h
+	@mkdir -p $(BUILD)
+	$(CXX) $(CXXFLAGS) -std=gnu++17 -I$(PRIVATE)/interface -c $< -o $@
+
+$(BUILD)/PlatinumControlLook.rsrc: $(PLATINUM)/controllook/PlatinumControlLook.rdef
+
+$(PLATINUM_LOOK): $(BUILD)/PlatinumControlLook.o $(BUILD)/PlatinumControlLook.rsrc
+	@mkdir -p $(dir $@)
+	$(CXX) $(SYSROOT_FLAGS) -shared -s -o $@ $(BUILD)/PlatinumControlLook.o \
+		-lbe -lstdc++
+	$(XRES) -o $@ $(BUILD)/PlatinumControlLook.rsrc
 
 # Haiku's Flat decorator and control look, for the Flat themes (Renku's
 # repositories don't have the haiku_extras package they come in).

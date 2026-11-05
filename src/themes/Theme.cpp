@@ -1358,14 +1358,19 @@ schedule_description(const ThemeSchedule& schedule)
 static const char* kBeOSTabsName = "beos tabs";
 
 
-//! Only Reactionary's window borders can draw a BeOS-style tab so far.
+//! The window borders that can draw a BeOS-style tab.
 static bool
 draws_beos_tabs(DecorInfo* decor)
 {
 	if (decor == NULL || decor->Ref() == NULL)
 		return false;
 	BPath path(decor->Ref());
-	return path.Leaf() != NULL && strcmp(path.Leaf(), "Reactionary") == 0;
+	static const char* const kNames[] = { "Reactionary", "Expose", "Platinum" };
+	for (size_t i = 0; i < sizeof(kNames) / sizeof(kNames[0]); i++) {
+		if (path.Leaf() != NULL && strcmp(path.Leaf(), kNames[i]) == 0)
+			return true;
+	}
+	return false;
 }
 
 

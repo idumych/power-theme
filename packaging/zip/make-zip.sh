@@ -11,7 +11,7 @@
 # build/BUILT_FOR names the system the prebuilt files were built for.
 set -eu
 
-version=${1:-0.5}
+version=${1:-0.6}
 root=$(cd "$(dirname "$0")/../.." && pwd)
 name=power-theme-$version
 out=$root/dist/$name
@@ -46,6 +46,7 @@ cp "$root/data/PowerTheme/icon-map" "$out/data/PowerTheme/"
 cp -R "$root/build/data/PowerTheme/." "$out/data/PowerTheme/"
 # keeps the icon theme's aliases as symbolic links
 cp -R "$root/build/icons/ClassicOS2000" "$out/data/icons/"
+cp -R "$root/data/icons/NineIconsRedux" "$out/data/icons/"
 
 cp -R "$root/src" "$root/tools" "$root/packaging" "$root/build-headers" \
 	"$root/data" "$root/Makefile" "$root/README.md" "$root/LICENSE" \

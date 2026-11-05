@@ -86,12 +86,16 @@ cache=${POWERTHEME_CACHE:-$(finddir B_USER_SETTINGS_DIRECTORY 2>/dev/null)/Power
 addons="decorators:Reactionary:decorators/Reactionary:src/decorator:*Decorator.cpp:resources.rdef
 decorators:Smoke:decorators/Smoke:src/smoke:*Decorator.cpp:resources.rdef
 decorators:Tidy:decorators/Tidy:src/tidy:*Decorator.cpp:resources.rdef
+decorators:Expose:decorators/Expose:src/third_party/expose/decorator:*Decorator.cpp:resources.rdef
+decorators:Platinum:decorators/Platinum:src/third_party/platinum/decorator:*Decorator.cpp:resources.rdef
 decorators:Gonx:decorators/Gonx:src/third_party/gonx/decorator:*Decorator.cpp:resources.rdef
 decorators:FlatDecorator:decorators/FlatDecorator:src/third_party/haiku-flat/decorator:*Decorator.cpp:resources.rdef
 control_look:Reactionary:control_looks/Reactionary:src/controllook:*ControlLook.cpp:*ControlLook.rdef
 control_look:Smoke:control_looks/Smoke:src/smoke:*ControlLook.cpp:*ControlLook.rdef
 control_look:Dano:control_looks/Dano:src/dano:*ControlLook.cpp:*ControlLook.rdef
 control_look:Tidy:control_looks/Tidy:src/tidy:*ControlLook.cpp:*ControlLook.rdef
+control_look:Expose:control_looks/Expose:src/third_party/expose/controllook:*ControlLook.cpp:*ControlLook.rdef
+control_look:Platinum:control_looks/Platinum:src/third_party/platinum/controllook:*ControlLook.cpp:*ControlLook.rdef
 control_look:Gonx:control_looks/Gonx:src/third_party/gonx/controllook:*ControlLook.cpp:*ControlLook.rdef
 control_look:FlatControlLook:control_looks/FlatControlLook:src/third_party/haiku-flat/controllook:*ControlLook.cpp:*ControlLook.rdef"
 

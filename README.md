@@ -21,6 +21,8 @@ It comes with its own looks:
   of Haiku's own icons;
 - **Dano**, the controls of BeOS R5.1 "Dano", with Haiku's window borders;
 - **Tidy** and **Tidy Dark**, after mockups from Haiku's forum;
+- **Expose** and **Expose Dark**, after Mark Whittaker's KDE themes;
+- **Platinum**, in the style of Mac OS 9, after Niels's KDE theme;
 - and the Haiku, Gonx and four Flat themes.
 
 The Reactionary ME look is an independent, unofficial port. It is not
@@ -61,8 +63,8 @@ top left of the first pictures shows how an application can follow the mode.
 
 Window borders that can draw one can have a BeOS-style tab instead of a title bar
 across the window, whatever the theme. It's as wide as the title, with close on the
-left and zoom on the right, and shift-dragging it slides it along the window. So far
-that's Reactionary's borders; turn it on with **BeOS-style tabs** in the window, or
+left and zoom on the right, and shift-dragging it slides it along the window. That's
+Reactionary's, Expose's and Platinum's borders; turn it on with **BeOS-style tabs** in the window, or
 `powertheme --beos-tabs=on`. Run **Build add-ons…** after updating to get it.
 
 ## What needs pending Renku OS changes
@@ -83,6 +85,7 @@ this work, with what's finished, tested and still open.
 | The Deskbar logo is light on dark menus | It stays navy | [#288](https://github.com/RenkuOS/Source/pull/288) |
 | Applications can ask whether the desktop is dark, such as to swap their artwork | They can't, with a standard call | [#289](https://github.com/RenkuOS/Source/pull/289) |
 | Check boxes and radio buttons stay readable on dark panels, in applications that place controls by hand | Their labels can stay black | [#295](https://github.com/RenkuOS/Source/pull/295) |
+| Menus join a submenu's selection to the item it opened from, as BeOS Dano's ZSnake did, as in the Expose and Platinum pictures | They don't | [#279](https://github.com/RenkuOS/Source/pull/279), [#280](https://github.com/RenkuOS/Source/pull/280), [#281](https://github.com/RenkuOS/Source/pull/281) |
 | Desktop labels stay readable on a plain pale desktop | They stay white, so Renku Light sets a darker system desktop colour to get black ones | [#296](https://github.com/RenkuOS/Source/pull/296) |
 | A slid BeOS-style tab keeps its place when the window borders change | It goes back to the start | [#297](https://github.com/RenkuOS/Source/pull/297) |
 
@@ -102,8 +105,10 @@ picture at the top is Power Theme itself, under the stock Haiku theme.
 | **Smoke** window borders and controls, in the style of ZETA's, with the colours of the "smoke" Theme Manager theme | **Gonx**: Gonx's window borders and controls |
 | ![Dano](docs/screenshots/dano.png) | ![Tidy](docs/screenshots/tidy.png) |
 | **Dano**: the controls of BeOS R5.1 "Dano", with Haiku's window borders | **Tidy**: a thin frame, soft menu bars and slim scroll bars, after mockups from Haiku's forum |
-| ![Tidy Dark](docs/screenshots/tidy-dark.png) | |
-| **Tidy Dark**: the same in dark | |
+| ![Tidy Dark](docs/screenshots/tidy-dark.png) | ![Expose](docs/screenshots/expose.png) |
+| **Tidy Dark**: the same in dark | **Expose**: a dark glossy title bar over soft grey controls with orange-topped tabs, with ZSnake on in the menus |
+| ![Expose Dark](docs/screenshots/expose-dark.png) | ![Platinum](docs/screenshots/platinum.png) |
+| **Expose Dark**: the same title bar with dark glass controls and slate selections, with ZSnake on | **Platinum**: Mac OS 9's bevelled frame and striped title bar, lavender controls and NineIcons Redux, with ZSnake on |
 | ![The Power Theme window](docs/screenshots/themes-window.png) | |
 | **Power Theme** under Renku: the theme list with a preview, the icon theme, and the parts to apply | |
 
@@ -118,7 +123,7 @@ Power Theme comes as a package for Haiku R1/beta6 and later, and Renku OS
 (x86_64), on the [releases page](https://github.com/idumych/power-theme/releases):
 
 ```sh
-pkgman install ./powertheme-0.5-1-x86_64.hpkg
+pkgman install ./powertheme-0.6-1-x86_64.hpkg
 ```
 
 Then open **Power Theme** (Deskbar → Applications), click **Build
@@ -213,6 +218,27 @@ click **Build add-ons…** again.
   scroll. Without compositing, its rounded corners aren't anti-aliased. The
   mockups' changes inside applications, such as Tracker's folder path, list
   icon sizes and spacing and a new HaikuDepot, aren't something a theme can do.
+- **Expose** (`add-ons/decorators/Expose`, `add-ons/control_look/Expose`,
+  `data/themes/Expose`, `data/themes/Expose Dark`): a light and dark pair after
+  [Expose Dark](https://store.kde.org/p/2347990) and its
+  [Kvantum theme](https://store.kde.org/p/2348069), and
+  [Expose Air Dark](https://store.kde.org/p/2357405), by Mark Whittaker: a dark
+  glossy title bar across the window, split into a bright and a dark half, with
+  its title on the left and glass buttons on the right, the close button red. The
+  light theme has soft grey buttons with a white rim, orange-topped tabs and a
+  round slider thumb, and the dark one dark glass controls with slate selections. Without compositing, its soft shadow is left out and its
+  rounded corners aren't anti-aliased. Expose Dark's Kvantum theme has no dark
+  palette, hence Expose Air Dark's controls in the dark theme. Its add-ons are under
+  the GNU GPL, unlike the rest of Power Theme.
+- **Platinum** (`add-ons/decorators/Platinum`, `add-ons/control_look/Platinum`,
+  `data/themes/Platinum`): Mac OS 9's look, after
+  [Platinum Retro OS9](https://store.kde.org/p/2361987) by Niels, with the
+  [QPlatinum](https://store.kde.org/p/1287747) colours: a wide bevelled frame with a
+  hard shadow, a striped title bar with its title in the middle and the close
+  button on the left, bevelled grey buttons that go dark when pressed, lavender
+  scroll bars and pop-up arrows, a tiled wallpaper, and the
+  [NineIcons Redux](https://store.kde.org/p/1960539) icons on folders and file
+  types. It has no dark version. Its add-ons are under the GNU GPL, unlike the rest of Power Theme.
 - **The Gonx theme** (`data/themes/Gonx`): the look of
   [Gonx](https://github.com/idumych/gonx), with its colours, desktop colour
   and fonts over Haiku's defaults, and Haiku's icons. Power Theme builds
@@ -412,6 +438,23 @@ should run on (Haiku R1/beta6), against that system's own headers.
   [Haiku's forum](https://discuss.haiku-os.org/t/ui-adjustments-that-stay-out-of-the-way/16988).
   They aren't affiliated with this project. It is drawn from scratch; the mockups
   aren't included.
+- Expose's window decorator and control look (`src/third_party/expose`), GNU GPL
+  version 3 or later, follow [Expose Dark](https://store.kde.org/p/2347990), its
+  [Kvantum theme](https://store.kde.org/p/2348069) and
+  [Expose Air Dark](https://store.kde.org/p/2357405) by Mark Whittaker (GPL), whose
+  artwork is included and whose buttons and check marks they use. Mark Whittaker
+  isn't affiliated with this project.
+- Platinum's window decorator and control look (`src/third_party/platinum`), GNU
+  GPL version 3 or later, follow
+  [Platinum Retro OS9](https://store.kde.org/p/2361987) by Niels (GPL), whose
+  window decoration artwork and wallpaper are included. Its colours follow
+  [QPlatinum](https://store.kde.org/p/1287747) by zinjanthr0pus. Its controls are
+  drawn from scratch, measuring
+  [Mac9Kvantum](https://store.kde.org/p/1766812) by drgordbord, which has no licence,
+  so nothing of it is included. Its icons are from
+  [NineIcons Redux](https://store.kde.org/p/1960539) by aitees (MIT licence, in
+  `data/icons/NineIconsRedux`). Apple and these authors aren't affiliated with this
+  project.
 - [nanosvg](https://github.com/memononen/nanosvg) by Mikko Mononen (zlib
   licence), in `src/themes/third_party`.
 - Gonx's window decorator and control look (`src/third_party/gonx`), MIT
@@ -419,4 +462,6 @@ should run on (Haiku R1/beta6), against that system's own headers.
 - Project layout, scripts and the start of the theme tool from
   [Gonx](https://github.com/idumych/gonx).
 
-Power Theme's own code is under the MIT licence (see `LICENSE`).
+Power Theme's own code is under the MIT licence (see `LICENSE`), apart from
+Expose's and Platinum's add-ons, which are under the GNU GPL
+(`src/third_party/expose/LICENSE`, `src/third_party/platinum/LICENSE`).
