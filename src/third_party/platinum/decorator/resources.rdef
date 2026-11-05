@@ -1,0 +1,10 @@
+resource("be:decor:info") message('deco') {
+	"name"				= "Platinum",
+	"authors"			= "idumych, after Niels's Platinum",
+	"short_descr"		= "After Platinum, a KDE window decoration in the style of Mac OS 9",
+	"long_descr"		= "A wide bevelled frame and a striped title bar with its title in the middle",
+	"lic_url"			= "https://www.gnu.org/licenses/gpl-3.0.html",
+	"lic_name"			= "GPL-3.0-or-later",
+	"support_url"		= "https://github.com/idumych/power-theme",
+	float "version"		= 0.1
+};

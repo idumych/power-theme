@@ -1,0 +1,39 @@
+Platinum, after these KDE themes, in the style of Mac OS 9:
+
+  Platinum Retro OS9, a window decoration and global theme by Niels (nielsvm),
+  GNU General Public License, version 3 (LICENSE)
+  https://store.kde.org/p/1319936
+  https://store.kde.org/p/2361987
+
+  QPlatinum, a colour scheme by zinjanthr0pus
+  https://store.kde.org/p/1287747
+
+  Mac9Kvantum, a Kvantum theme by drgordbord, a reference only
+  https://store.kde.org/p/1766812
+
+art/ holds the window decoration's artwork and settings as they were published.
+The decorator here is written for Renku and Haiku, with colours and sizes measured
+from that artwork and its buttons taken from it by tools/make-platinum-art.py.
+
+The control look is drawn from scratch. Its colours and sizes were measured from
+Mac9Kvantum, which has no licence, so nothing of its artwork is included. Should
+its author license it, the look could be matched more closely.
+
+These add-ons are under the GNU GPL, version 3 or later, unlike the rest of Power
+Theme, which is under the MIT licence. Power Theme doesn't link them: app_server
+and applications load them, like any other decorator and control look.
+
+The theme's wallpaper comes with the global theme, under the same licence.
+
+The theme's icons are in data/icons/NineIconsRedux: NineIcons Redux by aitees, under
+the MIT licence (its LICENSE file is with them), copied by tools/make-nineicons.py.
+It's based on Grassmunk's NineIcons, which has no licence of its own. 7 of the 156
+files here are identical to that pack: application-x-executable, and some sizes of
+folder, x-office-address-book and two OpenDocument template icons.
+
+Not ported: the global theme's cursors, the classic panel layout, and the window buttons' help, keep above and shade buttons, which
+Haiku's windows don't have. A decorator can't blend, so the frame's shadow, which is
+translucent in the artwork, is a solid dark line. Scroll bars keep Haiku's usual
+width, because its windows lay themselves out around it.
+
+Apple is not affiliated with this project, or with the themes above.
