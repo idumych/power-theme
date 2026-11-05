@@ -1,0 +1,10 @@
+resource("be:decor:info") message('deco') {
+	"name"				= "Expose",
+	"authors"			= "idumych, after Mark Whittaker's Expose Dark",
+	"short_descr"		= "After Expose Dark, a KDE window decoration",
+	"long_descr"		= "A dark glossy title bar across the window, with glass buttons on the right",
+	"lic_url"			= "https://www.gnu.org/licenses/gpl-3.0.html",
+	"lic_name"			= "GPL-3.0-or-later",
+	"support_url"		= "https://github.com/idumych/power-theme",
+	float "version"		= 0.1
+};

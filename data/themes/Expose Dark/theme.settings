@@ -1,0 +1,50 @@
+# "Expose Dark", after Expose Dark and Expose Air Dark by Mark Whittaker
+# (store.kde.org/p/2347990, store.kde.org/p/2357405), GNU GPL.
+# Colours from the Expose Air Dark colour scheme and Kvantum theme.
+
+name = Expose Dark
+variant of = Expose
+mode = dark
+description = The same dark glossy title bar, with dark glass controls and slate selections after Expose Air Dark, a Kvantum theme.
+decorator = Expose
+control look = Expose
+wallpaper = none
+desktop color = #232323
+font plain = Noto Sans, Regular, 12
+font bold = Noto Sans, Bold, 12
+font fixed = Noto Sans Mono, Regular, 12
+font menu = Noto Sans, Regular, 12
+icons = haiku
+
+color B_DESKTOP_COLOR = #232323
+color B_PANEL_BACKGROUND_COLOR = #2D2E2C
+color B_PANEL_TEXT_COLOR = #D0D1CE
+color B_DOCUMENT_BACKGROUND_COLOR = #1E1F1C
+color B_DOCUMENT_TEXT_COLOR = #D0D1CE
+color B_CONTROL_BACKGROUND_COLOR = #3A3B39
+color B_CONTROL_TEXT_COLOR = #EFF0EC
+color B_CONTROL_BORDER_COLOR = #1B1B1B
+color B_CONTROL_HIGHLIGHT_COLOR = #646B76
+color B_CONTROL_MARK_COLOR = #98A0A8
+color B_KEYBOARD_NAVIGATION_COLOR = #98A0A8
+color B_NAVIGATION_PULSE_COLOR = #98A0A8
+color B_SHINE_COLOR = #5D5E5D
+color B_SHADOW_COLOR = #000000
+color B_MENU_BACKGROUND_COLOR = #2D2E2C
+color B_MENU_SELECTED_BACKGROUND_COLOR = #6E7682
+color B_MENU_ITEM_TEXT_COLOR = #D0D1CE
+color B_MENU_SELECTED_ITEM_TEXT_COLOR = #EFF0EC
+color B_MENU_SELECTED_BORDER_COLOR = #50514F
+color B_LIST_BACKGROUND_COLOR = #1E1F1C
+color B_LIST_ITEM_TEXT_COLOR = #D0D1CE
+color B_LIST_SELECTED_BACKGROUND_COLOR = #6E7682
+color B_LIST_SELECTED_ITEM_TEXT_COLOR = #EFF0EC
+color B_SCROLL_BAR_THUMB_COLOR = #535353
+color B_STATUS_BAR_COLOR = #6E7682
+color B_TOOLTIP_BACKGROUND_COLOR = #F1F5FB
+color B_TOOLTIP_TEXT_COLOR = #000000
+color B_WINDOW_TAB_COLOR = #595959
+color B_WINDOW_TEXT_COLOR = #FFFFFF
+color B_WINDOW_INACTIVE_TAB_COLOR = #333333
+color B_WINDOW_INACTIVE_TEXT_COLOR = #FFFFFF
+color B_WINDOW_BORDER_COLOR = #2A2A2A
