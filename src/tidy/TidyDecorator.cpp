@@ -23,7 +23,7 @@
 
 
 // how far each of a corner's first rows is cut in
-static const int32 kCorner[] = { 3, 2, 1, 1 };
+static const int32 kCorner[] = { 3, 2, 1 };
 static const int32 kCornerRows = sizeof(kCorner) / sizeof(kCorner[0]);
 
 static const float kResizeCornerLength = 14;
