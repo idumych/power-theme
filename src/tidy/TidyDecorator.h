@@ -60,7 +60,12 @@ protected:
 
 	virtual	void				_GetFootprint(BRegion* region);
 
+	virtual	void				_FontsChanged(DesktopSettings& settings,
+									BRegion* updateRegion = NULL);
+
 private:
+			void				_UpdateMenuBarHeight(
+									const DesktopSettings& settings);
 			bool				_HasThinTop() const;
 			float				_Scale() const;
 			float				_TabHeight() const;
@@ -82,6 +87,8 @@ private:
 			void				_DrawResizeGrip(BRect invalid);
 			void				_DrawButtonBox(BRect box,
 									const rgb_color& base, bool pressed);
+
+			float				fMenuBarHeight;
 };
 
 

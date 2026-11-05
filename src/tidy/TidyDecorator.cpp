@@ -88,6 +88,7 @@ TidyDecorator::TidyDecorator(DesktopSettings& settings, BRect rect,
 	:
 	TabDecorator(settings, rect, desktop)
 {
+	_UpdateMenuBarHeight(settings);
 }
 
 
@@ -299,10 +300,8 @@ TidyDecorator::_DrawFrame(BRect rect)
 	// shading and its bottom line, so that it runs from edge to edge as in the
 	// mockups. Other windows stay flat, as they are there.
 	if (fTopTab->look == B_DOCUMENT_WINDOW_LOOK) {
-		font_height height;
-		fDrawState.Font().GetHeight(height);
-		const float line = std::min(fFrame.bottom, fFrame.top
-			+ ceilf(height.ascent + height.descent) + 4);
+		const float line = std::min(fFrame.bottom,
+			fFrame.top + fMenuBarHeight);
 		const bool dark = is_dark(face);
 		const rgb_color top = dark ? mix(face, kWhite, 0.2f) : face;
 		const rgb_color end = dark ? mix(face, kWhite, 0.06f)
@@ -486,6 +485,35 @@ TidyDecorator::_DrawMinimize(Decorator::Tab* tab, bool direct, BRect rect)
 
 
 //	#pragma mark - private
+
+
+void
+TidyDecorator::_FontsChanged(DesktopSettings& settings, BRegion* updateRegion)
+{
+	_UpdateMenuBarHeight(settings);
+	TabDecorator::_FontsChanged(settings, updateRegion);
+}
+
+
+/*!	How far a menu bar's bottom line is from the top of the window, worked out
+	as BMenuBar does: the menu font's height and margins of a sixth of the plain
+	font's size, above and below. A menu bar's own font isn't the window title's.
+*/
+void
+TidyDecorator::_UpdateMenuBarHeight(const DesktopSettings& settings)
+{
+	ServerFont plain;
+	settings.GetDefaultPlainFont(plain);
+	menu_info info;
+	settings.GetMenuInfo(info);
+
+	ServerFont font(plain);
+	font.SetSize(info.font_size);
+	font_height height;
+	font.GetHeight(height);
+	fMenuBarHeight = ceilf(height.ascent + height.descent
+		+ plain.Size() / 3.0f);
+}
 
 
 bool

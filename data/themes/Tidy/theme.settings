@@ -9,6 +9,11 @@ decorator = Tidy
 control look = Tidy
 wallpaper = default
 desktop color = #336698
+font plain = Noto Sans, Regular, 12
+font bold = Noto Sans, Bold, 12
+font fixed = Noto Sans Mono, Regular, 12
+font menu = Noto Sans, Regular, 12
+
 color B_DESKTOP_COLOR = #336698
 icons = haiku
 

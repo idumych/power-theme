@@ -275,7 +275,9 @@ TidyControlLook::DrawBorder(BView* view, BRect& rect, const BRect& updateRect,
 	const rgb_color& base, border_style borderStyle, uint32 flags,
 	uint32 borders)
 {
-	if (dynamic_cast<BMenuBar*>(view) == NULL) {
+	// Tracker's folder icon sits at the end of its menu bar, as a view of its own
+	if (dynamic_cast<BMenuBar*>(view) == NULL && (view->Name() == NULL
+			|| strcmp(view->Name(), "DraggableContainerIcon") != 0)) {
 		HaikuControlLook::DrawBorder(view, rect, updateRect, base, borderStyle,
 			flags, borders);
 		return;
