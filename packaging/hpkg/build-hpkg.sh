@@ -59,14 +59,18 @@ description		"Power Theme switches the desktop between themes, and back: window 
 borders, controls, colours, fonts, wallpaper, the Deskbar's place and \
 freedesktop icon themes. It reads Theme Manager themes too. It comes with \
 the Reactionary ME (Windows ME), Smoke (in the style of ZETA), Renku, \
-Gonx, Haiku and four Flat themes and the ClassicOS 2000 icons. The window \
+Gonx, Haiku, Dano, Tidy, Expose, Platinum (in the style of Mac OS 9) and four \
+Flat themes, and the ClassicOS 2000 and NineIcons Redux icons. The window \
 borders and controls are built on your own system by Power Theme's \
 'Build add-ons...' (they use private parts of app_server and libbe, so they \
 must match the exact system build); it offers to install the compiler."
 packager		"idumych <idumych@users.noreply.github.com>"
 vendor			"idumych"
 copyrights		"2026 idumych"
-licenses		"MIT"
+licenses {
+	"MIT"
+	"GNU GPL v3"
+}
 urls			"https://github.com/idumych/power-theme"
 provides {
 	powertheme = $version
