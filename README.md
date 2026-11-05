@@ -20,6 +20,7 @@ It comes with its own looks:
 - **Haiku Dark**, a black and yellow version of Haiku's look, with dark versions
   of Haiku's own icons;
 - **Dano**, the controls of BeOS R5.1 "Dano", with Haiku's window borders;
+- **Tidy** and **Tidy Dark**, after mockups from Haiku's forum;
 - and the Haiku, Gonx and four Flat themes.
 
 The Reactionary ME look is an independent, unofficial port. It is not
@@ -99,6 +100,10 @@ picture at the top is Power Theme itself, under the stock Haiku theme.
 | **Renku Light**: the same on washi paper, with Haiku's own icons | **DarkFlat**, from haiku_darkstyle, with Haiku's Flat window borders and controls |
 | ![Smoke](docs/screenshots/smoke.png) | ![Gonx](docs/screenshots/gonx.png) |
 | **Smoke** window borders and controls, in the style of ZETA's, with the colours of the "smoke" Theme Manager theme | **Gonx**: Gonx's window borders and controls |
+| ![Dano](docs/screenshots/dano.png) | ![Tidy](docs/screenshots/tidy.png) |
+| **Dano**: the controls of BeOS R5.1 "Dano", with Haiku's window borders | **Tidy**: a thin frame, soft menu bars and slim scroll bars, after mockups from Haiku's forum |
+| ![Tidy Dark](docs/screenshots/tidy-dark.png) | |
+| **Tidy Dark**: the same in dark | |
 | ![The Power Theme window](docs/screenshots/themes-window.png) | |
 | **Power Theme** under Renku: the theme list with a preview, the icon theme, and the parts to apply | |
 
@@ -113,7 +118,7 @@ Power Theme comes as a package for Haiku R1/beta6 and later, and Renku OS
 (x86_64), on the [releases page](https://github.com/idumych/power-theme/releases):
 
 ```sh
-pkgman install ./powertheme-0.4.1-1-x86_64.hpkg
+pkgman install ./powertheme-0.5-1-x86_64.hpkg
 ```
 
 Then open **Power Theme** (Deskbar → Applications), click **Build
@@ -199,6 +204,15 @@ click **Build add-ons…** again.
   tab on the left, an overflowing tick and radio bullet, sunken grey sliders and
   swept tabs. It also turns on double scroll bar arrows, as Dano has, until you
   leave the theme. Its window borders are Haiku's own for now.
+- **Tidy** (`add-ons/decorators/Tidy`, `add-ons/control_look/Tidy`,
+  `data/themes/Tidy`, `data/themes/Tidy Dark`): a light and dark pair after the
+  ["Tidy" mockups](https://discuss.haiku-os.org/t/ui-adjustments-that-stay-out-of-the-way/16988)
+  by anon40228759: a rounded yellow tab with its title in the middle, a thin
+  rounded frame that only has an outline along the top, soft menu bars, pale
+  column headers, and slim scroll bars that are blank when there's nothing to
+  scroll. Without compositing, its rounded corners aren't anti-aliased. The
+  mockups' changes inside applications, such as Tracker's folder path, list
+  icon sizes and spacing and a new HaikuDepot, aren't something a theme can do.
 - **The Gonx theme** (`data/themes/Gonx`): the look of
   [Gonx](https://github.com/idumych/gonx), with its colours, desktop colour
   and fonts over Haiku's defaults, and Haiku's icons. Power Theme builds
@@ -391,6 +405,13 @@ should run on (Haiku R1/beta6), against that system's own headers.
 - Smoke's look follows ZETA's Smoke decorator and controls (yellowTAB,
   later magnussoft). ZETA is not affiliated with this project. Smoke is
   drawn from scratch after screenshots; nothing from ZETA is included.
+- Dano's look follows the controls of BeOS R5.1 "Dano". Be Inc.'s successors are
+  not affiliated with this project. It is drawn from scratch after screenshots of
+  a running system; nothing from Dano is included.
+- Tidy's look follows the "Tidy" mockups by anon40228759 on
+  [Haiku's forum](https://discuss.haiku-os.org/t/ui-adjustments-that-stay-out-of-the-way/16988).
+  They aren't affiliated with this project. It is drawn from scratch; the mockups
+  aren't included.
 - [nanosvg](https://github.com/memononen/nanosvg) by Mikko Mononen (zlib
   licence), in `src/themes/third_party`.
 - Gonx's window decorator and control look (`src/third_party/gonx`), MIT

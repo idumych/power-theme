@@ -69,6 +69,21 @@ Steps: "Reactionary ME", restart Tracker, screenshot the desktop.
 PASS when: {p}-labels.txt says "desktop labels white: yes", from the brightest
 pixels under the first icon.
 
+### dano
+Steps: `powertheme --apply=Haiku --parts=decorator,controls`, `--apply=Dano`, start
+StyledEdit, list its images; open a Tracker window and take a screenshot.
+PASS when: {p}-dano.txt says "new application loads control look: Dano", and the
+screenshot shows Dano's double scroll bar arrows and Haiku's window borders.
+
+### tidy
+Steps: `powertheme --apply=Haiku --parts=decorator,controls`, `--apply=Tidy`, start
+StyledEdit, list its images and read `decorator_settings`; `--mode=dark`, `--status`;
+`--mode=light`, `--status`; screenshots of a Tracker window in both.
+PASS when: {p}-tidy.txt says "new application loads control look: Tidy" and "window
+borders: Tidy", and shows the pair switching: "theme: Tidy Dark" with mode: dark, and
+back with mode: light. The screenshots show the rounded tab with its title in the
+middle, slim scroll bars, and in the dark one, marks that can be seen in check boxes.
+
 ### revert
 Steps: note every icon attribute in `mime_db` and the colours before any theme;
 apply themes as above; `powertheme --revert`; compare.
