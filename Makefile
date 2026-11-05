@@ -64,6 +64,8 @@ FLAT := src/third_party/haiku-flat
 SMOKE_DECOR := $(BUILD)/Smoke
 SMOKE_LOOK := $(BUILD)/control_look/Smoke
 DANO_LOOK := $(BUILD)/control_look/Dano
+TIDY_DECOR := $(BUILD)/Tidy
+TIDY_LOOK := $(BUILD)/control_look/Tidy
 GONX := src/third_party/gonx
 GONX_LOOK := $(BUILD)/control_look/Gonx
 
@@ -73,17 +75,20 @@ GONX_LOOK := $(BUILD)/control_look/Gonx
 DECOR_SOURCE := $(BUILD)/data/PowerTheme
 
 all: $(DECOR) $(LOOK) $(THEMES) $(FLAT_DECOR) $(FLAT_LOOK) $(SMOKE_DECOR) \
-	$(SMOKE_LOOK) $(DANO_LOOK) $(GONX_LOOK) decorator-source
+	$(SMOKE_LOOK) $(DANO_LOOK) $(TIDY_DECOR) $(TIDY_LOOK) $(GONX_LOOK) \
+	decorator-source
 
 decorator-source:
 	rm -rf $(DECOR_SOURCE)
 	mkdir -p $(DECOR_SOURCE)/source/decorators/Reactionary \
 		$(DECOR_SOURCE)/source/decorators/Smoke \
+		$(DECOR_SOURCE)/source/decorators/Tidy \
 		$(DECOR_SOURCE)/source/decorators/Gonx \
 		$(DECOR_SOURCE)/source/decorators/FlatDecorator \
 		$(DECOR_SOURCE)/source/control_looks/Reactionary \
 		$(DECOR_SOURCE)/source/control_looks/Smoke \
 		$(DECOR_SOURCE)/source/control_looks/Dano \
+		$(DECOR_SOURCE)/source/control_looks/Tidy \
 		$(DECOR_SOURCE)/source/control_looks/Gonx \
 		$(DECOR_SOURCE)/source/control_looks/FlatControlLook
 	cp src/themes/build-decorators.sh $(DECOR_SOURCE)/
@@ -98,6 +103,9 @@ decorator-source:
 	cp src/controllook/* $(DECOR_SOURCE)/source/control_looks/Reactionary/
 	cp src/smoke/SmokeControlLook.* $(DECOR_SOURCE)/source/control_looks/Smoke/
 	cp src/dano/DanoControlLook.* $(DECOR_SOURCE)/source/control_looks/Dano/
+	cp src/tidy/TidyDecorator.* src/tidy/resources.rdef \
+		$(DECOR_SOURCE)/source/decorators/Tidy/
+	cp src/tidy/TidyControlLook.* $(DECOR_SOURCE)/source/control_looks/Tidy/
 	cp $(GONX)/controllook/* $(GONX)/LICENSE \
 		$(DECOR_SOURCE)/source/control_looks/Gonx/
 	cp $(FLAT)/controllook/* $(DECOR_SOURCE)/source/control_looks/FlatControlLook/
@@ -152,6 +160,30 @@ $(DANO_LOOK): $(BUILD)/DanoControlLook.o $(BUILD)/DanoControlLook.rsrc
 	$(CXX) $(SYSROOT_FLAGS) -shared -s -o $@ $(BUILD)/DanoControlLook.o \
 		-lbe -lstdc++
 	$(XRES) -o $@ $(BUILD)/DanoControlLook.rsrc
+
+# Tidy, after the mockups on Haiku's forum.
+$(BUILD)/TidyDecorator.o: src/tidy/TidyDecorator.cpp src/tidy/TidyDecorator.h
+	@mkdir -p $(BUILD)
+	$(CXX) $(CXXFLAGS) $(DECOR_INCLUDES) -c $< -o $@
+
+$(BUILD)/TidyDecorator.rsrc: src/tidy/resources.rdef
+
+$(TIDY_DECOR): $(BUILD)/TidyDecorator.o $(BUILD)/TidyDecorator.rsrc
+	$(CXX) $(SYSROOT_FLAGS) -shared -s -o $@ $(BUILD)/TidyDecorator.o \
+		-lbe $(APP_SERVER) -lstdc++
+	$(XRES) -o $@ $(BUILD)/TidyDecorator.rsrc
+
+$(BUILD)/TidyControlLook.o: src/tidy/TidyControlLook.cpp src/tidy/TidyControlLook.h
+	@mkdir -p $(BUILD)
+	$(CXX) $(CXXFLAGS) -std=gnu++17 -I$(PRIVATE)/interface -c $< -o $@
+
+$(BUILD)/TidyControlLook.rsrc: src/tidy/TidyControlLook.rdef
+
+$(TIDY_LOOK): $(BUILD)/TidyControlLook.o $(BUILD)/TidyControlLook.rsrc
+	@mkdir -p $(dir $@)
+	$(CXX) $(SYSROOT_FLAGS) -shared -s -o $@ $(BUILD)/TidyControlLook.o \
+		-lbe -lstdc++
+	$(XRES) -o $@ $(BUILD)/TidyControlLook.rsrc
 
 # Haiku's Flat decorator and control look, for the Flat themes (Renku's
 # repositories don't have the haiku_extras package they come in).

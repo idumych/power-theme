@@ -1,0 +1,46 @@
+# "Tidy", after the mockups by anon40228759 on Haiku's forum ("UI adjustments
+# that stay out of the way", 2025). Colours measured from them.
+
+name = Tidy
+variant of = Tidy
+mode = light
+description = The Tidy mockups from Haiku's forum: a rounded yellow tab, a thin frame, soft menu bars, pale column headers and slim scroll bars.
+decorator = Tidy
+control look = Tidy
+wallpaper = default
+desktop color = #336698
+color B_DESKTOP_COLOR = #336698
+icons = haiku
+
+color B_PANEL_BACKGROUND_COLOR = #EDEDED
+color B_PANEL_TEXT_COLOR = #000000
+color B_DOCUMENT_BACKGROUND_COLOR = #FFFFFF
+color B_DOCUMENT_TEXT_COLOR = #000000
+color B_CONTROL_BACKGROUND_COLOR = #F4F4F4
+color B_CONTROL_TEXT_COLOR = #000000
+color B_CONTROL_BORDER_COLOR = #9C9C9C
+color B_CONTROL_HIGHLIGHT_COLOR = #5AA5F0
+color B_CONTROL_MARK_COLOR = #1E4A78
+color B_KEYBOARD_NAVIGATION_COLOR = #4A90D9
+color B_NAVIGATION_PULSE_COLOR = #4A90D9
+color B_SHINE_COLOR = #FFFFFF
+color B_SHADOW_COLOR = #000000
+color B_MENU_BACKGROUND_COLOR = #EDEDED
+color B_MENU_SELECTED_BACKGROUND_COLOR = #C7E6F0
+color B_MENU_ITEM_TEXT_COLOR = #000000
+color B_MENU_SELECTED_ITEM_TEXT_COLOR = #000000
+color B_MENU_SELECTED_BORDER_COLOR = #9CC8DA
+color B_LIST_BACKGROUND_COLOR = #FFFFFF
+color B_LIST_ITEM_TEXT_COLOR = #000000
+color B_LIST_SELECTED_BACKGROUND_COLOR = #DCEFF6
+color B_LIST_SELECTED_ITEM_TEXT_COLOR = #000000
+color B_SCROLL_BAR_THUMB_COLOR = #ECECEC
+color B_STATUS_BAR_COLOR = #5AA5F0
+color B_TOOLTIP_BACKGROUND_COLOR = #FFFFFF
+color B_TOOLTIP_TEXT_COLOR = #000000
+color B_WINDOW_TAB_COLOR = #F9CA14
+color B_WINDOW_TEXT_COLOR = #000000
+color B_WINDOW_INACTIVE_TAB_COLOR = #D8D8D8
+color B_WINDOW_INACTIVE_TEXT_COLOR = #5A5A5A
+color B_WINDOW_BORDER_COLOR = #EDEDED
+color B_WINDOW_INACTIVE_BORDER_COLOR = #EDEDED

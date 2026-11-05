@@ -1,0 +1,10 @@
+resource("be:decor:info") message('deco') {
+	"name"				= "Tidy",
+	"authors"			= "idumych",
+	"short_descr"		= "After the Tidy mockups on Haiku's forum",
+	"long_descr"		= "A rounded tab, a thin rounded frame and only an outline along the top",
+	"lic_url"			= "",
+	"lic_name"			= "MIT",
+	"support_url"		= "https://github.com/idumych/power-theme",
+	float "version"		= 0.1
+};
