@@ -19,7 +19,7 @@ It comes with its own looks:
   dark and normal Haiku icons;
 - **Haiku Dark**, a black and yellow version of Haiku's look, with dark versions
   of Haiku's own icons;
-- **Dano**, the controls of BeOS R5.1 "Dano", with Haiku's window borders;
+- **Dano**, the controls of BeOS R5.1 "Dano", with Haiku's BeOS window borders;
 - **Tidy** and **Tidy Dark**, after mockups from Haiku's forum, and **Tidy Square**
   and **Tidy Square Dark**, with square corners for a compositor to round, and
   **Tidy Renku** and **Tidy Renku Light**, in Renku OS's colours, also square as
@@ -107,7 +107,7 @@ picture at the top is Power Theme itself, under the stock Haiku theme.
 | ![Smoke](docs/screenshots/smoke.png) | ![Gonx](docs/screenshots/gonx.png) |
 | **Smoke** window borders and controls, in the style of ZETA's, with the colours of the "smoke" Theme Manager theme | **Gonx**: Gonx's window borders and controls |
 | ![Dano](docs/screenshots/dano.png) | ![Tidy](docs/screenshots/tidy.png) |
-| **Dano**: the controls of BeOS R5.1 "Dano", with Haiku's window borders | **Tidy**: a thin frame, soft menu bars and slim scroll bars, after mockups from Haiku's forum |
+| **Dano**: the controls of BeOS R5.1 "Dano", with Haiku's BeOS window borders | **Tidy**: a thin frame, soft menu bars and slim scroll bars, after mockups from Haiku's forum |
 | ![Tidy Dark](docs/screenshots/tidy-dark.png) | ![Expose](docs/screenshots/expose.png) |
 | **Tidy Dark**: the same in dark | **Expose**: a dark glossy title bar over soft grey controls with orange-topped tabs, with ZSnake on in the menus |
 | ![Expose Dark](docs/screenshots/expose-dark.png) | ![Platinum](docs/screenshots/platinum.png) |
@@ -206,12 +206,12 @@ click **Build add-ons…** again.
   fonts (from Haiku's source) and Haiku's icons. It switches back to stock
   Haiku whatever you had before; **Revert** instead goes back to *your*
   look from before the first theme, customisations included.
-- **Dano** (`add-ons/control_look/Dano`, `data/themes/Dano`): the controls of
+- **Dano** (`add-ons/decorators/BeDecorator`, `add-ons/control_look/Dano`, `data/themes/Dano`): the controls of
   BeOS R5.1 "Dano", redrawn from screenshots of a running system: white buttons
   with a soft shadow, a default button on a blue plate, menu fields with a blue
   tab on the left, an overflowing tick and radio bullet, sunken grey sliders and
   swept tabs. It also turns on double scroll bar arrows, as Dano has, until you
-  leave the theme. Its window borders are Haiku's own for now.
+  leave the theme. Its window borders are Haiku's BeDecorator (`add-ons/decorators/BeDecorator`).
 - **Tidy** (`add-ons/decorators/Tidy`, `add-ons/control_look/Tidy`,
   `data/themes/Tidy`, `data/themes/Tidy Dark`): a light and dark pair after the
   ["Tidy" mockups](https://discuss.haiku-os.org/t/ui-adjustments-that-stay-out-of-the-way/16988)
@@ -447,6 +447,8 @@ should run on (Haiku R1/beta6), against that system's own headers.
   Haiku Dark uses DarkFlat's colours.
 - FlatDecorator and FlatControlLook from Haiku (as in Renku OS's source),
   MIT licence, Haiku, Inc.; FlatControlLook by nhtello.
+- BeDecorator from Haiku (as in Renku OS's source), MIT licence, Haiku, Inc., with
+  one change, in `src/third_party/haiku-be`.
 - Smoke's look follows ZETA's Smoke decorator and controls (yellowTAB,
   later magnussoft). ZETA is not affiliated with this project. Smoke is
   drawn from scratch after screenshots; nothing from ZETA is included.

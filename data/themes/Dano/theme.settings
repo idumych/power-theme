@@ -1,9 +1,10 @@
 # BeOS R5.1 "Dano": its controls and colours, measured from screenshots of a
-# running system, with Haiku's own window borders and icons. Needs the Dano
-# control look.
+# running system, with Haiku's BeOS window borders and its own icons. Needs the
+# Dano control look and BeDecorator.
 
 name = Dano
 description = The controls of BeOS R5.1 "Dano": white buttons with a soft shadow, a default button on a blue plate, menu fields with a blue tab, and an overflowing tick.
+decorator = BeDecorator
 control look = Dano
 icons = haiku
 desktop color = #336698

@@ -60,6 +60,8 @@ LOOK := $(BUILD)/control_look/Reactionary
 FLAT_DECOR := $(BUILD)/FlatDecorator
 FLAT_LOOK := $(BUILD)/control_look/FlatControlLook
 FLAT := src/third_party/haiku-flat
+BE_DECOR := $(BUILD)/BeDecorator
+BE := src/third_party/haiku-be
 
 SMOKE_DECOR := $(BUILD)/Smoke
 SMOKE_LOOK := $(BUILD)/control_look/Smoke
@@ -81,7 +83,7 @@ PLATINUM_LOOK := $(BUILD)/control_look/Platinum
 # out as build-decorators.sh expects it in a data folder's "PowerTheme".
 DECOR_SOURCE := $(BUILD)/data/PowerTheme
 
-all: $(DECOR) $(LOOK) $(THEMES) $(FLAT_DECOR) $(FLAT_LOOK) $(SMOKE_DECOR) \
+all: $(DECOR) $(LOOK) $(THEMES) $(FLAT_DECOR) $(FLAT_LOOK) $(BE_DECOR) $(SMOKE_DECOR) \
 	$(SMOKE_LOOK) $(DANO_LOOK) $(TIDY_DECOR) $(TIDY_SQUARE_DECOR) $(TIDY_LOOK) \
 	$(GONX_LOOK) \
 	$(EXPOSE_DECOR) $(EXPOSE_LOOK) $(PLATINUM_DECOR) $(PLATINUM_LOOK) \
@@ -97,6 +99,7 @@ decorator-source:
 		$(DECOR_SOURCE)/source/decorators/Platinum \
 		$(DECOR_SOURCE)/source/decorators/Gonx \
 		$(DECOR_SOURCE)/source/decorators/FlatDecorator \
+		$(DECOR_SOURCE)/source/decorators/BeDecorator \
 		$(DECOR_SOURCE)/source/control_looks/Reactionary \
 		$(DECOR_SOURCE)/source/control_looks/Smoke \
 		$(DECOR_SOURCE)/source/control_looks/Dano \
@@ -114,6 +117,7 @@ decorator-source:
 	cp $(GONX)/decorator/* $(GONX)/LICENSE \
 		$(DECOR_SOURCE)/source/decorators/Gonx/
 	cp $(FLAT)/decorator/* $(DECOR_SOURCE)/source/decorators/FlatDecorator/
+	cp $(BE)/decorator/* $(DECOR_SOURCE)/source/decorators/BeDecorator/
 	cp src/controllook/* $(DECOR_SOURCE)/source/control_looks/Reactionary/
 	cp src/smoke/SmokeControlLook.* $(DECOR_SOURCE)/source/control_looks/Smoke/
 	cp src/dano/DanoControlLook.* $(DECOR_SOURCE)/source/control_looks/Dano/
@@ -282,6 +286,18 @@ $(FLAT_DECOR): $(BUILD)/FlatDecorator.o $(BUILD)/FlatDecorator.rsrc
 		-lbe $(APP_SERVER) -lstdc++
 	$(XRES) -o $@ $(BUILD)/FlatDecorator.rsrc
 
+# Haiku's BeOS decorator, for the Dano theme (from the same package).
+$(BUILD)/BeDecorator.o: $(BE)/decorator/BeDecorator.cpp $(BE)/decorator/BeDecorator.h
+	@mkdir -p $(BUILD)
+	$(CXX) $(CXXFLAGS) $(DECOR_INCLUDES) -c $< -o $@
+
+$(BUILD)/BeDecorator.rsrc: $(BE)/decorator/resources.rdef
+
+$(BE_DECOR): $(BUILD)/BeDecorator.o $(BUILD)/BeDecorator.rsrc
+	$(CXX) $(SYSROOT_FLAGS) -shared -s -o $@ $(BUILD)/BeDecorator.o \
+		-lbe $(APP_SERVER) -lstdc++
+	$(XRES) -o $@ $(BUILD)/BeDecorator.rsrc
+
 $(BUILD)/FlatControlLook.o: $(FLAT)/controllook/FlatControlLook.cpp $(FLAT)/controllook/FlatControlLook.h
 	@mkdir -p $(BUILD)
 	$(CXX) $(CXXFLAGS) -Wno-unused-variable -I$(PRIVATE)/interface -c $< -o $@
@@ -362,7 +378,7 @@ $(BUILD)/icon-test: tools/icon-test.cpp src/themes/HVIFEncoder.cpp src/themes/HV
 
 clean:
 	rm -rf $(BUILD)/*.o $(BUILD)/*.rsrc $(BUILD)/themes $(DECOR) $(LOOK) \
-		$(THEMES) $(BUILD)/icon-test $(FLAT_DECOR) $(FLAT_LOOK) \
+		$(THEMES) $(BUILD)/icon-test $(FLAT_DECOR) $(FLAT_LOOK) $(BE_DECOR) \
 		$(SMOKE_DECOR) $(SMOKE_LOOK) $(GONX_LOOK)
 	rm -rf $(DECOR_SOURCE)
 

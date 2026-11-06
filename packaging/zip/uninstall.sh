@@ -18,12 +18,13 @@ for app in "$apps/PowerTheme" "$apps/Themes"; do
 		break
 	fi
 done
-if setdecor -l 2>/dev/null | grep -q -E '^\*(Reactionary|FlatDecorator|Smoke)'; then
+if setdecor -l 2>/dev/null | grep -q -E '^\*(Reactionary|FlatDecorator|BeDecorator|Smoke|Tidy)'; then
 	setdecor Default >/dev/null
 fi
 
 rm -f "$addons/decorators/Reactionary" "$addons/control_look/Reactionary" \
 	"$addons/decorators/FlatDecorator" "$addons/control_look/FlatControlLook" \
+	"$addons/decorators/BeDecorator" \
 	"$addons/decorators/Smoke" "$addons/control_look/Smoke" \
 	"$addons/control_look/Dano" \
 	"$addons/decorators/Tidy" "$addons/decorators/TidySquare" \

@@ -1,0 +1,11 @@
+BeDecorator from Haiku (as in Renku OS's source tree, github.com/RenkuOS/Source,
+commit 4799bb5a188c, src/add-ons/decorators). MIT licence, Copyright Haiku, Inc.;
+see the notices in each file.
+
+Haiku ships it in its haiku_extras package; Renku's repositories don't offer
+that, so Power Theme builds it for the Dano theme.
+
+One change: its base class is TabDecorator rather than SATDecorator, as for
+FlatDecorator, because SATDecorator's headers aren't among those bundled or
+fetched for building. Two includes that aren't needed are gone, and the
+Stack & Tile highlight's value is defined in the source.

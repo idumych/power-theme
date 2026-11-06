@@ -1,6 +1,6 @@
 #!/bin/sh
 # Build Power Theme's add-ons, the window decorators and control looks
-# (Reactionary, Smoke, Gonx, and Haiku's Flat ones if the system lacks
+# (Reactionary, Smoke, Gonx, and Haiku's Flat and Be ones if the system lacks
 # them), on, and for, the running system.
 #
 # A decorator runs inside app_server and uses its private classes, so it
@@ -91,6 +91,7 @@ decorators:Expose:decorators/Expose:src/third_party/expose/decorator:*Decorator.
 decorators:Platinum:decorators/Platinum:src/third_party/platinum/decorator:*Decorator.cpp:resources.rdef
 decorators:Gonx:decorators/Gonx:src/third_party/gonx/decorator:*Decorator.cpp:resources.rdef
 decorators:FlatDecorator:decorators/FlatDecorator:src/third_party/haiku-flat/decorator:*Decorator.cpp:resources.rdef
+decorators:BeDecorator:decorators/BeDecorator:src/third_party/haiku-be/decorator:*Decorator.cpp:resources.rdef
 control_look:Reactionary:control_looks/Reactionary:src/controllook:*ControlLook.cpp:*ControlLook.rdef
 control_look:Smoke:control_looks/Smoke:src/smoke:*ControlLook.cpp:*ControlLook.rdef
 control_look:Dano:control_looks/Dano:src/dano:*ControlLook.cpp:*ControlLook.rdef
@@ -398,7 +399,7 @@ todo=""
 for entry in $addons; do
 	kind=$(echo "$entry" | cut -d: -f1)
 	name=$(echo "$entry" | cut -d: -f2)
-	# Haiku's Flat add-ons come with its haiku_extras package
+	# Haiku's Flat and Be add-ons come with its haiku_extras package
 	if [ -e "/boot/system/add-ons/$kind/$name" ]; then
 		echo "$name ($kind): the system has it already"
 		continue
