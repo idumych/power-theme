@@ -1,0 +1,62 @@
+# The light version of "Tidy Renku Square": see the Tidy Renku Light theme.
+
+name = Tidy Renku Square Light
+variant of = Tidy Renku Square
+mode = light
+description = Tidy Renku Light with a square tab and frame, for a compositor that rounds windows itself.
+decorator = TidySquare
+control look = Tidy
+icons = haiku
+desktop color = #EFE9DD
+wallpaper = wallpaper.jpg
+wallpaper mode = scaled
+
+font plain = Noto Sans, Regular, 12
+font bold = Noto Sans, Bold, 12
+font fixed = Noto Sans Mono, Regular, 12
+font menu = Noto Sans, Regular, 12
+
+# paper #FBF8F1, washi #EFE9DD, washi 2 #C9C2B4, edge #A89F8E, muted #6C6878,
+# indigo #191D2E, fire #FF6A13, fire 2 #FF8A3D, deep fire #A83C06, seal #A8321E,
+# chosen #F6D9C4
+color B_PANEL_BACKGROUND_COLOR = #EFE9DD
+color B_PANEL_TEXT_COLOR = #191D2E
+color B_DOCUMENT_BACKGROUND_COLOR = #FBF8F1
+color B_DOCUMENT_TEXT_COLOR = #191D2E
+color B_CONTROL_BACKGROUND_COLOR = #FBF8F1
+color B_CONTROL_TEXT_COLOR = #191D2E
+color B_CONTROL_BORDER_COLOR = #A89F8E
+color B_CONTROL_HIGHLIGHT_COLOR = #FF6A13
+color B_CONTROL_MARK_COLOR = #A83C06
+color B_KEYBOARD_NAVIGATION_COLOR = #FF6A13
+color B_NAVIGATION_PULSE_COLOR = #FF8A3D
+color B_SHINE_COLOR = #FBF8F1
+color B_SHADOW_COLOR = #A89F8E
+color B_TOOLTIP_BACKGROUND_COLOR = #FBF8F1
+color B_TOOLTIP_TEXT_COLOR = #191D2E
+color B_MENU_BACKGROUND_COLOR = #EFE9DD
+color B_MENU_SELECTED_BACKGROUND_COLOR = #FF6A13
+color B_MENU_ITEM_TEXT_COLOR = #191D2E
+color B_MENU_SELECTED_ITEM_TEXT_COLOR = #160A02
+color B_MENU_SELECTED_BORDER_COLOR = #FF6A13
+color B_WINDOW_TAB_COLOR = #FF6A13
+color B_WINDOW_TEXT_COLOR = #160A02
+color B_WINDOW_INACTIVE_TAB_COLOR = #C9C2B4
+color B_WINDOW_INACTIVE_TEXT_COLOR = #4E4B59
+color B_WINDOW_BORDER_COLOR = #EFE9DD
+color B_WINDOW_INACTIVE_BORDER_COLOR = #EFE9DD
+color B_LIST_BACKGROUND_COLOR = #FBF8F1
+color B_LIST_SELECTED_BACKGROUND_COLOR = #F6D9C4
+color B_LIST_ITEM_TEXT_COLOR = #191D2E
+color B_LIST_SELECTED_ITEM_TEXT_COLOR = #191D2E
+color B_SCROLL_BAR_THUMB_COLOR = #FF8A3D
+color B_LINK_TEXT_COLOR = #A83C06
+color B_LINK_HOVER_COLOR = #7E2C04
+color B_LINK_VISITED_COLOR = #A8321E
+color B_LINK_ACTIVE_COLOR = #FF6A13
+color B_STATUS_BAR_COLOR = #FF6A13
+color B_SUCCESS_COLOR = #1F6B2E
+color B_FAILURE_COLOR = #A8321E
+# darker than the desktop colour above, which is how Tracker and the control
+# looks know to use black labels on the desktop rather than white ones
+color B_DESKTOP_COLOR = #C9C2B4

@@ -1,0 +1,61 @@
+# "Tidy Renku" with square corners, for a compositor that rounds windows itself:
+# see the Tidy Renku theme.
+
+name = Tidy Renku Square
+variant of = Tidy Renku Square
+mode = dark
+description = Tidy Renku with a square tab and frame, for a compositor that rounds windows itself.
+decorator = TidySquare
+control look = Tidy
+icons = haiku-dark
+desktop color = #0C0D12
+wallpaper = wallpaper.jpg
+wallpaper mode = scaled
+
+font plain = Noto Sans, Regular, 12
+font bold = Noto Sans, Bold, 12
+font fixed = Noto Sans Mono, Regular, 12
+font menu = Noto Sans, Regular, 12
+
+# night #0C0D12, night 2 #12141C, indigo #191D2E, indigo 2 #232842,
+# window edge #3A3F55, washi #EFE9DD, washi 2 #C9C2B4, muted #8D8A99,
+# fire #FF6A13, fire 2 #FF8A3D, seal #D8432A, gold #F2C14E
+color B_PANEL_BACKGROUND_COLOR = #191D2E
+color B_PANEL_TEXT_COLOR = #EFE9DD
+color B_DOCUMENT_BACKGROUND_COLOR = #12141C
+color B_DOCUMENT_TEXT_COLOR = #EFE9DD
+color B_CONTROL_BACKGROUND_COLOR = #232842
+color B_CONTROL_TEXT_COLOR = #EFE9DD
+color B_CONTROL_BORDER_COLOR = #3A3F55
+color B_CONTROL_HIGHLIGHT_COLOR = #FF6A13
+color B_CONTROL_MARK_COLOR = #FF8A3D
+color B_KEYBOARD_NAVIGATION_COLOR = #FF6A13
+color B_NAVIGATION_PULSE_COLOR = #FF8A3D
+color B_SHINE_COLOR = #232842
+color B_SHADOW_COLOR = #0C0D12
+color B_TOOLTIP_BACKGROUND_COLOR = #232842
+color B_TOOLTIP_TEXT_COLOR = #EFE9DD
+color B_MENU_BACKGROUND_COLOR = #191D2E
+color B_MENU_SELECTED_BACKGROUND_COLOR = #FF6A13
+color B_MENU_ITEM_TEXT_COLOR = #EFE9DD
+color B_MENU_SELECTED_ITEM_TEXT_COLOR = #160A02
+color B_MENU_SELECTED_BORDER_COLOR = #FF6A13
+color B_WINDOW_TAB_COLOR = #FF6A13
+color B_WINDOW_TEXT_COLOR = #160A02
+color B_WINDOW_INACTIVE_TAB_COLOR = #232842
+color B_WINDOW_INACTIVE_TEXT_COLOR = #8D8A99
+color B_WINDOW_BORDER_COLOR = #191D2E
+color B_WINDOW_INACTIVE_BORDER_COLOR = #191D2E
+color B_LIST_BACKGROUND_COLOR = #0C0D12
+color B_LIST_SELECTED_BACKGROUND_COLOR = #232842
+color B_LIST_ITEM_TEXT_COLOR = #EFE9DD
+color B_LIST_SELECTED_ITEM_TEXT_COLOR = #FF8A3D
+color B_SCROLL_BAR_THUMB_COLOR = #FF8A3D
+color B_LINK_TEXT_COLOR = #FF8A3D
+color B_LINK_HOVER_COLOR = #F2C14E
+color B_LINK_VISITED_COLOR = #D8432A
+color B_LINK_ACTIVE_COLOR = #FF6A13
+color B_STATUS_BAR_COLOR = #FF6A13
+color B_SUCCESS_COLOR = #9FE3A8
+color B_FAILURE_COLOR = #D8432A
+color B_DESKTOP_COLOR = #0C0D12

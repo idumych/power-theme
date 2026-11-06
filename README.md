@@ -21,7 +21,9 @@ It comes with its own looks:
   of Haiku's own icons;
 - **Dano**, the controls of BeOS R5.1 "Dano", with Haiku's window borders;
 - **Tidy** and **Tidy Dark**, after mockups from Haiku's forum, and **Tidy Square**
-  and **Tidy Square Dark**, with square corners for a compositor to round;
+  and **Tidy Square Dark**, with square corners for a compositor to round, and
+  **Tidy Renku** and **Tidy Renku Light**, in Renku OS's colours, also square as
+  **Tidy Renku Square** and **Tidy Renku Square Light**;
 - **Expose** and **Expose Dark**, after Mark Whittaker's KDE themes;
 - **Platinum**, in the style of Mac OS 9, after Niels's KDE theme;
 - and the Haiku, Gonx and four Flat themes.
@@ -223,6 +225,10 @@ click **Build add-ons…** again.
   `data/themes/Tidy Square Dark`): Tidy with the corners of its tab and frame left
   square, for a compositor that rounds windows itself. Its colours and controls
   are Tidy's.
+- **Tidy Renku** (`data/themes/Tidy Renku`, `data/themes/Tidy Renku Light`): Tidy's
+  window borders, controls and fonts with the colours, icons and wallpapers of the
+  Renku themes. **Tidy Renku Square** (`data/themes/Tidy Renku Square`,
+  `data/themes/Tidy Renku Square Light`) is the same with Tidy Square's window borders.
 - **Expose** (`add-ons/decorators/Expose`, `add-ons/control_look/Expose`,
   `data/themes/Expose`, `data/themes/Expose Dark`): a light and dark pair after
   [Expose Dark](https://store.kde.org/p/2347990) and its

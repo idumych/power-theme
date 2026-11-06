@@ -87,7 +87,10 @@ middle, slim scroll bars, and in the dark one, marks that can be seen in check b
 Then `--apply="Tidy Square"`, read `decorator_settings`, `--mode=dark`, `--status`,
 `--mode=light`: it also says "square window borders: TidySquare" and "square dark:
 ... theme: Tidy Square Dark", and its screenshot shows every corner of the tab and
-frame square, and otherwise the same window as Tidy's.
+frame square, and otherwise the same window as Tidy's. Then `--apply="Tidy Renku"`,
+`--status`, `--mode=light`, `--status`: it says "renku dark: ... theme: Tidy Renku" and
+"renku light: ... theme: Tidy Renku Light", and its screenshots show a fire orange tab,
+text that can be read in both, and the Renku wallpapers.
 
 ### expose
 Steps: `powertheme --apply=Haiku --parts=decorator,controls`, `--apply=Expose`,

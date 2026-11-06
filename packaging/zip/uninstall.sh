@@ -40,6 +40,8 @@ rm -rf "$data/themes/Reactionary ME" "$data/themes/Haiku" "$data/themes/Gonx" \
 	"$data/themes/Haiku Dark" "$data/themes/Reactionary ME Dark" \
 	"$data/themes/Expose" "$data/themes/Expose Dark" "$data/themes/Platinum" \
 	"$data/themes/Tidy Square" "$data/themes/Tidy Square Dark" \
+	"$data/themes/Tidy Renku" "$data/themes/Tidy Renku Light" \
+	"$data/themes/Tidy Renku Square" "$data/themes/Tidy Renku Square Light" \
 	"$data/icons/ClassicOS2000" "$data/icons/breeze-dark" \
 	"$data/icons/NineIconsRedux" \
 	"$data/PowerTheme" "$settings/PowerTheme" "$data/Themes" "$settings/Themes"
