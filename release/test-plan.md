@@ -90,7 +90,10 @@ Then `--apply="Tidy Square"`, read `decorator_settings`, `--mode=dark`, `--statu
 frame square, and otherwise the same window as Tidy's. Then `--apply="Tidy Renku"`,
 `--status`, `--mode=light`, `--status`: it says "renku dark: ... theme: Tidy Renku" and
 "renku light: ... theme: Tidy Renku Light", and its screenshots show a fire orange tab,
-text that can be read in both, and the Renku wallpapers.
+text that can be read in both, and the Renku wallpapers. Then `--apply="Tidy Renku Square"`,
+read `decorator_settings`, `--status`, `--mode=light`, `--status`: it says "renku square
+window borders: TidySquare", "renku square dark: ... theme: Tidy Renku Square" and "renku
+square light: ... theme: Tidy Renku Square Light".
 
 ### expose
 Steps: `powertheme --apply=Haiku --parts=decorator,controls`, `--apply=Expose`,
