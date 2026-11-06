@@ -26,7 +26,8 @@ rm -f "$addons/decorators/Reactionary" "$addons/control_look/Reactionary" \
 	"$addons/decorators/FlatDecorator" "$addons/control_look/FlatControlLook" \
 	"$addons/decorators/Smoke" "$addons/control_look/Smoke" \
 	"$addons/control_look/Dano" \
-	"$addons/decorators/Tidy" "$addons/control_look/Tidy" \
+	"$addons/decorators/Tidy" "$addons/decorators/TidySquare" \
+	"$addons/control_look/Tidy" \
 	"$addons/decorators/Expose" "$addons/control_look/Expose" \
 	"$addons/decorators/Platinum" "$addons/control_look/Platinum" \
 	"$apps/PowerTheme" "$bin/powertheme" \
@@ -38,6 +39,7 @@ rm -rf "$data/themes/Reactionary ME" "$data/themes/Haiku" "$data/themes/Gonx" \
 	"$data/themes/OrangeFlat" "$data/themes/Renku" "$data/themes/Renku Light" \
 	"$data/themes/Haiku Dark" "$data/themes/Reactionary ME Dark" \
 	"$data/themes/Expose" "$data/themes/Expose Dark" "$data/themes/Platinum" \
+	"$data/themes/Tidy Square" "$data/themes/Tidy Square Dark" \
 	"$data/icons/ClassicOS2000" "$data/icons/breeze-dark" \
 	"$data/icons/NineIconsRedux" \
 	"$data/PowerTheme" "$settings/PowerTheme" "$data/Themes" "$settings/Themes"

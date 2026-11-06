@@ -22,9 +22,14 @@
 #include "DrawingEngine.h"
 
 
-// how far each of a corner's first rows is cut in
+// how far each of a corner's first rows is cut in; TidySquareDecorator.cpp cuts
+// none of them
 static const int32 kCorner[] = { 3, 2, 1 };
+#ifdef TIDY_SQUARE_CORNERS
+static const int32 kCornerRows = 0;
+#else
 static const int32 kCornerRows = sizeof(kCorner) / sizeof(kCorner[0]);
+#endif
 
 static const float kResizeCornerLength = 14;
 static const float kBorderResizeLength = 22;

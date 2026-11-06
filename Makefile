@@ -65,6 +65,7 @@ SMOKE_DECOR := $(BUILD)/Smoke
 SMOKE_LOOK := $(BUILD)/control_look/Smoke
 DANO_LOOK := $(BUILD)/control_look/Dano
 TIDY_DECOR := $(BUILD)/Tidy
+TIDY_SQUARE_DECOR := $(BUILD)/TidySquare
 TIDY_LOOK := $(BUILD)/control_look/Tidy
 GONX := src/third_party/gonx
 GONX_LOOK := $(BUILD)/control_look/Gonx
@@ -81,7 +82,8 @@ PLATINUM_LOOK := $(BUILD)/control_look/Platinum
 DECOR_SOURCE := $(BUILD)/data/PowerTheme
 
 all: $(DECOR) $(LOOK) $(THEMES) $(FLAT_DECOR) $(FLAT_LOOK) $(SMOKE_DECOR) \
-	$(SMOKE_LOOK) $(DANO_LOOK) $(TIDY_DECOR) $(TIDY_LOOK) $(GONX_LOOK) \
+	$(SMOKE_LOOK) $(DANO_LOOK) $(TIDY_DECOR) $(TIDY_SQUARE_DECOR) $(TIDY_LOOK) \
+	$(GONX_LOOK) \
 	$(EXPOSE_DECOR) $(EXPOSE_LOOK) $(PLATINUM_DECOR) $(PLATINUM_LOOK) \
 	decorator-source
 
@@ -90,6 +92,7 @@ decorator-source:
 	mkdir -p $(DECOR_SOURCE)/source/decorators/Reactionary \
 		$(DECOR_SOURCE)/source/decorators/Smoke \
 		$(DECOR_SOURCE)/source/decorators/Tidy \
+		$(DECOR_SOURCE)/source/decorators/TidySquare \
 		$(DECOR_SOURCE)/source/decorators/Expose \
 		$(DECOR_SOURCE)/source/decorators/Platinum \
 		$(DECOR_SOURCE)/source/decorators/Gonx \
@@ -116,6 +119,8 @@ decorator-source:
 	cp src/dano/DanoControlLook.* $(DECOR_SOURCE)/source/control_looks/Dano/
 	cp src/tidy/TidyDecorator.* src/tidy/resources.rdef \
 		$(DECOR_SOURCE)/source/decorators/Tidy/
+	cp src/tidy/TidySquareDecorator.cpp src/tidy/TidyDecorator.* \
+		src/tidy/square-resources.rdef $(DECOR_SOURCE)/source/decorators/TidySquare/
 	cp src/tidy/TidyControlLook.* $(DECOR_SOURCE)/source/control_looks/Tidy/
 	cp $(EXPOSE)/decorator/* $(EXPOSE)/LICENSE $(EXPOSE)/README \
 		$(DECOR_SOURCE)/source/decorators/Expose/
@@ -191,6 +196,18 @@ $(TIDY_DECOR): $(BUILD)/TidyDecorator.o $(BUILD)/TidyDecorator.rsrc
 	$(CXX) $(SYSROOT_FLAGS) -shared -s -o $@ $(BUILD)/TidyDecorator.o \
 		-lbe $(APP_SERVER) -lstdc++
 	$(XRES) -o $@ $(BUILD)/TidyDecorator.rsrc
+
+# Tidy with square corners, for a compositor that rounds windows itself.
+$(BUILD)/TidySquareDecorator.o: src/tidy/TidySquareDecorator.cpp src/tidy/TidyDecorator.cpp src/tidy/TidyDecorator.h
+	@mkdir -p $(BUILD)
+	$(CXX) $(CXXFLAGS) $(DECOR_INCLUDES) -c $< -o $@
+
+$(BUILD)/TidySquareDecorator.rsrc: src/tidy/square-resources.rdef
+
+$(TIDY_SQUARE_DECOR): $(BUILD)/TidySquareDecorator.o $(BUILD)/TidySquareDecorator.rsrc
+	$(CXX) $(SYSROOT_FLAGS) -shared -s -o $@ $(BUILD)/TidySquareDecorator.o \
+		-lbe $(APP_SERVER) -lstdc++
+	$(XRES) -o $@ $(BUILD)/TidySquareDecorator.rsrc
 
 $(BUILD)/TidyControlLook.o: src/tidy/TidyControlLook.cpp src/tidy/TidyControlLook.h
 	@mkdir -p $(BUILD)

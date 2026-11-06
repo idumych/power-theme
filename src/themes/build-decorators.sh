@@ -85,7 +85,8 @@ cache=${POWERTHEME_CACHE:-$(finddir B_USER_SETTINGS_DIRECTORY 2>/dev/null)/Power
 # tree, and the source files' and resource file's names
 addons="decorators:Reactionary:decorators/Reactionary:src/decorator:*Decorator.cpp:resources.rdef
 decorators:Smoke:decorators/Smoke:src/smoke:*Decorator.cpp:resources.rdef
-decorators:Tidy:decorators/Tidy:src/tidy:*Decorator.cpp:resources.rdef
+decorators:Tidy:decorators/Tidy:src/tidy:TidyDecorator.cpp:resources.rdef
+decorators:TidySquare:decorators/TidySquare:src/tidy:TidySquareDecorator.cpp:square-resources.rdef
 decorators:Expose:decorators/Expose:src/third_party/expose/decorator:*Decorator.cpp:resources.rdef
 decorators:Platinum:decorators/Platinum:src/third_party/platinum/decorator:*Decorator.cpp:resources.rdef
 decorators:Gonx:decorators/Gonx:src/third_party/gonx/decorator:*Decorator.cpp:resources.rdef

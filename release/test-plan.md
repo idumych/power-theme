@@ -84,6 +84,10 @@ PASS when: {p}-tidy.txt says "new application loads control look: Tidy" and "win
 borders: Tidy", and shows the pair switching: "theme: Tidy Dark" with mode: dark, and
 back with mode: light. The screenshots show the rounded tab with its title in the
 middle, slim scroll bars, and in the dark one, marks that can be seen in check boxes.
+Then `--apply="Tidy Square"`, read `decorator_settings`, `--mode=dark`, `--status`,
+`--mode=light`: it also says "square window borders: TidySquare" and "square dark:
+... theme: Tidy Square Dark", and its screenshot shows every corner of the tab and
+frame square, and otherwise the same window as Tidy's.
 
 ### expose
 Steps: `powertheme --apply=Haiku --parts=decorator,controls`, `--apply=Expose`,

@@ -20,7 +20,8 @@ It comes with its own looks:
 - **Haiku Dark**, a black and yellow version of Haiku's look, with dark versions
   of Haiku's own icons;
 - **Dano**, the controls of BeOS R5.1 "Dano", with Haiku's window borders;
-- **Tidy** and **Tidy Dark**, after mockups from Haiku's forum;
+- **Tidy** and **Tidy Dark**, after mockups from Haiku's forum, and **Tidy Square**
+  and **Tidy Square Dark**, with square corners for a compositor to round;
 - **Expose** and **Expose Dark**, after Mark Whittaker's KDE themes;
 - **Platinum**, in the style of Mac OS 9, after Niels's KDE theme;
 - and the Haiku, Gonx and four Flat themes.
@@ -218,6 +219,10 @@ click **Build add-ons…** again.
   scroll. Without compositing, its rounded corners aren't anti-aliased. The
   mockups' changes inside applications, such as Tracker's folder path, list
   icon sizes and spacing and a new HaikuDepot, aren't something a theme can do.
+- **Tidy Square** (`add-ons/decorators/TidySquare`, `data/themes/Tidy Square`,
+  `data/themes/Tidy Square Dark`): Tidy with the corners of its tab and frame left
+  square, for a compositor that rounds windows itself. Its colours and controls
+  are Tidy's.
 - **Expose** (`add-ons/decorators/Expose`, `add-ons/control_look/Expose`,
   `data/themes/Expose`, `data/themes/Expose Dark`): a light and dark pair after
   [Expose Dark](https://store.kde.org/p/2347990) and its
