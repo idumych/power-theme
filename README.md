@@ -377,6 +377,10 @@ click **Build add-ons…** again.
 
 ## Limitations
 
+- A Deskbar along the side of the screen, or collapsed, sizes its logo by the window
+  tab's height, which it reads only as it starts. So Power Theme restarts the Deskbar
+  when a theme changes that height. Its tray icons from add-ons come back; an icon put
+  there by a running application may not until that application restarts.
 - The light "Windows ME" and dark "WinME-Dark" variants of Reactionary are
   ported. The theme's dim
   colour schemes, cursors and wallpaper are not.

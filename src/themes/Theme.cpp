@@ -31,9 +31,11 @@
 #include <Roster.h>
 #include <Screen.h>
 #include <StringList.h>
+#include <Window.h>
 #include <fs_attr.h>
 #include <be_apps/Tracker/Background.h>
 
+#include <new>
 #include <vector>
 
 #include <DecorInfo.h>
@@ -51,6 +53,7 @@ extern void _set_system_font_(const char* which, font_family family,
 
 static const char* kPreviousName = "previous";
 static const char* kTrackerSignature = "application/x-vnd.Be-TRAK";
+static const char* kDeskbarSignature = "application/x-vnd.Be-TSKB";
 static const char* kBackgroundImageSet = "be:bgndimginfoset";
 static const char* kCurrentName = "current";
 static const char* kThemeIconsName = "theme icons";
@@ -1017,6 +1020,63 @@ write_wallpaper(const BMessage& info, BString& log)
 //	#pragma mark - Deskbar
 
 
+/*!	How tall a window's tab is now, or -1. The Deskbar asks this once, as it
+	starts, and sizes its logo's menu by the answer.
+*/
+static float
+window_tab_height()
+{
+	BWindow* window = new(std::nothrow) BWindow(BRect(), NULL, B_TITLED_WINDOW,
+		0);
+	if (window == NULL)
+		return -1;
+	float height = -1;
+	BMessage settings;
+	BRect tab;
+	if (window->GetDecoratorSettings(&settings) == B_OK
+		&& settings.FindRect("tab frame", &tab) == B_OK)
+		height = tab.Height();
+	delete window;
+	return height;
+}
+
+
+//! Whether the Deskbar is along the top or bottom, sized by its own contents.
+static bool
+deskbar_ignores_tab_height(BDeskbar& deskbar)
+{
+	bool expanded;
+	const deskbar_location location = deskbar.Location(&expanded);
+	return expanded
+		&& (location == B_DESKBAR_TOP || location == B_DESKBAR_BOTTOM);
+}
+
+
+/*!	A Deskbar keeps the tab height it started with, so a shorter tab than the
+	logo's height cuts the logo off, whichever look is in use later. Restarting
+	it is the only way to tell it. One that didn't care about the height before
+	may have an old one to get rid of, now it does. launch_daemon starts it
+	again, as it's a service; asking the roster meanwhile can take half a minute.
+*/
+static void
+update_deskbar_for_tab_height(float tabHeight, bool ignoredTabHeight)
+{
+	BDeskbar deskbar;
+	if (!deskbar.IsRunning() || deskbar_ignores_tab_height(deskbar))
+		return;
+	const float now = window_tab_height();
+	if (tabHeight < 0 || now < 0 || (now == tabHeight && !ignoredTabHeight))
+		return;
+
+	const team_id team = be_roster->TeamFor(kDeskbarSignature);
+	if (BMessenger(kDeskbarSignature).SendMessage(B_QUIT_REQUESTED) != B_OK)
+		return;
+	team_info info;
+	for (int32 i = 0; i < 50 && get_team_info(team, &info) == B_OK; i++)
+		snooze(100000);
+}
+
+
 static void
 save_scroll_bar_arrows(BMessage& look)
 {
@@ -1546,6 +1606,9 @@ apply_appearance(const Theme& theme, uint32 parts, BString& log)
 {
 	const uint32 requested = parts;
 	parts &= theme.Parts();
+	const float tabHeight = window_tab_height();
+	BDeskbar deskbar;
+	const bool ignoredTabHeight = deskbar_ignores_tab_height(deskbar);
 
 	BMessage previous;
 	if (load_message(kPreviousName, previous) != B_OK) {
@@ -1649,6 +1712,8 @@ apply_appearance(const Theme& theme, uint32 parts, BString& log)
 		else
 			BPrivate::set_control_look(path);
 	}
+
+	update_deskbar_for_tab_height(tabHeight, ignoredTabHeight);
 
 	set_current(theme.Name(), NULL);
 	set_current_parts(requested & ~THEME_ICONS);
@@ -1781,6 +1846,9 @@ revert_appearance(BString& log)
 	status_t status = load_message(kPreviousName, previous);
 	if (status != B_OK)
 		return status;
+	const float tabHeight = window_tab_height();
+	BDeskbar deskbar;
+	const bool ignoredTabHeight = deskbar_ignores_tab_height(deskbar);
 
 	BString decorator;
 	if (previous.FindString("decorator", &decorator) == B_OK)
@@ -1823,6 +1891,8 @@ revert_appearance(BString& log)
 	bool doubled;
 	if (previous.FindBool("double arrows", &doubled) == B_OK)
 		set_scroll_bar_arrows(doubled);
+
+	update_deskbar_for_tab_height(tabHeight, ignoredTabHeight);
 
 	BPath path;
 	if (themes_settings_path(path, kPreviousName) == B_OK)

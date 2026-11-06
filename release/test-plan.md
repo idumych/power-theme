@@ -116,6 +116,15 @@ striped title bar, the close button on the left and two on the right, lavender
 scroll bars, an inactive window flat with no stripes or buttons, and lilac folders.
 Files with different types show different icons from NineIcons Redux.
 
+### deskbar
+Steps: go through "Haiku", "Tidy", "Platinum", "Expose Dark", "Reactionary ME",
+"Tidy Square", "Haiku" and `--revert`, noting the Deskbar's team and how long each
+apply takes, with a screenshot of the Deskbar after each.
+PASS when: the Deskbar is running after every step, with a new team where the tab's
+height changed and it is on the side of the screen, and the same team while it is
+along the bottom. Its logo is whole in every screenshot, and no apply takes over
+10 seconds because of it.
+
 ### revert
 Steps: note every icon attribute in `mime_db` and the colours before any theme;
 apply themes as above; `powertheme --revert`; compare.
