@@ -122,6 +122,32 @@ footer { border-top: 1px solid var(--line); padding: 24px 0 48px; color: var(--m
 	</section>
 
 	<section>
+		<h2 id="compositor">A composited desktop</h2>
+		<div class="sheet">
+			<p>Until now, every pixel on a Renku screen belonged to exactly one window, so a window's edge had nothing to blend with. That's why decorators could only fake smooth corners, and why they showed a thin dark rim over other windows. In this work each window draws to a buffer of its own and a compositor builds the screen from those buffers, so corners blend with whatever is really behind them and windows cast soft shadows.</p>
+			<div class="compare">
+				<img src="img/compositor-on.png" width="1024" height="768" alt="A Tracker window, DeskCalc and StyledEdit overlapping, with rounded corners and soft shadows.">
+				<img class="over" src="img/compositor-off.png" width="1024" height="768" alt="The same windows with square corners and no shadows.">
+				<div class="bar"></div>
+				<span class="tag l">Off</span>
+				<span class="tag r">On</span>
+				<input type="range" min="0" max="100" value="50" aria-label="Compare the desktop with compositing off and on">
+			</div>
+			<p class="caption">Drag across the picture. The same windows, with compositing off and on, on Renku OS in a virtual machine.</p>
+			<div class="pair narrow">
+				<figure><img src="img/compositor-corners-off.png" width="400" height="648" alt="Close-up of a window's tab and frame corners, square, with no shadow." loading="lazy"><figcaption>Off: square corners, 8× zoom.</figcaption></figure>
+				<figure><img src="img/compositor-corners-on.png" width="400" height="648" alt="The same corners, rounded and blended with the windows and desktop behind them, with a shadow." loading="lazy"><figcaption>On: the corners blend with what's behind them.</figcaption></figure>
+			</div>
+			<p>It also changes what a window costs. Moving one no longer makes the windows below it redraw: 0 redraws, against about 390 in the same test without it, because what's underneath is already in its buffer. Screen updates are limited to one per refresh, which cut app_server's CPU use for moving and raising windows and for big fills in that test. A window's buffer is freed when it's hidden or closed.</p>
+			<img src="img/compositor-renku-light.png" width="1024" height="768" alt="The Renku Light theme applied with compositing on, with Power Theme's window open and windows casting shadows." loading="lazy">
+			<p>Power Theme's themes work with it, and switch live with it on. Every decorator gets the shadow, but so far only the Default decorator has rounded corners, so the others keep their square ones.</p>
+			<p>It's off by default. Turn it on in Appearance, under Look and feel, then restart. Safe mode always uses the old way of drawing, as the way back if it doesn't work on a machine.</p>
+			<p><b>Try it:</b> <a href="https://github.com/idumych/power-theme/releases/tag/renku-respin-1">Renku respin 1</a> is an unofficial bootable x86_64 image with the compositor, live theme switching, ZSnake and Power Theme with its add-ons already built. It has only run in VirtualBox, so expect rough edges.</p>
+			<p class="status"><b>Not proposed yet:</b> the compositor isn't in Renku, and it's only in that image.</p>
+		</div>
+	</section>
+
+	<section>
 		<h2>Two new looks</h2>
 		<div class="sheet">
 			<p><b>Dano</b> brings back the controls of BeOS R5.1 "Dano", redrawn from screenshots of a running system: white buttons with a soft shadow, a default button on a blue plate, menu fields with a blue tab, and double scroll bar arrows. It only sets the controls, colours and fonts, so it keeps the window borders you already have.</p>
@@ -266,7 +292,7 @@ powertheme --mode=toggle</pre>
 				<figure><img src="img/zsnake-deskbar.png" width="470" height="470" alt="The Deskbar's menu open, with its button in the selection colour and the path running into a submenu." loading="lazy"><figcaption>The Deskbar's button takes the selection colour, so the path starts there.</figcaption></figure>
 				<figure><img src="img/zsnake-appearance.png" width="515" height="507" alt="Appearance's Look and feel tab, with a checkbox to join submenus to the item they open from." loading="lazy"><figcaption>A switch in Appearance, off by default.</figcaption></figure>
 			</div>
-			<p class="status"><b>In review:</b> <a href="https://github.com/RenkuOS/Source/pull/279">#279</a> is ready, and <a href="https://github.com/RenkuOS/Source/pull/280">#280</a> and <a href="https://github.com/RenkuOS/Source/pull/281">#281</a> are drafts stacked on it.</p>
+			<p class="status"><b>In review:</b> <a href="https://github.com/RenkuOS/Source/pull/279">#279</a> is merged, and <a href="https://github.com/RenkuOS/Source/pull/280">#280</a> and <a href="https://github.com/RenkuOS/Source/pull/281">#281</a> are still drafts. All three are in <a href="#compositor">the respin</a>.</p>
 		</div>
 	</section>
 
@@ -306,6 +332,8 @@ powertheme --mode=toggle</pre>
 				<tr><td class="n">0 and 3 pixels</td><td>Difference between a window switched live and one started fresh, for Be and Flat. The comparison also caught a slider that was 1,559 pixels off, since fixed.</td></tr>
 				<tr><td class="n">Live switch</td><td>The schedule changed theme and icons at the set minute, with Power Theme open. It also caught up at start, kept a manual change and restarted after a reboot.</td></tr>
 				<tr><td class="n">The 0.5 package</td><td>Installed on Haiku R1/beta6 on a 16 GB disk and on a stock Renku nightly, with add-ons built on each. Dano and the Tidy pair applied and reverted on both, with no crashes. On beta6 it also went through modes, the schedule, dark icons, BeOS-style tabs and a reboot.</td></tr>
+				<tr><td class="n">The respin</td><td>Booted and installed to disk in VirtualBox. It starts with compositing off, and the check box turned it on after a restart. Themes applied live through Power Theme's window with it off and on, without app_server restarting, and the system restarted with a Power Theme decorator selected.</td></tr>
+				<tr><td class="n">60,000 operations</td><td>Stress runs on the compositor before the respin: 30 windows moved, resized, hidden, minimized and closed while drawing. App_server didn't restart. BDirectWindow, BWindowScreen and screen mode changes also worked on that build.</td></tr>
 				<tr><td class="n">Exact revert</td><td>After 20 rounds of applying and reverting icons, the file count stayed the same. A separate check found every icon restored exactly.</td></tr>
 				</tbody>
 			</table></div>
@@ -322,7 +350,10 @@ powertheme --mode=toggle</pre>
 				<li>Until the Tracker changes land, open windows show some new icons only after Tracker restarts.</li>
 				<li>Application icons don't change at all, as they're part of the applications, so they keep their original colours next to the dark icons.</li>
 				<li>Tracker sometimes crashes in its Attributes menu code when a script resizes a window just after a restart, with Haiku's icons or the dark ones, and with or without the Tracker changes. The cause is unknown, and it's <a href="https://github.com/RenkuOS/Source/issues/294">reported as #294</a>.</li>
-				<li>ZSnake's app_server change (#280) hasn't run on a built image yet, and one crash of a test Deskbar on closing its menu was seen once.</li>
+				<li>One crash of a test Deskbar on closing a ZSnake menu was seen once.</li>
+				<li>The compositor has never used a real vertical sync, as the virtual machines it ran on have no retrace signal, so screen updates are paced by a timer there. Video overlays and high resolutions weren't tested.</li>
+				<li>About 1 boot in 20 hung at the logo in testing, from a kernel deadlock that has nothing to do with this work, <a href="https://github.com/RenkuOS/Source/issues/308">reported as #308</a>.</li>
+				<li>In scripted tests, about 1 in 3 clicks on a menu item did nothing when the menu had been open for two seconds. A stock nightly did the same, so it doesn't come from this work, and it may be how the test clicks.</li>
 								<li>While a schedule is on, its background process appears as a second Power Theme entry in the Deskbar.</li>
 				<li>Switching modes in Reactionary ME can leave small marks in title bars until they next redraw. The Haiku theme's decorator didn't show this.</li>
 				<li>Icon swapping was tested on Renku only. Beta6 got the themes, window and schedule, as its test machine has almost no free disk.</li>
