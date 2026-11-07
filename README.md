@@ -151,6 +151,28 @@ hold Space while booting, open **Select safe mode options** and choose
 **Disable user add-ons**. Once you're on the desktop, open Power Theme and
 click **Build add-ons…** again.
 
+### On Linux, with Hokku
+
+[Hokku](https://github.com/idumych/hokku), the Haiku API on Linux, runs the
+same window decorators and control looks, built from the same sources, in
+its applications: it draws their window frames itself on Wayland, rounding
+their corners and casting a shadow, or a glow on a dark desktop. Power
+Theme themes Hokku's applications there. It needs Hokku installed with its
+development files (headers, `libdecorator`, `rc`), and g++ and binutils to
+build the add-ons:
+
+```sh
+make COSMOE_ROOT=/usr && sudo make COSMOE_ROOT=/usr install
+PowerTheme                    # then Build add-ons… and apply a theme
+```
+
+The add-ons go in `~/cosmoe/addons`. A theme's window borders show in
+applications started after it is applied; colours and fonts change in
+running ones too. "Default", Haiku's window borders, is Haiku there. A
+light/dark schedule starts at login from `~/.config/autostart`. Other Linux
+applications, and Hokku applications run from an AppImage, keep the
+desktop's own frames; on X11 the window manager draws them all.
+
 ## What's here
 
 - **Window decorator** (`add-ons/decorators/Reactionary`), from the
@@ -419,6 +441,10 @@ every kind of control.
 
 To cross-build on Linux against a Renku source tree, run
 `sh tools/sync-sysroot.sh <ssh-host>` once per Renku build, then `make`.
+
+For Hokku on Linux, `make COSMOE_ROOT=<Hokku's prefix>` builds
+`build/hokku/PowerTheme` and the add-ons' source folder (`hokku.mk`), and
+`make COSMOE_ROOT=... install` installs them with the themes and icons.
 
 `make icon-test` builds `build/icon-test`, which encodes an icon's PNG
 designs and compares Haiku's rendering of the result with them, pixel by
