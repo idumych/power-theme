@@ -243,6 +243,20 @@ struct ThemeSchedule {
 // the background process that keeps to the schedule
 extern const char* const kThemeSchedulePort;
 
+// What finds and stops that process: a port on Haiku, and on Hokku, whose
+// ports are each process's own, a locked file with its process ID.
+// claim_schedule_process() makes this process the one, or returns false if
+// another is; wait_for_schedule_stop() waits up to \a timeout for the call
+// to stop, and returns whether it came.
+bool		schedule_process_running();
+void		stop_schedule_process();
+bool		claim_schedule_process();
+bool		wait_for_schedule_stop(bigtime_t timeout);
+void		release_schedule_process();
+// Runs \a program with \a argument, in a session of its own, and waits
+// for it if \a wait.
+status_t	run_program(const char* program, const char* argument, bool wait);
+
 status_t	load_schedule(ThemeSchedule& schedule);
 // Saves it, installs or removes the launch_daemon job for the next login, and
 // starts or stops the background process. Needs a running BApplication, of this

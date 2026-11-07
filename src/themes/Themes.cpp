@@ -229,11 +229,8 @@ apply_icons(const char* id)
 static int
 run_schedule()
 {
-	if (find_port(kThemeSchedulePort) >= 0)
-		return 0;
-	const port_id port = create_port(1, kThemeSchedulePort);
-	if (port < 0)
-		return 1;
+	if (!claim_schedule_process())
+		return schedule_process_running() ? 0 : 1;
 
 	// it outlasts the Terminal that may have started it
 	setsid();
@@ -261,26 +258,16 @@ run_schedule()
 		const theme_mode mode = scheduled_mode_now(schedule);
 		if (mode != current) {
 			current = mode;
-			const char* arguments[] = { image.name,
-				mode == THEME_MODE_DARK ? "--mode=dark" : "--mode=light" };
-			const thread_id team = load_image(2, arguments,
-				const_cast<const char**>(environ));
-			if (team >= 0) {
-				status_t result;
-				resume_thread(team);
-				wait_for_thread(team, &result);
-			}
+			run_program(image.name, mode == THEME_MODE_DARK
+				? "--mode=dark" : "--mode=light", true);
 		}
 
 		// set_schedule() ends the wait to stop it
-		int32 code;
-		if (read_port_etc(port, &code, NULL, 0, B_RELATIVE_TIMEOUT,
-				kScheduleCheckInterval) != B_TIMED_OUT) {
+		if (wait_for_schedule_stop(kScheduleCheckInterval))
 			break;
-		}
 	}
 
-	delete_port(port);
+	release_schedule_process();
 	return 0;
 }
 

@@ -1,0 +1,7 @@
+[Desktop Entry]
+Type=Application
+Name=Power Theme
+Comment=Switch the look of Hokku's applications: window borders, controls, colours and fonts
+Exec=PowerTheme
+Icon=preferences-desktop-theme
+Categories=Settings;DesktopSettings;

@@ -12,6 +12,14 @@
 #
 #   sh tools/sync-sysroot.sh <ssh-host>     # once per Renku build
 #   make
+#
+# For Hokku, the Haiku API on Linux, see hokku.mk:
+#
+#   make COSMOE_ROOT=/usr
+
+ifdef COSMOE_ROOT
+include hokku.mk
+else
 
 RENKU_SRC ?= $(HOME)/Projects/renku-src
 SYSROOT ?= $(CURDIR)/build/sysroot
@@ -367,3 +375,5 @@ clean:
 	rm -rf $(DECOR_SOURCE)
 
 .PHONY: all clean demo icon-test decorator-source
+
+endif	# COSMOE_ROOT

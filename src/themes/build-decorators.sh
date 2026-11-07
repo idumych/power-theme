@@ -3,6 +3,11 @@
 # (Reactionary, Smoke, Gonx, and Haiku's Flat ones if the system lacks
 # them), on, and for, the running system.
 #
+# On Linux it builds them for Hokku, the Haiku API there, which runs
+# decorators in each application (libdecorator) rather than in a server:
+# against the headers and libraries of Hokku's install, so there is nothing
+# to fetch, and into Hokku's add-ons folder in the home folder.
+#
 # A decorator runs inside app_server and uses its private classes, so it
 # must be compiled against the headers of the exact system build it runs
 # on and linked against that system's app_server. A control look subclasses
@@ -100,6 +105,76 @@ control_look:Platinum:control_looks/Platinum:src/third_party/platinum/controlloo
 control_look:Gonx:control_looks/Gonx:src/third_party/gonx/controllook:*ControlLook.cpp:*ControlLook.rdef
 control_look:FlatControlLook:control_looks/FlatControlLook:src/third_party/haiku-flat/controllook:*ControlLook.cpp:*ControlLook.rdef"
 
+
+# Hokku: the compiler, Hokku's install, and what to build with
+
+hokku=false
+[ "$(uname -s)" = Haiku ] || hokku=true
+develFolder=""
+develFlags=""
+develLink=""
+build=""
+trap 'rm -rf "$develFolder" "$build"' EXIT
+if $hokku; then
+	$fetch_only && fail "--fetch-only is for Haiku and Renku"
+	say 6 "Finding Hokku"
+	addonsDir=$(finddir B_SYSTEM_ADDONS_DIRECTORY 2>/dev/null) \
+		|| fail "Hokku isn't installed (no finddir)"
+	libDir=$(dirname "$addonsDir")
+	prefix=$(dirname "$libDir")
+	include=$prefix/include
+	missing=""
+	command -v g++ >/dev/null 2>&1 || missing="$missing g++"
+	command -v objcopy >/dev/null 2>&1 || missing="$missing binutils"
+	[ -x "$prefix/bin/rc" ] || missing="$missing Hokku's rc"
+	[ -f "$include/private/app_server/Decorator.h" ] \
+		&& [ -e "$libDir/libdecorator.so" ] \
+		|| missing="$missing Hokku's development files"
+	if [ -n "$missing" ]; then
+		# installing them is the administrator's, with the distribution's
+		# package manager: --install-tools can't
+		echo "NEED_TOOLS$missing"
+		echo "ERROR not installed:$missing"
+		exit 3
+	fi
+	g++ --version | head -1
+	echo "Hokku: $prefix"
+
+	kits=""
+	for kit in config os os/app os/interface os/kernel os/storage os/support \
+			os/translation os/locale os/add-ons/graphics private \
+			private/interface private/shared private/app private/system \
+			posix; do
+		kits="$kits -I$include/$kit"
+	done
+	common="-O2 -Wall -Wno-multichar -fPIC -std=gnu++17 -DAPP_COSMOE"
+	flags="$common -I$include/private/app_server -I$include $kits"
+	lookFlags="$common -Wno-unused-variable -I$include $kits"
+	decorLink="-Wl,--no-undefined -L$libDir -ldecorator -lbe"
+	lookLink="-Wl,--no-undefined -L$libDir -lbe"
+	rc=$prefix/bin/rc
+	systemAddons=$addonsDir
+	[ -n "$dest" ] || { dest=$(finddir B_USER_NONPACKAGED_ADDONS_DIRECTORY); \
+		reload=true; }
+fi
+
+# Resources go in the add-on: as an attribute on Haiku, a section on Hokku
+add_resources() {
+	if $hokku; then
+		LD_LIBRARY_PATH=$libDir "$rc" -o "$1.rsrc" "$2" 2>&1 \
+			|| fail "$3: rc failed"
+		objcopy --add-section .cosmoe_rsrc="$1.rsrc" \
+			--set-section-flags .cosmoe_rsrc=readonly,data "$1" 2>&1 \
+			|| fail "$3: objcopy failed"
+	else
+		rc -o "$1.rsrc" "$2" 2>&1 || fail "$3: rc failed"
+		xres -o "$1" "$1.rsrc" 2>&1 || fail "$3: xres failed"
+	fi
+	rm -f "$1.rsrc"
+}
+
+# Haiku and Renku: steps 1 to 3 find the system's own headers
+if ! $hokku; then
 
 # 1. the system's revision
 
@@ -391,6 +466,13 @@ flags="-O2 -Wall -Wno-multichar -fPIC -std=gnu++17
 	-iquote $app/drawing -iquote $app/drawing/Painter -iquote $app/font
 	-I$private -I$private/app -I$private/shared -I$private/interface
 	-I$private/graphics -I$headers/renku/headers/libs/agg -I$freetype"
+lookFlags="-O2 -Wall -Wno-multichar -Wno-unused-variable -fPIC
+	-std=gnu++17 -I$private/interface"
+decorLink="-lbe /boot/system/servers/app_server -lstdc++"
+lookLink="-lbe -lstdc++"
+systemAddons=/boot/system/add-ons
+
+fi	# Haiku and Renku
 
 build=$(mktemp -d "${TMPDIR:-/tmp}/themes-build.XXXXXX") || fail "no temporary folder"
 
@@ -399,7 +481,7 @@ for entry in $addons; do
 	kind=$(echo "$entry" | cut -d: -f1)
 	name=$(echo "$entry" | cut -d: -f2)
 	# Haiku's Flat add-ons come with its haiku_extras package
-	if [ -e "/boot/system/add-ons/$kind/$name" ]; then
+	if [ -e "$systemAddons/$kind/$name" ]; then
 		echo "$name ($kind): the system has it already"
 		continue
 	fi
@@ -421,12 +503,11 @@ for item in $todo; do
 	if [ "$kind" = decorators ]; then
 		label="$name window borders"
 		kindflags=$flags
-		link="-lbe /boot/system/servers/app_server -lstdc++"
+		link=$decorLink
 	else
 		label="$name controls"
-		kindflags="-O2 -Wall -Wno-multichar -Wno-unused-variable -fPIC
-			-std=gnu++17 -I$private/interface"
-		link="-lbe -lstdc++"
+		kindflags=$lookFlags
+		link=$lookLink
 	fi
 
 	percent=$((35 + index * 55 / count))
@@ -447,9 +528,7 @@ for item in $todo; do
 	g++ -shared -s -o "$output" $objects $develLink $link 2>&1 \
 		|| fail "$label: doesn't link"
 	for rdef in "$folder"/$resources; do
-		rc -o "$output.rsrc" "$rdef" 2>&1 || fail "$label: rc failed"
-		xres -o "$output" "$output.rsrc" 2>&1 || fail "$label: xres failed"
-		rm -f "$output.rsrc"
+		add_resources "$output" "$rdef" "$label"
 	done
 	built="$built $kind:$name"
 	index=$((index + 1))
@@ -475,7 +554,12 @@ for item in $built; do
 		|| fail "can't install $name in $dest/$kind"
 	echo "Installed $dest/$kind/$name"
 	names="$names $name"
-	if $reload && [ "$kind" = decorators ] && [ "$name" = "$active" ]; then
+	if $reload && $hokku && [ "$kind" = decorators ] \
+			&& [ "$name" = "$active" ]; then
+		# each application runs its own copy: windows opened from now on
+		# have the new one
+		echo "Applications started from now on use the new $name"
+	elif $reload && [ "$kind" = decorators ] && [ "$name" = "$active" ]; then
 		# load the new one, and check app_server takes it
 		say 96 "Switching to the new $name window borders"
 		team=$(app_server_team)

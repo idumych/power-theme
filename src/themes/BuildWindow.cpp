@@ -329,6 +329,18 @@ BuildWindow::_Finished(int status)
 	}
 
 	if (status == kNeedTools) {
+#ifdef APP_COSMOE
+		// Linux: the distribution's packages, which need the administrator
+		fStatus->SetText("Needs tools that aren't installed.");
+		BString text("Building the add-ons needs these, which aren't "
+			"installed:");
+		text << fNeedTools << ". Install them with your distribution's "
+			"package manager, then build again.";
+		BAlert* alert = new BAlert("Build add-ons", text.String(), "OK",
+			NULL, NULL, B_WIDTH_AS_USUAL, B_INFO_ALERT);
+		alert->Go(NULL);
+		return;
+#else
 		BString packages(fNeedTools.IsEmpty() ? "gcc haiku_devel" : fNeedTools);
 		fStatus->SetText("Needs packages that aren't installed.");
 		BString text("Building the add-ons needs these packages, which "
@@ -341,6 +353,7 @@ BuildWindow::_Finished(int status)
 		if (alert->Go() == 1)
 			_Start(true);
 		return;
+#endif
 	}
 
 	// a short status; the error is in the log in full

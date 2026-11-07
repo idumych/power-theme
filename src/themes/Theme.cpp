@@ -18,6 +18,11 @@
 #include <strings.h>
 #include <time.h>
 #include <unistd.h>
+#ifdef APP_COSMOE
+#	include <signal.h>
+#	include <sys/file.h>
+#	include <sys/wait.h>
+#endif
 
 #include <Application.h>
 #include <Deskbar.h>
@@ -379,6 +384,12 @@ libbe_has(const char* symbol)
 const char*
 running_applications_note()
 {
+#ifdef APP_COSMOE
+	// Hokku: each application draws its own windows and loads its control
+	// look when it starts
+	return "Running applications take the new colours and fonts; restart them "
+		"to see the new window borders and controls.";
+#endif
 	// BPrivate::update_control_look() and BPrivate::update_system_fonts().
 	// If these ever change, the note only asks for a restart that's not needed.
 	const bool controls = libbe_has("_ZN8BPrivate19update_control_lookEv");
@@ -636,6 +647,12 @@ find_decorator(DecorInfoUtility& decorators, const BString& names)
 	names.Split("|", true, alternatives);
 	for (int32 i = 0; i < alternatives.CountStrings(); i++) {
 		BString name = trimmed(alternatives.StringAt(i));
+#ifdef APP_COSMOE
+		// Hokku's "Default" is the Linux desktop's own frame; Haiku's is
+		// called Haiku there
+		if (name == "Default")
+			name = "Haiku";
+#endif
 		DecorInfo* decor = decorators.FindDecorator(name);
 		if (decor != NULL)
 			return decor;
@@ -1300,14 +1317,32 @@ save_schedule(const ThemeSchedule& schedule, const char* program)
 	if (status != B_OK)
 		return status;
 
+	// what starts it at login: launch_daemon's job on Haiku, the desktop's
+	// autostart folder on Linux
 	BPath job;
+#ifdef APP_COSMOE
+	const char* config = getenv("XDG_CONFIG_HOME");
+	if (config != NULL && config[0] == '/')
+		status = job.SetTo(config);
+	else
+		status = job.SetTo(getenv("HOME"), ".config");
+	if (status == B_OK)
+		status = job.Append("autostart");
+#else
 	status = find_directory(B_USER_SETTINGS_DIRECTORY, &job, true);
 	if (status == B_OK)
 		status = job.Append("launch");
+#endif
 	if (status != B_OK)
 		return status;
 	create_directory(job.Path(), 0755);
+#ifdef APP_COSMOE
+	BString leaf(kScheduleJob);
+	leaf << ".desktop";
+	status = job.Append(leaf.String());
+#else
 	status = job.Append(kScheduleJob);
+#endif
 	if (status != B_OK)
 		return status;
 
@@ -1321,6 +1356,15 @@ save_schedule(const ThemeSchedule& schedule, const char* program)
 	if (status != B_OK)
 		return status;
 	BString text;
+#ifdef APP_COSMOE
+	text << "# Written by Power Theme; powertheme --schedule=off removes it.\n"
+		"[Desktop Entry]\n"
+		"Type=Application\n"
+		"Name=Power Theme schedule\n"
+		"Comment=Switches the theme between its light and dark versions\n"
+		"Exec=\"" << program << "\" --run-schedule\n"
+		"NoDisplay=true\n";
+#else
 	text << "# Written by Power Theme; powertheme --schedule=off removes it.\n"
 		"target desktop {\n"
 		"\tjob x-vnd.idumych-PowerTheme-schedule {\n"
@@ -1328,6 +1372,7 @@ save_schedule(const ThemeSchedule& schedule, const char* program)
 		"\t\ton initial_volumes_mounted\n"
 		"\t}\n"
 		"}\n";
+#endif
 	ssize_t written = file.Write(text.String(), text.Length());
 	return written == text.Length() ? B_OK
 		: written < 0 ? (status_t)written : B_IO_ERROR;
@@ -1348,23 +1393,195 @@ set_schedule(const ThemeSchedule& schedule)
 
 	if (!schedule.enabled) {
 		// gone before this returns, so that turning it back on starts a new one
-		const port_id port = find_port(kThemeSchedulePort);
-		if (port >= 0)
-			write_port_etc(port, 0, NULL, 0, B_RELATIVE_TIMEOUT, 100000);
-		for (int32 i = 0; i < 20 && find_port(kThemeSchedulePort) >= 0; i++)
+		stop_schedule_process();
+		for (int32 i = 0; i < 20 && schedule_process_running(); i++)
 			snooze(50000);
 		return B_OK;
 	}
 
-	// from the next login, the launch_daemon job starts it
-	if (find_port(kThemeSchedulePort) >= 0)
+	// from the next login, the launch_daemon job or autostart entry starts it
+	if (schedule_process_running())
 		return B_OK;
-	BPath program(&info.ref);
-	const char* arguments[] = { program.Path(), "--run-schedule" };
+	return run_program(BPath(&info.ref).Path(), "--run-schedule", false);
+}
+
+
+//	#pragma mark - the schedule's process
+
+
+#ifdef APP_COSMOE
+
+static int sScheduleLock = -1;
+
+
+static BString
+schedule_lock_path()
+{
+	BPath path;
+	themes_settings_path(path, "schedule.pid");
+	return path.Path();
+}
+
+
+static pid_t
+schedule_process()
+{
+	int fd = open(schedule_lock_path().String(), O_RDONLY);
+	if (fd < 0)
+		return -1;
+	pid_t pid = -1;
+	// locked by the running one; the file stays when it ends
+	if (flock(fd, LOCK_SH | LOCK_NB) != 0) {
+		char text[32] = { 0 };
+		if (read(fd, text, sizeof(text) - 1) > 0)
+			pid = atoi(text);
+	} else
+		flock(fd, LOCK_UN);
+	close(fd);
+	return pid;
+}
+
+
+bool
+schedule_process_running()
+{
+	return schedule_process() > 0;
+}
+
+
+void
+stop_schedule_process()
+{
+	const pid_t pid = schedule_process();
+	if (pid > 0)
+		kill(pid, SIGTERM);
+}
+
+
+bool
+claim_schedule_process()
+{
+	int fd = open(schedule_lock_path().String(), O_RDWR | O_CREAT, 0644);
+	if (fd < 0)
+		return false;
+	if (flock(fd, LOCK_EX | LOCK_NB) != 0) {
+		close(fd);
+		return false;
+	}
+	char text[32];
+	const int length = snprintf(text, sizeof(text), "%d\n", (int)getpid());
+	if (ftruncate(fd, 0) != 0 || write(fd, text, length) != length) {
+		close(fd);
+		return false;
+	}
+	sScheduleLock = fd;
+	return true;
+}
+
+
+bool
+wait_for_schedule_stop(bigtime_t timeout)
+{
+	// stop_schedule_process() ends it with a signal
+	snooze(timeout);
+	return false;
+}
+
+
+void
+release_schedule_process()
+{
+	if (sScheduleLock >= 0)
+		close(sScheduleLock);
+	sScheduleLock = -1;
+}
+
+
+status_t
+run_program(const char* program, const char* argument, bool wait)
+{
+	const pid_t child = fork();
+	if (child < 0)
+		return errno;
+	if (child == 0) {
+		setsid();
+		execl(program, program, argument, (char*)NULL);
+		_exit(127);
+	}
+	if (wait) {
+		int status;
+		while (waitpid(child, &status, 0) < 0 && errno == EINTR)
+			;
+	}
+	return B_OK;
+}
+
+#else	// APP_COSMOE
+
+static port_id sSchedulePort = -1;
+
+
+bool
+schedule_process_running()
+{
+	return find_port(kThemeSchedulePort) >= 0;
+}
+
+
+void
+stop_schedule_process()
+{
+	const port_id port = find_port(kThemeSchedulePort);
+	if (port >= 0)
+		write_port_etc(port, 0, NULL, 0, B_RELATIVE_TIMEOUT, 100000);
+}
+
+
+bool
+claim_schedule_process()
+{
+	if (find_port(kThemeSchedulePort) >= 0)
+		return false;
+	sSchedulePort = create_port(1, kThemeSchedulePort);
+	return sSchedulePort >= 0;
+}
+
+
+bool
+wait_for_schedule_stop(bigtime_t timeout)
+{
+	int32 code;
+	return read_port_etc(sSchedulePort, &code, NULL, 0, B_RELATIVE_TIMEOUT,
+		timeout) != B_TIMED_OUT;
+}
+
+
+void
+release_schedule_process()
+{
+	if (sSchedulePort >= 0)
+		delete_port(sSchedulePort);
+	sSchedulePort = -1;
+}
+
+
+status_t
+run_program(const char* program, const char* argument, bool wait)
+{
+	const char* arguments[] = { program, argument };
 	const thread_id team = load_image(2, arguments,
 		const_cast<const char**>(environ));
-	return team >= 0 ? resume_thread(team) : (status_t)team;
+	if (team < 0)
+		return team;
+	status_t status = resume_thread(team);
+	if (status == B_OK && wait) {
+		status_t result;
+		wait_for_thread(team, &result);
+	}
+	return status;
 }
+
+#endif	// APP_COSMOE
 
 
 bool
