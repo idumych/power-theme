@@ -116,6 +116,13 @@ striped title bar, the close button on the left and two on the right, lavender
 scroll bars, an inactive window flat with no stripes or buttons, and lilac folders.
 Files with different types show different icons from NineIcons Redux.
 
+### flat-tab
+Steps: build `tools/left-tab-test.cpp`, `powertheme --apply=DarkFlat`, start it,
+take a screenshot and run `tools/left-tab-check.py` on it.
+PASS when: {p}-flat.txt says "rows with lines across the left-titled tab: 0", and the
+tab is one smooth gradient in the screenshot. The end of the gradient used to show
+stripes of unrelated colours.
+
 ### deskbar
 Steps: go through "Haiku", "Tidy", "Platinum", "Expose Dark", "Reactionary ME",
 "Tidy Square", "Haiku" and `--revert`, noting the Deskbar's team and how long each

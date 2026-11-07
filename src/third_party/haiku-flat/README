@@ -1,8 +1,16 @@
 FlatDecorator and FlatControlLook from Haiku (as in Renku OS's source tree,
 github.com/RenkuOS/Source, commit 8cf759ea8e6b, src/add-ons/decorators and
-src/add-ons/control_look), unmodified. MIT licence, Copyright Haiku, Inc.;
-see the notices in each file. FlatControlLook is by nhtello (unarix), who
-first made both for haiku_darkstyle (github.com/unarix/haiku_darkstyle).
+src/add-ons/control_look). MIT licence, Copyright Haiku, Inc.; see the
+notices in each file. FlatControlLook is by nhtello (unarix), who first made
+both for haiku_darkstyle (github.com/unarix/haiku_darkstyle).
+
+Two changes from those:
+- The gradients in both end with a stop at 255. Past the last stop,
+  app_server's horizontal gradients draw whatever was in memory, which showed
+  as coloured stripes on a left-titled window's tab.
+- FlatDecorator's corners are rounded on a composited desktop, when the
+  system's headers have RoundedDecorator.h. On other systems it builds without
+  this and its corners stay square.
 
 Haiku ships them in its haiku_extras package; Renku's repositories don't
 offer that, so Reactionary builds them for the Flat themes.

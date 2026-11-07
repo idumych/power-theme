@@ -19,6 +19,12 @@
 #include "TabDecorator.h"
 #include "DecorManager.h"
 
+// Only a composited app_server has this; without it the corners stay square.
+#if __has_include("RoundedDecorator.h")
+#	include "RoundedDecorator.h"
+#	define FLAT_ROUNDED_CORNERS
+#endif
+
 
 class Desktop;
 class ServerBitmap;
@@ -32,7 +38,11 @@ protected:
 									BRect rect, Desktop* desktop);
 };
 
-class FlatDecorator: public TabDecorator {
+class FlatDecorator: public TabDecorator
+#ifdef FLAT_ROUNDED_CORNERS
+	, public RoundedDecorator
+#endif
+{
 public:
 								FlatDecorator(DesktopSettings& settings,
 									BRect frame, Desktop* desktop);
@@ -43,6 +53,11 @@ public:
 									Decorator::Tab* tab = NULL);
 
 	virtual void				UpdateColors(DesktopSettings& settings);
+
+#ifdef FLAT_ROUNDED_CORNERS
+	virtual	void				GetRoundedShape(
+									std::vector<ShapeRect>& shape) const;
+#endif
 
 protected:
 	virtual	void				_DrawFrame(BRect rect);
@@ -57,6 +72,9 @@ protected:
 									BRect rect);
 
 private:
+#ifdef FLAT_ROUNDED_CORNERS
+			void				_DrawFrameCorners();
+#endif
  			void				_DrawButtonBitmap(ServerBitmap* bitmap,
  									bool direct, BRect rect);
 			void				_DrawBlendedRect(DrawingEngine *engine,

@@ -274,6 +274,8 @@ fetch_headers() {
 
 	work=$(mktemp -d "${TMPDIR:-/tmp}/themes-headers.XXXXXX") || return 1
 	paths=$(cd "$bundled/renku" && find . -type f | sed 's|^\./||')
+	roundedPaths="src/servers/app/decorator/RoundedDecorator.h
+		src/servers/app/WindowShape.h"
 	# repository name, where its tags are, where its commits are, branches
 	for source_line in \
 		"RenkuOS/Source|https://github.com/RenkuOS/Source.git|https://github.com/RenkuOS/Source.git|HEAD" \
@@ -327,9 +329,16 @@ fetch_headers() {
 		# shellcheck disable=SC2086
 		if git -C "$work/git" -c advice.detachedHead=false checkout -q \
 				"$commit" -- $paths; then
+			# Only a composited app_server has these; FlatDecorator rounds
+			# its corners when they are there.
+			kept=$paths
+			# shellcheck disable=SC2086
+			git -C "$work/git" -c advice.detachedHead=false checkout -q \
+				"$commit" -- $roundedPaths 2>/dev/null \
+				&& kept="$paths $roundedPaths"
 			rm -rf "$target"
 			if mkdir -p "$target/renku" \
-				&& (cd "$work/git" && tar cf - $paths) \
+				&& (cd "$work/git" && tar cf - $kept) \
 					| tar xf - -C "$target/renku" \
 				&& echo "$revision" > "$target/REVISION" \
 				&& touch "$target/.complete"; then

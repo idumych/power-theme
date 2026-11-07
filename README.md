@@ -262,8 +262,8 @@ click **Build add-ons…** again.
   the first three over its night sky wallpaper. They use Haiku's own
   FlatDecorator and FlatControlLook, which Haiku ships in its haiku_extras
   package; Renku's repositories don't have it, so Power Theme builds them
-  from Renku's source (`src/third_party/haiku-flat`) unless the system
-  already has them. Converted from Theme Manager's format by
+  from Renku's source (`src/third_party/haiku-flat`, with two small changes
+  listed in its README) unless the system already has them. Converted from Theme Manager's format by
   `tools/import-uitheme.py`, with Noto Sans standing in for Noto Sans
   Display where that isn't installed; their Terminal, screensaver
   and sound settings are left out.
