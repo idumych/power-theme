@@ -139,11 +139,22 @@ footer { border-top: 1px solid var(--line); padding: 24px 0 48px; color: var(--m
 				<figure><img src="img/compositor-corners-on.png" width="400" height="648" alt="The same corners, rounded and blended with the windows and desktop behind them, with a shadow." loading="lazy"><figcaption>On: the corners blend with what's behind them.</figcaption></figure>
 			</div>
 			<p>It also changes what a window costs. Moving one no longer makes the windows below it redraw: 0 redraws, against about 390 in the same test without it, because what's underneath is already in its buffer. Screen updates are limited to one per refresh, which cut app_server's CPU use for moving and raising windows and for big fills in that test. A window's buffer is freed when it's hidden or closed.</p>
-			<img src="img/compositor-renku-light.png" width="1024" height="768" alt="The Renku Light theme applied with compositing on, with Power Theme's window open and windows casting shadows." loading="lazy">
-			<p>Power Theme's themes work with it, and switch live with it on. Every decorator gets the shadow, but so far only the Default decorator has rounded corners, so the others keep their square ones.</p>
-			<p>It's off by default. Turn it on in Appearance, under Look and feel, then restart. Safe mode always uses the old way of drawing, as the way back if it doesn't work on a machine.</p>
-			<p><b>Try it:</b> <a href="https://github.com/idumych/power-theme/releases/tag/renku-respin-1">Renku respin 1</a> is an unofficial bootable x86_64 image with the compositor, live theme switching, ZSnake and Power Theme with its add-ons already built. It has only run in VirtualBox, so expect rough edges.</p>
-			<p class="status"><b>Not proposed yet:</b> the compositor isn't in Renku, and it's only in that image.</p>
+			<h3>Options in Appearance</h3>
+			<p>Look and feel has three check boxes: <b>Compositor</b>, <b>Window shadows</b> and <b>Rounded window corners</b>. Shadows and corners change straight away on every window, including those on other workspaces. They're greyed out while the compositor is off, and keep their settings. The compositor itself is switched when the system starts, so ticking it offers to restart, with the buttons <b>Let's go!</b> and <b>I don't wanna</b>. Safe mode always uses the old way of drawing, as the way back if it doesn't work on a machine.</p>
+			<img src="img/compositor-options.png" width="680" height="200" alt="Appearance's Look and feel tab, close up: check boxes for Compositor (after a restart), and below it, indented, Window shadows and Rounded window corners." loading="lazy">
+			<img src="img/compositor-renku.png" width="1024" height="768" alt="The Renku theme with compositing on: a Tracker window and Appearance's Look and feel tab with the new options, both windows rounded and lit by a soft glow on the dark desktop." loading="lazy">
+			<h3>A shadow on light themes, a glow on dark ones</h3>
+			<p>A shadow doesn't show on a dark desktop. When a theme's panel colour is dark, windows get a soft glow in the theme's text colour instead, centred on the window. Changing the colours or the theme changes it straight away.</p>
+			<div class="pair narrow">
+				<figure><img src="img/compositor-shadow.png" width="420" height="315" alt="Close-up of a window's bottom left corner on Renku Light, rounded, with a soft shadow below and to the right." loading="lazy"><figcaption>Renku Light: a shadow. 3× zoom.</figcaption></figure>
+				<figure><img src="img/compositor-glow.png" width="420" height="315" alt="The same corner on the dark Renku theme, rounded, with a soft light glow all round it." loading="lazy"><figcaption>Renku: a glow. 3× zoom.</figcaption></figure>
+			</div>
+			<img src="img/compositor-expose-dark.png" width="1024" height="768" alt="The Expose Dark theme with compositing on: windows with Expose's own tabs and buttons, rounded, with a glow." loading="lazy">
+			<h3>Rounded corners on any decorator</h3>
+			<p>The compositor can cut a window's corners away, but only a decorator knows how to draw its own border along the curve. A decorator opts in to rounding by also inheriting a small class, <code>RoundedDecorator</code>, and decorators built without it keep their square corners, still with a shadow. Renku's Default and Flat decorators round their corners, and since <a href="https://github.com/idumych/power-theme/releases/tag/v0.6.1">Power Theme 0.6.1</a> so does every decorator Power Theme has. With the option unticked, Tidy, Expose and Gonx fall back to their own small curves.</p>
+			<p>Power Theme's themes switch live with the compositor on, and the shadow or glow follows each theme.</p>
+			<p><b>Try it:</b> <a href="https://github.com/idumych/power-theme/releases/tag/power-renku-1">Power Renku 1</a> is an unofficial bootable x86_64 image with the compositor on, all three options, Power Theme 0.6.1 and its Renku theme. It has only run in VirtualBox, so expect rough edges.</p>
+			<p class="status"><b>Proposed:</b> merging the compositor into Renku, off by default, is proposed in <a href="https://github.com/RenkuOS/Source/issues/320">RenkuOS/Source#320</a>, ahead of a series of PRs. It isn't in Renku yet.</p>
 		</div>
 	</section>
 
@@ -333,6 +344,7 @@ powertheme --mode=toggle</pre>
 				<tr><td class="n">Live switch</td><td>The schedule changed theme and icons at the set minute, with Power Theme open. It also caught up at start, kept a manual change and restarted after a reboot.</td></tr>
 				<tr><td class="n">The 0.5 package</td><td>Installed on Haiku R1/beta6 on a 16 GB disk and on a stock Renku nightly, with add-ons built on each. Dano and the Tidy pair applied and reverted on both, with no crashes. On beta6 it also went through modes, the schedule, dark icons, BeOS-style tabs and a reboot.</td></tr>
 				<tr><td class="n">The respin</td><td>Booted and installed to disk in VirtualBox. It starts with compositing off, and the check box turned it on after a restart. Themes applied live through Power Theme's window with it off and on, without app_server restarting, and the system restarted with a Power Theme decorator selected.</td></tr>
+				<tr><td class="n">Options and glow</td><td>All four combinations of shadows and corners switched live with the compositor on, including on another workspace, kept over a restart, and reset by Defaults. Both restart buttons and Escape worked. 13 themes switched live through all 8 decorators with every window look open, corners compared at 4×, and the glow measured on four dark themes.</td></tr>
 				<tr><td class="n">60,000 operations</td><td>Stress runs on the compositor before the respin: 30 windows moved, resized, hidden, minimized and closed while drawing. App_server didn't restart. BDirectWindow, BWindowScreen and screen mode changes also worked on that build.</td></tr>
 				<tr><td class="n">Exact revert</td><td>After 20 rounds of applying and reverting icons, the file count stayed the same. A separate check found every icon restored exactly.</td></tr>
 				</tbody>
