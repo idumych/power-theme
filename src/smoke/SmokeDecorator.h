@@ -17,6 +17,12 @@
 #include "TabDecorator.h"
 #include "DecorManager.h"
 
+// Only a composited app_server has this; without it the corners stay square.
+#if __has_include("RoundedDecorator.h")
+#	include "RoundedDecorator.h"
+#	define SMOKE_ROUNDED_CORNERS
+#endif
+
 
 class Desktop;
 
@@ -31,8 +37,17 @@ protected:
 };
 
 
-class SmokeDecorator : public TabDecorator {
+class SmokeDecorator : public TabDecorator
+#ifdef SMOKE_ROUNDED_CORNERS
+	, public RoundedDecorator
+#endif
+{
 public:
+#ifdef SMOKE_ROUNDED_CORNERS
+	virtual	void				GetRoundedShape(
+									std::vector<ShapeRect>& shape) const;
+#endif
+
 	// a tab's or frame's colours, worked out from the window tab colour
 	struct Palette {
 		rgb_color				outer;
@@ -68,6 +83,10 @@ protected:
 									float* inset) const;
 
 private:
+#ifdef SMOKE_ROUNDED_CORNERS
+			void				_StrokeRoundedFrame();
+			void				_StrokeRoundedTab(Decorator::Tab* tab);
+#endif
 			bool				_HasTab() const;
 			bool				_HasResizeCorner() const;
 			float				_Scale() const;

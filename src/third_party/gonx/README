@@ -3,3 +3,6 @@ Gonx's window decorator and control look, from github.com/idumych/gonx
 Gonx theme works without installing Gonx: Themes builds the decorator on
 the system it runs on (build-decorators.sh), and the control look ships
 prebuilt.
+
+Changed here: its corners are rounded by a composited app_server, when the
+system's headers have RoundedDecorator.h.

@@ -121,7 +121,8 @@ Steps: build `tools/left-tab-test.cpp`, `powertheme --apply=DarkFlat`, start it,
 take a screenshot and run `tools/left-tab-check.py` on it.
 PASS when: {p}-flat.txt says "rows with lines across the left-titled tab: 0", and the
 tab is one smooth gradient in the screenshot. The end of the gradient used to show
-stripes of unrelated colours.
+stripes of unrelated colours. It also says "decorators with rounding code: 0", from
+the add-ons built here: this system has no compositor to round them.
 
 ### deskbar
 Steps: go through "Haiku", "Tidy", "Platinum", "Expose Dark", "Reactionary ME",

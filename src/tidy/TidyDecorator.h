@@ -20,6 +20,12 @@
 #include "TabDecorator.h"
 #include "DecorManager.h"
 
+// Only a composited app_server has this; without it the corners stay square.
+#if __has_include("RoundedDecorator.h")
+#	include "RoundedDecorator.h"
+#	define TIDY_ROUNDED_CORNERS
+#endif
+
 
 class Desktop;
 
@@ -34,8 +40,17 @@ protected:
 };
 
 
-class TidyDecorator : public TabDecorator {
+class TidyDecorator : public TabDecorator
+#ifdef TIDY_ROUNDED_CORNERS
+	, public RoundedDecorator
+#endif
+{
 public:
+#ifdef TIDY_ROUNDED_CORNERS
+	virtual	void				GetRoundedShape(
+									std::vector<ShapeRect>& shape) const;
+#endif
+
 								TidyDecorator(DesktopSettings& settings,
 									BRect frame, Desktop* desktop);
 	virtual						~TidyDecorator();
@@ -64,6 +79,10 @@ protected:
 									BRegion* updateRegion = NULL);
 
 private:
+#ifdef TIDY_ROUNDED_CORNERS
+			void				_StrokeRoundedFrame();
+			void				_StrokeRoundedTab(Decorator::Tab* tab);
+#endif
 			void				_UpdateMenuBarHeight(
 									const DesktopSettings& settings);
 			bool				_HasThinTop() const;

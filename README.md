@@ -126,7 +126,7 @@ Power Theme comes as a package for Haiku R1/beta6 and later, and Renku OS
 (x86_64), on the [releases page](https://github.com/idumych/power-theme/releases):
 
 ```sh
-pkgman install ./powertheme-0.6-1-x86_64.hpkg
+pkgman install ./powertheme-0.6.1-1-x86_64.hpkg
 ```
 
 Then open **Power Theme** (Deskbar → Applications), click **Build
@@ -255,6 +255,10 @@ click **Build add-ons…** again.
   and fonts over Haiku's defaults, and Haiku's icons. Power Theme builds
   Gonx's window borders and controls (below);
   the sources are in `src/third_party/gonx`.
+- **Rounded corners:** every window decorator here can have its corners rounded
+  by a composited app_server, where Appearance has an option for it. They find
+  out when they are built, from the system's headers. Everywhere else they build
+  without this, and draw their corners as they always have.
 - **The Flat themes** (`data/themes/DarkFlat`, `LightFlat`, `MoonFlat`,
   `OrangeFlat`), from unarix's
   [haiku_darkstyle](https://github.com/unarix/haiku_darkstyle): flat

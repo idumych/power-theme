@@ -381,6 +381,9 @@ PlatinumDecorator::_DrawFrame(BRect rect)
 
 	if (_HasResizeCorner())
 		_DrawResizeCorner();
+#ifdef PLATINUM_ROUNDED_CORNERS
+	_StrokeRoundedFrame();
+#endif
 }
 
 
@@ -488,6 +491,9 @@ PlatinumDecorator::_DrawTab(Decorator::Tab* tab, BRect invalid)
 		_DrawStripes(middle + ceilf(width / 2) + kTitleGap, right, t);
 	}
 
+#ifdef PLATINUM_ROUNDED_CORNERS
+	_StrokeRoundedTab(tab);
+#endif
 	_DrawTitle(tab, t);
 	_DrawButtons(tab, invalid);
 }
@@ -1083,3 +1089,52 @@ instantiate_decor_addon(image_id id, const char* name)
 {
 	return new (std::nothrow) PlatinumDecorAddOn(id, name);
 }
+
+
+#ifdef PLATINUM_ROUNDED_CORNERS
+static const int32 kFrameCornerRadius = 6;
+static const int32 kTabCornerRadius = 5;
+
+
+void
+PlatinumDecorator::GetRoundedShape(std::vector<ShapeRect>& shape) const
+{
+	GetShape(shape);
+	RoundedDecorator::RoundShape(shape, fTopTab->look, kFrameCornerRadius,
+		kTabCornerRadius);
+}
+
+
+//! The compositor cuts off the corners, the border follows them.
+void
+PlatinumDecorator::_StrokeRoundedFrame()
+{
+	if (!RoundedDecorator::IsActive(GetDesktop()))
+		return;
+
+	std::vector<ShapeRect> shape;
+	GetRoundedShape(shape);
+	const rgb_color outline = IsFocus(fTopTab) ? kOutline : kInactiveOutline;
+	RoundedDecorator::StrokeCorners(fDrawingEngine, shape[0], outline, outline,
+		outline, outline);
+}
+
+
+void
+PlatinumDecorator::_StrokeRoundedTab(Decorator::Tab* tab)
+{
+	if (!RoundedDecorator::IsActive(GetDesktop()))
+		return;
+
+	std::vector<ShapeRect> shape;
+	GetRoundedShape(shape);
+	for (size_t i = 1; i < shape.size(); i++) {
+		if (shape[i].rect != tab->tabRect)
+			continue;
+		const rgb_color outline = IsFocus(tab) ? kOutline : kInactiveOutline;
+		RoundedDecorator::StrokeCorners(fDrawingEngine, shape[i], outline, outline,
+			outline, outline);
+		break;
+	}
+}
+#endif	// PLATINUM_ROUNDED_CORNERS

@@ -16,6 +16,12 @@
 #include "Decorator.h"
 #include "DecorManager.h"
 
+// Only a composited app_server has this; without it the corners stay square.
+#if __has_include("RoundedDecorator.h")
+#	include "RoundedDecorator.h"
+#	define REACTIONARY_ROUNDED_CORNERS
+#endif
+
 
 class Desktop;
 
@@ -35,8 +41,17 @@ private:
 };
 
 
-class ReactionaryDecorator : public Decorator {
+class ReactionaryDecorator : public Decorator
+#ifdef REACTIONARY_ROUNDED_CORNERS
+	, public RoundedDecorator
+#endif
+{
 public:
+#ifdef REACTIONARY_ROUNDED_CORNERS
+	virtual	void				GetRoundedShape(
+									std::vector<ShapeRect>& shape) const;
+#endif
+
 	struct Geometry {
 		float					border;
 		float					titleHeight;
@@ -107,6 +122,10 @@ protected:
 	virtual	void				_GetFootprint(BRegion* region);
 
 private:
+#ifdef REACTIONARY_ROUNDED_CORNERS
+			void				_StrokeRoundedFrame();
+			void				_StrokeRoundedTab(Decorator::Tab* tab);
+#endif
 			bool				_HasTab() const;
 			bool				_IsSmall() const;
 			bool				_HasResizeGrip() const;

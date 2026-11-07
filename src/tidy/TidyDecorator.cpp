@@ -344,6 +344,9 @@ TidyDecorator::_DrawFrame(BRect rect)
 	}
 
 	_DrawResizeGrip(rect);
+#ifdef TIDY_ROUNDED_CORNERS
+	_StrokeRoundedFrame();
+#endif
 }
 
 
@@ -355,6 +358,9 @@ TidyDecorator::_DrawTab(Decorator::Tab* tab, BRect invalid)
 		return;
 
 	_DrawTabBody(tab);
+#ifdef TIDY_ROUNDED_CORNERS
+	_StrokeRoundedTab(tab);
+#endif
 	_DrawTitle(tab, tabRect);
 	_DrawButtons(tab, invalid);
 }
@@ -709,3 +715,52 @@ instantiate_decor_addon(image_id id, const char* name)
 {
 	return new (std::nothrow) TidyDecorAddOn(id, name);
 }
+
+
+#ifdef TIDY_ROUNDED_CORNERS
+static const int32 kFrameCornerRadius = 6;
+static const int32 kTabCornerRadius = 5;
+
+
+void
+TidyDecorator::GetRoundedShape(std::vector<ShapeRect>& shape) const
+{
+	GetShape(shape);
+	RoundedDecorator::RoundShape(shape, fTopTab->look, kFrameCornerRadius,
+		kTabCornerRadius);
+}
+
+
+//! The compositor cuts off the corners, the border follows them.
+void
+TidyDecorator::_StrokeRoundedFrame()
+{
+	if (!RoundedDecorator::IsActive(GetDesktop()))
+		return;
+
+	std::vector<ShapeRect> shape;
+	GetRoundedShape(shape);
+	const rgb_color outline = _Outline(_TabFocus(fTopTab));
+	RoundedDecorator::StrokeCorners(fDrawingEngine, shape[0], outline, outline,
+		outline, outline);
+}
+
+
+void
+TidyDecorator::_StrokeRoundedTab(Decorator::Tab* tab)
+{
+	if (!RoundedDecorator::IsActive(GetDesktop()))
+		return;
+
+	std::vector<ShapeRect> shape;
+	GetRoundedShape(shape);
+	for (size_t i = 1; i < shape.size(); i++) {
+		if (shape[i].rect != tab->tabRect)
+			continue;
+		const rgb_color outline = _Outline(_TabFocus(tab));
+		RoundedDecorator::StrokeCorners(fDrawingEngine, shape[i], outline, outline,
+			outline, outline);
+		break;
+	}
+}
+#endif	// TIDY_ROUNDED_CORNERS

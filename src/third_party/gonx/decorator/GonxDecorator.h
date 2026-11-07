@@ -17,6 +17,12 @@
 #include "Decorator.h"
 #include "DecorManager.h"
 
+// Only a composited app_server has this; without it the corners stay square.
+#if __has_include("RoundedDecorator.h")
+#	include "RoundedDecorator.h"
+#	define GONX_ROUNDED_CORNERS
+#endif
+
 
 class Desktop;
 
@@ -31,8 +37,17 @@ protected:
 };
 
 
-class GonxDecorator : public Decorator {
+class GonxDecorator : public Decorator
+#ifdef GONX_ROUNDED_CORNERS
+	, public RoundedDecorator
+#endif
+{
 public:
+#ifdef GONX_ROUNDED_CORNERS
+	virtual	void				GetRoundedShape(
+									std::vector<ShapeRect>& shape) const;
+#endif
+
 	struct Tab : public Decorator::Tab {
 		BRect					titleRect;
 			// the painted, rounded title tab

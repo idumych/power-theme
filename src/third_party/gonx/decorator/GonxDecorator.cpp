@@ -1817,3 +1817,15 @@ instantiate_decor_addon(image_id id, const char* name)
 {
 	return new (std::nothrow) GonxDecorAddOn(id, name);
 }
+
+
+#ifdef GONX_ROUNDED_CORNERS
+void
+GonxDecorator::GetRoundedShape(std::vector<ShapeRect>& shape) const
+{
+	GetShape(shape);
+	const Geometry geometry = _Geometry();
+	RoundedDecorator::RoundShape(shape, fTopTab->look,
+		(int32)geometry.frameRadius, (int32)geometry.tabRadius);
+}
+#endif	// GONX_ROUNDED_CORNERS

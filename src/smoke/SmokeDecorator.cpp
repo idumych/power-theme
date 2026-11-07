@@ -296,6 +296,9 @@ SmokeDecorator::_DrawFrame(BRect rect)
 					_DrawTabBody(fTabList.ItemAt(i), true);
 			}
 			_DrawResizeCorner(rect);
+#ifdef SMOKE_ROUNDED_CORNERS
+			_StrokeRoundedFrame();
+#endif
 			break;
 
 		case B_BORDERED_WINDOW_LOOK:
@@ -313,6 +316,9 @@ SmokeDecorator::_DrawTab(Decorator::Tab* tab, BRect invalid)
 		return;
 
 	_DrawTabBody(tab, false);
+#ifdef SMOKE_ROUNDED_CORNERS
+	_StrokeRoundedTab(tab);
+#endif
 	_DrawTitle(tab, tabRect);
 	_DrawButtons(tab, invalid);
 }
@@ -853,3 +859,52 @@ instantiate_decor_addon(image_id id, const char* name)
 {
 	return new (std::nothrow) SmokeDecorAddOn(id, name);
 }
+
+
+#ifdef SMOKE_ROUNDED_CORNERS
+static const int32 kFrameCornerRadius = 6;
+static const int32 kTabCornerRadius = 5;
+
+
+void
+SmokeDecorator::GetRoundedShape(std::vector<ShapeRect>& shape) const
+{
+	GetShape(shape);
+	RoundedDecorator::RoundShape(shape, fTopTab->look, kFrameCornerRadius,
+		kTabCornerRadius);
+}
+
+
+//! The compositor cuts off the corners, the border follows them.
+void
+SmokeDecorator::_StrokeRoundedFrame()
+{
+	if (!RoundedDecorator::IsActive(GetDesktop()))
+		return;
+
+	std::vector<ShapeRect> shape;
+	GetRoundedShape(shape);
+	const rgb_color outer = _Palette(_TabFocus(fTopTab)).outer;
+	RoundedDecorator::StrokeCorners(fDrawingEngine, shape[0], outer, outer,
+		outer, outer);
+}
+
+
+void
+SmokeDecorator::_StrokeRoundedTab(Decorator::Tab* tab)
+{
+	if (!RoundedDecorator::IsActive(GetDesktop()))
+		return;
+
+	std::vector<ShapeRect> shape;
+	GetRoundedShape(shape);
+	for (size_t i = 1; i < shape.size(); i++) {
+		if (shape[i].rect != tab->tabRect)
+			continue;
+		const rgb_color outer = _Palette(_TabFocus(tab)).outer;
+		RoundedDecorator::StrokeCorners(fDrawingEngine, shape[i], outer, outer,
+			outer, outer);
+		break;
+	}
+}
+#endif	// SMOKE_ROUNDED_CORNERS

@@ -375,6 +375,9 @@ ExposeDecorator::_DrawFrame(BRect rect)
 
 	if (_HasResizeCorner())
 		_DrawResizeCorner();
+#ifdef EXPOSE_ROUNDED_CORNERS
+	_StrokeRoundedFrame();
+#endif
 }
 
 
@@ -429,6 +432,9 @@ ExposeDecorator::_DrawTab(Decorator::Tab* tab, BRect invalid)
 		_DrawCorner(t.right, t.top, -1, 1, line);
 	}
 
+#ifdef EXPOSE_ROUNDED_CORNERS
+	_StrokeRoundedTab(tab);
+#endif
 	_DrawTitle(tab, t);
 	_DrawButtons(tab, invalid);
 }
@@ -1074,3 +1080,50 @@ instantiate_decor_addon(image_id id, const char* name)
 {
 	return new (std::nothrow) ExposeDecorAddOn(id, name);
 }
+
+
+#ifdef EXPOSE_ROUNDED_CORNERS
+static const int32 kFrameCornerRadius = 6;
+static const int32 kTabCornerRadius = 5;
+
+
+void
+ExposeDecorator::GetRoundedShape(std::vector<ShapeRect>& shape) const
+{
+	GetShape(shape);
+	RoundedDecorator::RoundShape(shape, fTopTab->look, kFrameCornerRadius,
+		kTabCornerRadius);
+}
+
+
+//! The compositor cuts off the corners, the border follows them.
+void
+ExposeDecorator::_StrokeRoundedFrame()
+{
+	if (!RoundedDecorator::IsActive(GetDesktop()))
+		return;
+
+	std::vector<ShapeRect> shape;
+	GetRoundedShape(shape);
+	RoundedDecorator::StrokeCorners(fDrawingEngine, shape[0], kOutline, kOutline,
+		kOutline, kOutline);
+}
+
+
+void
+ExposeDecorator::_StrokeRoundedTab(Decorator::Tab* tab)
+{
+	if (!RoundedDecorator::IsActive(GetDesktop()))
+		return;
+
+	std::vector<ShapeRect> shape;
+	GetRoundedShape(shape);
+	for (size_t i = 1; i < shape.size(); i++) {
+		if (shape[i].rect != tab->tabRect)
+			continue;
+		RoundedDecorator::StrokeCorners(fDrawingEngine, shape[i], kOutline, kOutline,
+			kOutline, kOutline);
+		break;
+	}
+}
+#endif	// EXPOSE_ROUNDED_CORNERS

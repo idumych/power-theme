@@ -436,6 +436,9 @@ ReactionaryDecorator::_DrawFrame(BRect rect)
 
 	if (_HasResizeGrip())
 		_DrawResizeGrip(rect);
+#ifdef REACTIONARY_ROUNDED_CORNERS
+	_StrokeRoundedFrame();
+#endif
 }
 
 
@@ -480,6 +483,9 @@ ReactionaryDecorator::_DrawTab(Decorator::Tab* tab, BRect invalid)
 	gradient.SetEnd(bar.RightTop());
 	fDrawingEngine->FillRect(bar & invalid, gradient);
 
+#ifdef REACTIONARY_ROUNDED_CORNERS
+	_StrokeRoundedTab(tab);
+#endif
 	_DrawTitle(tab, bar);
 	_DrawButtons(tab, invalid);
 }
@@ -1109,3 +1115,50 @@ instantiate_decor_addon(image_id id, const char* name)
 {
 	return new (std::nothrow) ReactionaryDecorAddOn(id, name);
 }
+
+
+#ifdef REACTIONARY_ROUNDED_CORNERS
+static const int32 kFrameCornerRadius = 6;
+static const int32 kTabCornerRadius = 5;
+
+
+void
+ReactionaryDecorator::GetRoundedShape(std::vector<ShapeRect>& shape) const
+{
+	GetShape(shape);
+	RoundedDecorator::RoundShape(shape, fTopTab->look, kFrameCornerRadius,
+		kTabCornerRadius);
+}
+
+
+//! The compositor cuts off the corners, the border follows them.
+void
+ReactionaryDecorator::_StrokeRoundedFrame()
+{
+	if (!RoundedDecorator::IsActive(GetDesktop()))
+		return;
+
+	std::vector<ShapeRect> shape;
+	GetRoundedShape(shape);
+	RoundedDecorator::StrokeCorners(fDrawingEngine, shape[0], fFrameLight,
+		fFrameDarkShadow, fFrameDarkShadow, fFrameDarkShadow);
+}
+
+
+void
+ReactionaryDecorator::_StrokeRoundedTab(Decorator::Tab* tab)
+{
+	if (!RoundedDecorator::IsActive(GetDesktop()))
+		return;
+
+	std::vector<ShapeRect> shape;
+	GetRoundedShape(shape);
+	for (size_t i = 1; i < shape.size(); i++) {
+		if (shape[i].rect != tab->tabRect)
+			continue;
+		RoundedDecorator::StrokeCorners(fDrawingEngine, shape[i], fFrameLight,
+			fFrameDarkShadow, fFrameLight, fFrameDarkShadow);
+		break;
+	}
+}
+#endif	// REACTIONARY_ROUNDED_CORNERS

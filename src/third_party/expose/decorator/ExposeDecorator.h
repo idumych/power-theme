@@ -27,6 +27,12 @@
 #include "Decorator.h"
 #include "DecorManager.h"
 
+// Only a composited app_server has this; without it the corners stay square.
+#if __has_include("RoundedDecorator.h")
+#	include "RoundedDecorator.h"
+#	define EXPOSE_ROUNDED_CORNERS
+#endif
+
 
 class Desktop;
 
@@ -44,8 +50,17 @@ private:
 };
 
 
-class ExposeDecorator : public Decorator {
+class ExposeDecorator : public Decorator
+#ifdef EXPOSE_ROUNDED_CORNERS
+	, public RoundedDecorator
+#endif
+{
 public:
+#ifdef EXPOSE_ROUNDED_CORNERS
+	virtual	void				GetRoundedShape(
+									std::vector<ShapeRect>& shape) const;
+#endif
+
 								ExposeDecorator(DesktopSettings& settings,
 									BRect frame, Desktop* desktop,
 									bool beosTabs);
@@ -102,6 +117,10 @@ protected:
 	virtual	void				_GetFootprint(BRegion* region);
 
 private:
+#ifdef EXPOSE_ROUNDED_CORNERS
+			void				_StrokeRoundedFrame();
+			void				_StrokeRoundedTab(Decorator::Tab* tab);
+#endif
 			bool				_HasTitle() const;
 			bool				_HasFullTitleBar() const;
 			bool				_TopLeftIsRound() const;

@@ -27,3 +27,6 @@ what's behind a window, and the rounded corners' anti-aliasing, for the same
 reason; the window buttons' hover state, which decorators don't get; the Kvantum
 themes' tabs anywhere but along the top, which are Haiku's; and Expose Dark's wider
 scroll bars, because Haiku's windows lay themselves out around its usual width.
+
+Changed here: its corners are rounded by a composited app_server, when the
+system's headers have RoundedDecorator.h.

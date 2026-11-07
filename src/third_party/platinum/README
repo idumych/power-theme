@@ -37,3 +37,6 @@ translucent in the artwork, is a solid dark line. Scroll bars keep Haiku's usual
 width, because its windows lay themselves out around it.
 
 Apple is not affiliated with this project, or with the themes above.
+
+Changed here: its corners are rounded by a composited app_server, when the
+system's headers have RoundedDecorator.h.
