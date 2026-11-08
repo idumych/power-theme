@@ -12,7 +12,7 @@
 # AUR's hokku-git); the same as Hokku OS's packages/power-theme.
 
 pkgname=power-theme
-pkgver=0.6.1
+pkgver=0.7
 pkgrel=1
 pkgdesc='Theme manager: window borders, controls, colours, fonts and icons for Hokku apps and the Hokku session'
 arch=(x86_64)
@@ -24,7 +24,7 @@ makedepends=(git hokku)
 install=hokku-xattrs.install
 _app=PowerTheme
 _sig=application/x-vnd.idumych-PowerTheme
-_commit=f9ce18992f89de83ddce2c487be30871a1f4d56b  # main, with Hokku support
+_commit=4988a9baf6581ab848cc9362ec0835bf49009193  # v0.7
 source=("$pkgname::git+$url.git#commit=$_commit"
         hokku-xattrs.install)
 sha256sums=('SKIP'
@@ -56,9 +56,11 @@ _stage() {
     rm -rf "$db"
     mimeset -f --mimedb "$system" "$stage$app"
     # Only the app's own entry (the database's names are lowercase): those of
-    # the types it handles belong to hokku.
+    # the types it handles belong to hokku. Not looked up in the system's
+    # database, where an installed Power Theme's entry would keep mimeset from
+    # writing one.
     mkdir -p "$db" "$stage/usr/share/cosmoe/mime_db/application"
-    mimeset -a --mimedb "$db" --mimedb "$system" "$stage$app"
+    mimeset -a --mimedb "$db" "$stage$app"
     cp -a "$db/application/${name,,}" "$entry"
     chmod 644 "$entry"   # mimeset creates it 0600, unreadable to users
     # mimeset recorded where it found the app, which is in staging
