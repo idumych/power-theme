@@ -1,0 +1,66 @@
+# trashcan, from HOTDOG's objects/object-AmigaTrashIcon.m (trashPixels), Copyright (c) 2020 Arthur
+# Choung, GPL 3 or later. Palette lines, then a row a line; a space
+# is nothing.
+= b #000000
+= . #000022
+= X #FF8800
+= o #0055AA
+= O #FFFFFF
+|                                                              |
+|                                                              |
+|                                                              |
+|                                                              |
+|                                                              |
+|                                                              |
+|                                                              |
+|                                                              |
+|                               ................               |
+|                               ................               |
+|                              ...            ...              |
+|                              ...            ...              |
+|                   ......................................     |
+|                   ......................................     |
+|                 ..X.X.X.X.X.X.XXXXXXXXXXXXXXXXXXXXXXXXXX..   |
+|                 ..X.X.X.X.X.X.XXXXXXXXXXXXXXXXXXXXXXXXXX..   |
+|                ..X.X.X.X.X.X.X.X.X.X.X.XXXXXXXXXXXXXXXXXX..  |
+|                ..X.X.X.X.X.X.X.X.X.X.X.XXXXXXXXXXXXXXXXXX..  |
+|                ............................................  |
+|                ............................................  |
+|                 ..X.X.X.X.X.X.X.XXXXXXXXXXXXXXXXXXXXXXXX..   |
+|                 ..X.X.X.X.X.X.X.XXXXXXXXXXXXXXXXXXXXXXXX..   |
+|                 ...X.X.X.XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX..   |
+|                 ...X.X.X.XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX..   |
+|                  ...X......XXXXXXX.......XXXXXX.....XXX..    |
+|                  ...X......XXXXXXX.......XXXXXX.....XXX..    |
+|                  ..X...X.X...XXX...X.X.X..XXX..X.X...XX..    |
+|                  ..X...X.X...XXX...X.X.X..XXX..X.X...XX..    |
+|                  ...X...XXX..XXX..X.XXXX..XXX...XXX..XX..    |
+|                  ...X...XXX..XXX..X.XXXX..XXX...XXX..XX..    |
+|                  ..X...X.XX..XXX...X.XXX..XXX..X.XX..XX..    |
+|                  ..X...X.XX..XXX...X.XXX..XXX..X.XX..XX..    |
+|                   ..X...XXX..XXX..X.XXXX..XXX...XXX..X..     |
+|                   ..X...XXX..XXX..X.XXXX..XXX...XXX..X..     |
+|                   ...X...XXX..XX...X.XXX..XX...XXX..XX..     |
+|                   ...X...XXX..XX...X.XXX..XX...XXX..XX..     |
+|                   ..X...X.XX..XX..X.XXXX..XX..X.XX..XX..     |
+|                   ..X...X.XX..XX..X.XXXX..XX..X.XX..XX..     |
+|                   ...X...XXX..XXX..X.XX..XXX...XXX..XX..     |
+|                   ...X...XXX..XXX..X.XX..XXX...XXX..XX..     |
+|                    ...X...XX..XXX...XXX..XXX..XXX..XX..      |
+|                    ...X...XX..XXX...XXX..XXX..XXX..XX..      |
+|                    ..X...X.X..XXX..X.XX..XXX...XX..XX..      |
+|                    ..X...X.X..XXX..X.XX..XXX...XX..XX..      |
+|                    ...X...XXX..XX...XXX..XX...XXX..XX..      |
+|                    ...X...XXX..XX...XXX..XX...XXX..XX..      |
+|                    ..X.X...XX..XX..X.XX..XX..X.X..XXX..      |
+|                    ..X.X...XX..XX..X.XX..XX..X.X..XXX..      |
+|                .......X...X.X..XXX..XX..XXX...XX..XX..       |
+|                .......X...X.X..XXX..XX..XXX...XX..XX..       |
+|       .................X...X...XXX...X..XXX..X...XXX..       |
+|       .................X...X...XXX...X..XXX..X...XXX..       |
+|   ....................X.X.....X.X.X....XXXXX....XXXX..       |
+|   ....................X.X.....X.X.X....XXXXX....XXXX..       |
+|     .....................X.X.X.X.X.XXXXXXXXXXXXXXX...        |
+|     .....................X.X.X.X.X.XXXXXXXXXXXXXXX...        |
+|          ..........................................          |
+|          ..........................................          |

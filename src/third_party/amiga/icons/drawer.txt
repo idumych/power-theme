@@ -1,0 +1,42 @@
+# drawer, from HOTDOG's objects/object-AmigaDrawerIcon.m (drawerPixels), Copyright (c) 2020 Arthur
+# Choung, GPL 3 or later. Palette lines, then a row a line; a space
+# is nothing.
+= b #000000
+= . #000022
+= * #ff8800
+= X #0055aa
+= o #ffffff
+|              ...........................................................|
+|              ...........................................................|
+|          ....oooooooooooooooooooooooooooooooooooooooooooooooooooooo...o.|
+|          ....oooooooooooooooooooooooooooooooooooooooooooooooooooooo...o.|
+|      ....oooooooooooooooooooooooooooooooooooooooooooooooooooooooo...oo..|
+|      ....oooooooooooooooooooooooooooooooooooooooooooooooooooooooo...oo..|
+|   ................................................................ooo.o.|
+|   ................................................................ooo.o.|
+|   ..oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo..oooo..|
+|   ..oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo..oooo..|
+|   ..ooo......................................................ooo..ooo.o.|
+|   ..ooo......................................................ooo..ooo.o.|
+|   ..ooo..oooooooooooooooooooooooooooooooooooooooooooooooooo..ooo..oo.o..|
+|   ..ooo..oooooooooooooooooooooooooooooooooooooooooooooooooo..ooo..oo.o..|
+|   ..ooo..oooooooooooooooooooooooooooooooooooooooooooooooooo..ooo..ooo.o.|
+|   ..ooo..oooooooooooooooooooooooooooooooooooooooooooooooooo..ooo..ooo.o.|
+|   ..ooo..ooooooooooooooooo...oooooooooo...ooooooooooooooooo..ooo..oo.o..|
+|   ..ooo..ooooooooooooooooo...oooooooooo...ooooooooooooooooo..ooo..oo.o..|
+|   ..ooo..oooooooooooooooo................oooooooooooooooooo..ooo..o.o.. |
+|   ..ooo..oooooooooooooooo................oooooooooooooooooo..ooo..o.o.. |
+|   ..ooo..oooooooooooooooooooooooooooooooooooooooooooooooooo..ooo..oo..  |
+|   ..ooo..oooooooooooooooooooooooooooooooooooooooooooooooooo..ooo..oo..  |
+|   ..ooo..oooooooooooooooooooooooooooooooooooooooooooooooooo..ooo..o..   |
+|   ..ooo..oooooooooooooooooooooooooooooooooooooooooooooooooo..ooo..o..   |
+|   ..ooo......................................................ooo....    |
+|   ..ooo......................................................ooo....    |
+|   ..oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo...     |
+|   ..oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo...     |
+|   ................................................................      |
+|   ................................................................      |
+|                                                                         |
+|                                                                         |
+|                                                                         |
+|                                                                         |

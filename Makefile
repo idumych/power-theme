@@ -91,6 +91,9 @@ NEXT_DECOR := $(BUILD)/NeXT
 NEXT_LOOK := $(BUILD)/control_look/NeXT
 SYSTEM7_DECOR := $(BUILD)/System7
 SYSTEM7_LOOK := $(BUILD)/control_look/System7
+AMIGA_DECOR := $(BUILD)/Amiga
+AMIGA_LOOK := $(BUILD)/control_look/Amiga
+AMIGA := src/third_party/amiga
 
 # What Power Theme needs to build the add-ons (decorators, control looks) on a
 # user's system, laid
@@ -103,6 +106,7 @@ all: $(DECOR) $(LOOK) $(THEMES) $(FLAT_DECOR) $(FLAT_LOOK) $(SMOKE_DECOR) \
 	$(EXPOSE_DECOR) $(EXPOSE_LOOK) $(PLATINUM_DECOR) $(PLATINUM_LOOK) \
 	$(LEOPARD_DECOR) $(LEOPARD_LOOK) $(GERSHWIX_DECOR) $(GERSHWIX_LOOK) \
 	$(NEXT_DECOR) $(NEXT_LOOK) $(SYSTEM7_DECOR) $(SYSTEM7_LOOK) \
+	$(AMIGA_DECOR) $(AMIGA_LOOK) \
 	decorator-source
 
 decorator-source:
@@ -117,6 +121,7 @@ decorator-source:
 		$(DECOR_SOURCE)/source/decorators/Gershwix \
 		$(DECOR_SOURCE)/source/decorators/NeXT \
 		$(DECOR_SOURCE)/source/decorators/System7 \
+		$(DECOR_SOURCE)/source/decorators/Amiga \
 		$(DECOR_SOURCE)/source/decorators/Gonx \
 		$(DECOR_SOURCE)/source/decorators/FlatDecorator \
 		$(DECOR_SOURCE)/source/control_looks/Reactionary \
@@ -129,6 +134,7 @@ decorator-source:
 		$(DECOR_SOURCE)/source/control_looks/Gershwix \
 		$(DECOR_SOURCE)/source/control_looks/NeXT \
 		$(DECOR_SOURCE)/source/control_looks/System7 \
+		$(DECOR_SOURCE)/source/control_looks/Amiga \
 		$(DECOR_SOURCE)/source/control_looks/Gonx \
 		$(DECOR_SOURCE)/source/control_looks/FlatControlLook
 	cp src/themes/build-decorators.sh $(DECOR_SOURCE)/
@@ -172,6 +178,10 @@ decorator-source:
 		$(DECOR_SOURCE)/source/decorators/System7/
 	cp src/system7/System7ControlLook.* \
 		$(DECOR_SOURCE)/source/control_looks/System7/
+	cp $(AMIGA)/decorator/* $(AMIGA)/LICENSE \
+		$(DECOR_SOURCE)/source/decorators/Amiga/
+	cp $(AMIGA)/controllook/* $(AMIGA)/LICENSE \
+		$(DECOR_SOURCE)/source/control_looks/Amiga/
 	cp $(GONX)/controllook/* $(GONX)/LICENSE \
 		$(DECOR_SOURCE)/source/control_looks/Gonx/
 	cp $(FLAT)/controllook/* $(DECOR_SOURCE)/source/control_looks/FlatControlLook/
@@ -406,6 +416,30 @@ $(SYSTEM7_LOOK): $(BUILD)/System7ControlLook.o $(BUILD)/System7ControlLook.rsrc
 	$(CXX) $(SYSROOT_FLAGS) -shared -s -o $@ $(BUILD)/System7ControlLook.o \
 		-lbe -lstdc++
 	$(XRES) -o $@ $(BUILD)/System7ControlLook.rsrc
+
+# Amiga, Workbench 1.3 after Arthur Choung's HOTDOG (GPL 3 or later).
+$(BUILD)/AmigaDecorator.o: $(AMIGA)/decorator/AmigaDecorator.cpp $(AMIGA)/decorator/AmigaDecorator.h
+	@mkdir -p $(BUILD)
+	$(CXX) $(CXXFLAGS) $(DECOR_INCLUDES) -c $< -o $@
+
+$(BUILD)/AmigaDecorator.rsrc: $(AMIGA)/decorator/resources.rdef
+
+$(AMIGA_DECOR): $(BUILD)/AmigaDecorator.o $(BUILD)/AmigaDecorator.rsrc
+	$(CXX) $(SYSROOT_FLAGS) -shared -s -o $@ $(BUILD)/AmigaDecorator.o \
+		-lbe $(APP_SERVER) -lstdc++
+	$(XRES) -o $@ $(BUILD)/AmigaDecorator.rsrc
+
+$(BUILD)/AmigaControlLook.o: $(AMIGA)/controllook/AmigaControlLook.cpp $(AMIGA)/controllook/AmigaControlLook.h
+	@mkdir -p $(BUILD)
+	$(CXX) $(CXXFLAGS) -std=gnu++17 -I$(PRIVATE)/interface -c $< -o $@
+
+$(BUILD)/AmigaControlLook.rsrc: $(AMIGA)/controllook/AmigaControlLook.rdef
+
+$(AMIGA_LOOK): $(BUILD)/AmigaControlLook.o $(BUILD)/AmigaControlLook.rsrc
+	@mkdir -p $(dir $@)
+	$(CXX) $(SYSROOT_FLAGS) -shared -s -o $@ $(BUILD)/AmigaControlLook.o \
+		-lbe -lstdc++
+	$(XRES) -o $@ $(BUILD)/AmigaControlLook.rsrc
 
 # Haiku's Flat decorator and control look, for the Flat themes (Renku's
 # repositories don't have the haiku_extras package they come in).

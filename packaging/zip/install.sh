@@ -156,10 +156,13 @@ for theme in "$here"/data/themes/*; do
 	cp -R "$theme" "$data/themes/"
 done
 rm -rf "$data/icons/ClassicOS2000" "$data/icons/NineIconsRedux" \
-	"$data/icons/elementary" "$data/icons/NeXT"
+	"$data/icons/elementary" "$data/icons/NeXT" "$data/icons/Workbench"
 cp -R "$here/data/icons/ClassicOS2000" "$here/data/icons/NineIconsRedux" \
 	"$here/data/icons/elementary" "$here/data/icons/NeXT" \
-	"$data/icons/"
+	"$here/data/icons/Workbench" "$data/icons/"
+# the Amiga theme's pixel font
+mkdir -p "$data/fonts/ttfonts"
+cp "$here"/data/fonts/*.ttf "$data/fonts/ttfonts/"
 cp "$here/data/PowerTheme/icon-map" "$data/PowerTheme/icon-map"
 # what Power Theme's "Build add-ons" needs: the script, the add-ons'
 # source and the app_server headers

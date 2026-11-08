@@ -1,0 +1,47 @@
+# text-file, from HOTDOG's objects/object-AmigaTextFileIcon.m (textFilePixels), Copyright (c) 2020 Arthur
+# Choung, GPL 3 or later. Palette lines, then a row a line; a space
+# is nothing.
+= b #000000
+= . #000022
+= X #0055AA
+= o #FFFFFF
+|..............................          |
+|..............................          |
+|..oooooooooooooooooooooooo..oo..        |
+|..oooooooooooooooooooooooo..oo..        |
+|..oooooooooooooooooooooooo..oooo..      |
+|..oooooooooooooooooooooooo..oooo..      |
+|..oooooooooooooooooooooooo..oooooo..    |
+|..oooooooooooooooooooooooo..oooooo..    |
+|..ooo.........oooooooooooo..oooooooo..  |
+|..ooo.........oooooooooooo..oooooooo..  |
+|..oooooooooooooooooooooooo..............|
+|..oooooooooooooooooooooooo..............|
+|..ooo.........oooooooooooooooooooooooo..|
+|..ooo.........oooooooooooooooooooooooo..|
+|..oooooooooooooooooooooooooooooooooooo..|
+|..oooooooooooooooooooooooooooooooooooo..|
+|..oooooooooooooooooooooooooooooooooooo..|
+|..oooooooooooooooooooooooooooooooooooo..|
+|..ooooooo....o..........oo.......ooooo..|
+|..ooooooo....o..........oo.......ooooo..|
+|..oooooooooooooooooooooooooooooooooooo..|
+|..oooooooooooooooooooooooooooooooooooo..|
+|..ooo..o........o................ooooo..|
+|..ooo..o........o................ooooo..|
+|..oooooooooooooooooooooooooooooooooooo..|
+|..oooooooooooooooooooooooooooooooooooo..|
+|..ooo....................o.......ooooo..|
+|..ooo....................o.......ooooo..|
+|..oooooooooooooooooooooooooooooooooooo..|
+|..oooooooooooooooooooooooooooooooooooo..|
+|..oooooooooooooooooooooooooooooooooooo..|
+|..oooooooooooooooooooooooooooooooooooo..|
+|..ooooooooooooooooooooo..........ooooo..|
+|..ooooooooooooooooooooo..........ooooo..|
+|..oooooooooooooooooooooooooooooooooooo..|
+|..oooooooooooooooooooooooooooooooooooo..|
+|..oooooooooooooooooooooooooooooooooooo..|
+|..oooooooooooooooooooooooooooooooooooo..|
+|........................................|
+|........................................|

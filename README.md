@@ -33,6 +33,8 @@ It comes with its own looks:
 - **NeXT**, after Swizcore Studio's NeXTSTEP theme for Mac OS X, with its leather
   folders;
 - **System 7**, in the style of Mac OS 7.5;
+- **Amiga**, the Amiga's Workbench 1.3 as Arthur Choung's HOTDOG draws it, with
+  its Topaz font and Workbench icons;
 - and the Haiku, Gonx and four Flat themes.
 
 The Reactionary ME look is an independent, unofficial port. It is not
@@ -85,7 +87,7 @@ scratch after screenshots of Leopard; nothing of Apple's is included.
 Window borders that can draw one can have a BeOS-style tab instead of a title bar
 across the window, whatever the theme. It's as wide as the title, with close on the
 left and zoom on the right, and shift-dragging it slides it along the window. That's
-Reactionary's, Expose's, Platinum's, Leopard's, Gershwix's, NeXT's and System 7's borders; turn it on with **BeOS-style tabs** in the window, or
+Reactionary's, Expose's, Platinum's, Leopard's, Gershwix's, NeXT's, System 7's and Amiga's borders; turn it on with **BeOS-style tabs** in the window, or
 `powertheme --beos-tabs=on`. Run **Build add-ons…** after updating to get it.
 
 ## What needs Renku OS changes
@@ -136,8 +138,8 @@ theme.
 | **Leopard**: Mac OS X 10.5's grey title bar and red, yellow and green gel buttons, white pill buttons, blue gel pop-ups, check boxes and scroll bars, elementary's blue-grey folders and an aurora of its own | **Leopard Graphite**: the same in Graphite's steel blue, window buttons too |
 | ![Gershwix French Blue](docs/screenshots/gershwix.png) | ![NeXT](docs/screenshots/next.png) |
 | **Gershwix French Blue**: a striped grey title bar with square boxes, light bevelled buttons, a ridged scroll thumb and slider knob and a tube-shaded progress bar in French blue, and NineIcons Redux; six other colours share the rest | **NeXT**: NeXTSTEP's black title bar with bevelled grey boxes, square grey buttons, stippled scroll bars with dimpled thumbs, a black progress bar and a slate desktop, with its leather folders |
-| ![System 7](docs/screenshots/system7.png) | |
-| **System 7**: Mac OS 7.5's striped title bar with a close box and a zoom box, black frames with a drop shadow, white rounded buttons, a lavender scroll thumb and the dotted grey desktop | |
+| ![System 7](docs/screenshots/system7.png) | ![Amiga](docs/screenshots/amiga.png) |
+| **System 7**: Mac OS 7.5's striped title bar with a close box and a zoom box, black frames with a drop shadow, white rounded buttons, a lavender scroll thumb and the dotted grey desktop | **Amiga**: Workbench 1.3 after HOTDOG: white title bars with blue stripes and gadgets, blue windows, orange and blue buttons, the Topaz pixel font and Workbench's drawers |
 | ![The Power Theme window](docs/screenshots/themes-window.png) | |
 | **Power Theme** under Renku: the theme list with a preview, the icon theme, and the parts to apply | |
 
@@ -391,6 +393,27 @@ Rebuild the package when Hokku's decorator classes change; until then,
   and progress bars, and white menus with a black selection. The theme has the
   black and white dotted desktop, the Deskbar across the top, ChicagoFLF or Chicago
   where installed (Noto otherwise), and NineIcons Redux.
+- **Amiga** (`add-ons/decorators/Amiga`, `add-ons/control_look/Amiga`,
+  `data/themes/Amiga`, `data/icons/Workbench` and the fonts `HOTDOG Topaz` and
+  `HOTDOG Topaz Bold`): the Amiga's Workbench 1.3 as Arthur Choung's
+  [HOTDOG](https://github.com/paulwratt/HOTDOG) draws it, ported from its code
+  (GPL 3 or later, in `src/third_party/amiga`). A white title bar with two blue
+  stripes, HOTDOG's close gadget at its left, the title in blue after it, and its
+  two depth gadgets at its right, which here minimize and zoom; a white frame two
+  pixels wide and HOTDOG's resize gadget. An inactive window's stripes are dotted,
+  and a gadget held down turns black and orange. The controls are HOTDOG's: white
+  panels with blue text, buttons with an orange outline round a blue one that turn
+  black when pressed, its check boxes and radio buttons pixel for pixel, blue text
+  fields, lists and documents with white text, white menus with a black and orange
+  selection, and scroll bars with a blue knob in a white track. Text is Topaz, made
+  into a font of square pixels from HOTDOG's (`tools/make-topaz-font.py`), at 16
+  points, where each square is a screen pixel; the theme turns off subpixel font
+  smoothing while it's in use (`font smoothing = grey`), so that the pixels stay
+  sharp, and any other theme or **Revert** brings your own setting back. The
+  Workbench icons are HOTDOG's drawer, open drawer, disk, RAM disk, Shell, text
+  file and trashcan, scaled without smoothing (`tools/make-workbench-icons.py`),
+  with NineIcons Redux for the rest. The desktop is Workbench's blue and the
+  Deskbar runs across the top.
 - **The Gonx theme** (`data/themes/Gonx`): the look of
   [Gonx](https://github.com/idumych/gonx), with its colours, desktop colour
   and fonts over Haiku's defaults, and Haiku's icons. Power Theme builds
@@ -443,7 +466,7 @@ Rebuild the package when Hokku's decorator classes change; until then,
   - Saves your look and icons the first time, so **Revert** always gets
     back to them, whatever was applied in between.
   - **Build add-ons…** compiles the window decorators and control looks
-    (Reactionary, Smoke, Dano, Tidy, Expose, Platinum, Leopard, Gershwix, NeXT, System 7, Gonx, and
+    (Reactionary, Smoke, Dano, Tidy, Expose, Platinum, Leopard, Gershwix, NeXT, System 7, Amiga, Gonx, and
     Haiku's Flat ones if the system lacks them) on the system they will run on, with a progress bar and a log.
     Decorators run inside app_server and use its private classes, and
     control looks subclass Haiku's private HaikuControlLook, so ones built
@@ -493,7 +516,7 @@ Rebuild the package when Hokku's decorator classes change; until then,
   --beos-tabs=on`, gives window borders that can draw one a tab as wide as the
   title on top of the frame, with close on the left and zoom on the right, instead
   of a title bar across the window, and shift-dragging a tab slides it. It's for any theme using those borders, and so
-  far that's Reactionary's, Expose's, Platinum's, Leopard's, Gershwix's, NeXT's and System 7's. It stays on through a change of mode.
+  far that's Reactionary's, Expose's, Platinum's, Leopard's, Gershwix's, NeXT's, System 7's and Amiga's. It stays on through a change of mode.
 - **Theme Manager themes**: themes made for
   [Theme Manager](https://github.com/HaikuArchives/HaikuThemeManager)
   (and BeOS and ZETA before it), such as the
@@ -566,6 +589,10 @@ Rebuild the package when Hokku's decorator classes change; until then,
   Tracker no longer draws a background behind them, so they get a light glow on the
   dotted desktop instead. Its scroll thumb grows with the content, where Mac OS's
   was a fixed square.
+- Amiga's depth gadgets minimize and zoom, as Haiku has no button to send a
+  window behind the others. Workbench's icons are wide, so at Tracker's smallest
+  size they are thin. Applications that keep their own font sizes don't show
+  Topaz at its pixel size.
 
 ## Building
 
@@ -654,6 +681,11 @@ should run on (Haiku R1/beta6), against that system's own headers.
   screenshots of Mac OS 7.5.5 from Nathan Lineback's
   [toastytech.com](http://toastytech.com/guis/mac755.html); nothing of Apple's is
   included. Apple isn't affiliated with this project.
+- Amiga's window gadgets, controls, palette, Topaz font and Workbench icons come
+  from [HOTDOG](https://github.com/paulwratt/HOTDOG) by Arthur Choung (© 2020, GNU
+  GPL version 3 or later, in `src/third_party/amiga`, `data/icons/Workbench` and
+  `data/fonts`). Commodore, Amiga and HOTDOG's author aren't affiliated with this
+  project.
 - [nanosvg](https://github.com/memononen/nanosvg) by Mikko Mononen (zlib
   licence), in `src/themes/third_party`.
 - Gonx's window decorator and control look (`src/third_party/gonx`), MIT
@@ -664,4 +696,5 @@ should run on (Haiku R1/beta6), against that system's own headers.
 Power Theme's own code is under the MIT licence (see `LICENSE`), Leopard's,
 Gershwix's, NeXT's and System 7's add-ons included, apart from Expose's and Platinum's add-ons, which are under the
 GNU GPL (`src/third_party/expose/LICENSE`, `src/third_party/platinum/LICENSE`), as
-are the elementary icons (`data/icons/elementary/COPYING`).
+are the elementary icons (`data/icons/elementary/COPYING`) and Amiga's add-ons,
+Workbench icons and Topaz fonts (`src/third_party/amiga/LICENSE`).

@@ -47,8 +47,10 @@ cp -R "$root/build/data/PowerTheme/." "$out/data/PowerTheme/"
 # keeps the icon theme's aliases as symbolic links
 cp -R "$root/build/icons/ClassicOS2000" "$out/data/icons/"
 cp -R "$root/data/icons/NineIconsRedux" "$root/data/icons/elementary" \
-	"$root/data/icons/NeXT" \
+	"$root/data/icons/NeXT" "$root/data/icons/Workbench" \
 	"$out/data/icons/"
+mkdir -p "$out/data/fonts"
+cp "$root"/data/fonts/*.ttf "$out/data/fonts/"
 
 cp -R "$root/src" "$root/tools" "$root/packaging" "$root/build-headers" \
 	"$root/data" "$root/Makefile" "$root/README.md" "$root/LICENSE" \

@@ -175,6 +175,20 @@ one, pop-ups with a shadow and a black triangle, check boxes with a cross, radio
 buttons with a dot, hollow scroll arrows and a lavender thumb, a white menu with a
 black outline, and the black and white dotted desktop.
 
+### amiga
+Steps: `powertheme --apply=Haiku --parts=decorator,controls`, `--apply=Amiga`,
+start StyledEdit, list its images and read `decorator_settings`; read the
+subpixel smoothing setting; screenshot of the controls demo with a menu open, a
+Tracker window and the Deskbar; `--restart-tracker` and screenshot the Deskbar;
+`--apply="System 7"` and read the smoothing setting again.
+PASS when: {p}-amiga.txt says "window borders: Amiga", "new application loads
+control look: Amiga", "subpixel smoothing with Amiga: off" and "subpixel smoothing
+after System 7: on" (when it was on before). The screenshots show white title bars
+with blue stripes, the close gadget at the left and two depth gadgets at the
+right; all text in Topaz, its pixels sharp without coloured edges; orange and blue
+buttons, pixel check boxes and radio buttons, blue lists with white text, drawers
+for folders, and Deskbar labels that don't overlap after Tracker restarts.
+
 ### flat-tab
 Steps: build `tools/left-tab-test.cpp`, `powertheme --apply=DarkFlat`, start it,
 take a screenshot and run `tools/left-tab-check.py` on it.

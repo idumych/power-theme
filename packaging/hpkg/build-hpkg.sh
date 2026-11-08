@@ -35,6 +35,7 @@ work=$(mktemp -d "${TMPDIR:-/tmp}/powertheme-hpkg.XXXXXX")
 trap 'rm -rf "$work"' EXIT
 
 mkdir -p "$work/apps" "$work/bin" "$work/data/themes" "$work/data/icons" \
+	"$work/data/fonts/ttfonts" \
 	"$work/data/deskbar/menu/Applications" \
 	"$work/documentation/packages/powertheme"
 cp "$build/PowerTheme" "$work/apps/PowerTheme"
@@ -45,8 +46,10 @@ cp -R "$root/data/themes/." "$work/data/themes/"
 # keeps the icon theme's aliases as symbolic links
 cp -R "$icons" "$work/data/icons/ClassicOS2000"
 cp -R "$root/data/icons/NineIconsRedux" "$root/data/icons/elementary" \
-	"$root/data/icons/NeXT" \
+	"$root/data/icons/NeXT" "$root/data/icons/Workbench" \
 	"$work/data/icons/"
+# the Amiga theme's pixel font, Topaz as HOTDOG draws it
+cp "$root"/data/fonts/*.ttf "$work/data/fonts/ttfonts/"
 cp -R "$build/data/PowerTheme" "$work/data/PowerTheme"
 cp "$root/data/PowerTheme/icon-map" "$work/data/PowerTheme/icon-map"
 cp "$root/README.md" "$root/LICENSE" "$root/packaging/zip/INSTALL.txt" \
@@ -64,8 +67,9 @@ the Reactionary ME (Windows ME), Smoke (in the style of ZETA), Renku, \
 Gonx, Haiku, Dano, Tidy, Expose, Platinum (in the style of Mac OS 9), Leopard \
 (in the style of Mac OS X 10.5), Gershwix (after Mintar's Platinum theme for \
 Mac OS X, in seven colours), NeXT (after Swizcore Studio's NeXTSTEP theme \
-for Mac OS X), System 7 (in the style of Mac OS 7.5) and four Flat themes, and the ClassicOS 2000, \
-NineIcons Redux, elementary and NeXT icons. The window \
+for Mac OS X), System 7 (in the style of Mac OS 7.5), Amiga (Workbench 1.3, after \
+HOTDOG, with its Topaz font and icons) and four Flat themes, and the ClassicOS 2000, \
+NineIcons Redux, elementary, NeXT and Workbench icons. The window \
 borders and controls are built on your own system by Power Theme's \
 'Build add-ons...' (they use private parts of app_server and libbe, so they \
 must match the exact system build); it offers to install the compiler."

@@ -1,0 +1,10 @@
+resource("be:decor:info") message('deco') {
+	"name"				= "Amiga",
+	"authors"			= "idumych, after Arthur Choung's HOTDOG",
+	"short_descr"		= "In the style of the Amiga's Workbench 1.3, after HOTDOG",
+	"long_descr"		= "A white title bar with blue stripes, a close gadget at its left and depth gadgets at its right",
+	"lic_url"			= "https://www.gnu.org/licenses/gpl-3.0.html",
+	"lic_name"			= "GPL-3.0-or-later",
+	"support_url"		= "https://github.com/idumych/power-theme",
+	float "version"		= 0.1
+};

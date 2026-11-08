@@ -1,0 +1,38 @@
+# disk, from HOTDOG's objects/object-AmigaDiskIcon.m (diskPixels), Copyright (c) 2020 Arthur
+# Choung, GPL 3 or later. Palette lines, then a row a line; a space
+# is nothing.
+= b #000000
+= . #000022
+= X #FF8800
+= o #0055AA
+= O #FFFFFF
+|.........XXXXXXXXXXXXXXXXX.......  |
+|.........XXXXXXXXXXXXXXXXX.......  |
+|.........XXXXXXXXXX....XXX........ |
+|.........XXXXXXXXXX....XXX........ |
+|.........XXXXXXXXXX....XXX.........|
+|.........XXXXXXXXXX....XXX.........|
+|.........XXXXXXXXXX....XXX.........|
+|.........XXXXXXXXXX....XXX.........|
+|.........XXXXXXXXXXXXXXXXX.........|
+|.........XXXXXXXXXXXXXXXXX.........|
+|...................................|
+|...................................|
+|...................................|
+|...................................|
+|......OOOOOOO.X.X.X.O.o.OOOO.......|
+|......OOOOOOO.X.X.X.O.o.OOOO.......|
+|......OOOOOO.X.O.X.o.O.o.OOOO......|
+|......OOOOOO.X.O.X.o.O.o.OOOO......|
+|......OOOOO.X.O.X.O.o.O.o.OOO......|
+|......OOOOO.X.O.X.O.o.O.o.OOO......|
+|......OOOO.X.O.X.OOO.o.O.o.OO......|
+|......OOOO.X.O.X.OOO.o.O.o.OO......|
+|......OOO.X.O.X.OOOOOOOOOOOOO......|
+|......OOO.X.O.X.OOOOOOOOOOOOO......|
+|......OO.X.O.X.OOOOOOOOOOOOOO......|
+|......OO.X.O.X.OOOOOOOOOOOOOO......|
+|..oo..O.X.O.X.OOOOOOOOOOOOOOO......|
+|..oo..O.X.O.X.OOOOOOOOOOOOOOO......|
+|......OOOOOOOOOOOOOOOOOOOOOOO......|
+|......OOOOOOOOOOOOOOOOOOOOOOO......|

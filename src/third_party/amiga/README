@@ -1,0 +1,7 @@
+The Amiga theme's window decorator and control look, in the style of the Amiga's
+Workbench 1.3 as Arthur Choung's HOTDOG draws it (https://github.com/paulwratt/HOTDOG,
+a mirror of fmamp.com/hotdoglinux). The window gadgets' pixels and the palette come
+from HOTDOG's objects/object-AmigaWindow.m, and how buttons, check boxes, radio
+buttons, text fields and menus look from its other Amiga objects. HOTDOG is
+Copyright (c) 2020 Arthur Choung, under the GNU General Public License, version 3
+or later (LICENSE), and so are these add-ons.

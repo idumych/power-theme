@@ -17,6 +17,7 @@
  *   wallpaper mode = scaled
  *   deskbar = right top, expanded
  *   scroll bar arrows = double
+ *   font smoothing = grey
  *   font plain = Noto Sans, Regular, 10
  *   font bold = Noto Sans Display | Noto Sans, Medium | Bold, 12
  *   color B_PANEL_BACKGROUND_COLOR = #D4D0C8
@@ -31,7 +32,10 @@
  * "wallpaper mode" is scaled (the default), centered, tiled or manual
  * (the image's top left corner at the screen's). "deskbar" places the
  * Deskbar: top, bottom, left top, right top, left bottom or right bottom,
- * optionally followed by ", expanded" or ", collapsed".
+ * optionally followed by ", expanded" or ", collapsed". "font smoothing =
+ * grey" turns off subpixel font smoothing while the theme is in use, for a
+ * pixel font whose squares must stay sharp; a theme without it brings back the
+ * setting from before any theme.
  *
  * A theme can be one version of another: "variant of = Flat" and "mode =
  * dark". Two themes that say they are the same theme's light and dark versions
@@ -135,6 +139,10 @@ public:
 	// keeps the setting from before any theme
 			int32				ScrollBarArrows() const
 									{ return fScrollBarArrows; }
+			// whether the theme wants fonts smoothed in grey only, without
+			// the coloured edges of subpixel smoothing: for pixel fonts
+			bool				GreyFontSmoothing() const
+									{ return fGreyFontSmoothing; }
 			const BString&		Wallpaper() const { return fWallpaper; }
 				// "none", "default", or the image's full path
 			int32				WallpaperMode() const
@@ -176,6 +184,7 @@ private:
 			int32				fDeskbarLocation;
 			bool				fDeskbarExpanded;
 			int32				fScrollBarArrows;
+			bool				fGreyFontSmoothing;
 			bool				fUITheme;
 			bool				fHasDesktopColor;
 			rgb_color			fDesktopColor;

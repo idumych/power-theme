@@ -362,9 +362,9 @@ find_build_script(BString& path)
 }
 
 
-//! Whether the running system's libbe has the given function.
-static bool
-libbe_has(const char* symbol)
+//!	A function of libbe's that not every system has, or NULL.
+static void*
+libbe_function(const char* symbol)
 {
 	image_info info;
 	int32 cookie = 0;
@@ -374,10 +374,20 @@ libbe_has(const char* symbol)
 			continue;
 
 		void* function;
-		return get_image_symbol(info.id, symbol, B_SYMBOL_TYPE_TEXT, &function)
-			== B_OK;
+		if (get_image_symbol(info.id, symbol, B_SYMBOL_TYPE_TEXT, &function)
+				== B_OK)
+			return function;
+		return NULL;
 	}
-	return false;
+	return NULL;
+}
+
+
+//! Whether the running system's libbe has the given function.
+static bool
+libbe_has(const char* symbol)
+{
+	return libbe_function(symbol) != NULL;
 }
 
 
@@ -456,6 +466,7 @@ Theme::Theme()
 	fDeskbarLocation(-1),
 	fDeskbarExpanded(true),
 	fScrollBarArrows(0),
+	fGreyFontSmoothing(false),
 	fUITheme(false),
 	fHasDesktopColor(false)
 {
@@ -560,6 +571,10 @@ Theme::Load(const char* folder)
 				fScrollBarArrows = 2;
 			else if (value == "single")
 				fScrollBarArrows = 1;
+		} else if (key == "font smoothing") {
+			value.ToLower();
+			fGreyFontSmoothing = value == "grey" || value == "gray"
+				|| value == "greyscale" || value == "grayscale";
 		} else if (key == "wallpaper mode") {
 			value.ToLower();
 			if (value == "centered" || value == "centred")
@@ -1075,6 +1090,21 @@ deskbar_ignores_tab_height(BDeskbar& deskbar)
 	may have an old one to get rid of, now it does. launch_daemon starts it
 	again, as it's a service; asking the roster meanwhile can take half a minute.
 */
+/*!	Asks the Deskbar to quit and waits for it; the registrar starts it again,
+	laid out for the look in use.
+*/
+static void
+restart_deskbar()
+{
+	const team_id team = be_roster->TeamFor(kDeskbarSignature);
+	if (BMessenger(kDeskbarSignature).SendMessage(B_QUIT_REQUESTED) != B_OK)
+		return;
+	team_info info;
+	for (int32 i = 0; i < 50 && get_team_info(team, &info) == B_OK; i++)
+		snooze(100000);
+}
+
+
 static void
 update_deskbar_for_tab_height(float tabHeight, bool ignoredTabHeight)
 {
@@ -1085,12 +1115,7 @@ update_deskbar_for_tab_height(float tabHeight, bool ignoredTabHeight)
 	if (tabHeight < 0 || now < 0 || (now == tabHeight && !ignoredTabHeight))
 		return;
 
-	const team_id team = be_roster->TeamFor(kDeskbarSignature);
-	if (BMessenger(kDeskbarSignature).SendMessage(B_QUIT_REQUESTED) != B_OK)
-		return;
-	team_info info;
-	for (int32 i = 0; i < 50 && get_team_info(team, &info) == B_OK; i++)
-		snooze(100000);
+	restart_deskbar();
 }
 
 
@@ -1111,6 +1136,39 @@ set_scroll_bar_arrows(bool doubled)
 		info.double_arrows = doubled;
 		set_scroll_bar_info(&info);
 	}
+}
+
+
+// Appearance's font smoothing switch: libbe's, though not in its headers
+typedef void (*set_subpixel_function)(bool);
+typedef status_t (*get_subpixel_function)(bool*);
+static const char* kSetSubpixel = "_Z25set_subpixel_antialiasingb";
+static const char* kGetSubpixel = "_Z25get_subpixel_antialiasingPb";
+
+
+static void
+save_font_smoothing(BMessage& look)
+{
+	get_subpixel_function get
+		= (get_subpixel_function)libbe_function(kGetSubpixel);
+	bool subpixel;
+	if (get != NULL && get(&subpixel) == B_OK)
+		look.AddBool("subpixel smoothing", subpixel);
+}
+
+
+static void
+set_font_smoothing(bool subpixel)
+{
+	get_subpixel_function get
+		= (get_subpixel_function)libbe_function(kGetSubpixel);
+	set_subpixel_function set
+		= (set_subpixel_function)libbe_function(kSetSubpixel);
+	bool current;
+	if (get == NULL || set == NULL || get(&current) != B_OK
+		|| current == subpixel)
+		return;
+	set(subpixel);
 }
 
 
@@ -1185,6 +1243,7 @@ current_appearance(BMessage& look)
 	save_wallpaper(look);
 	save_deskbar(look);
 	save_scroll_bar_arrows(look);
+	save_font_smoothing(look);
 }
 
 
@@ -1644,7 +1703,7 @@ draws_beos_tabs(DecorInfo* decor)
 	BPath path(decor->Ref());
 	static const char* const kNames[] = { "Reactionary", "Expose", "Platinum",
 		"Leopard", "Gershwix", "NeXT",
-		"System7" };
+		"System7", "Amiga" };
 	for (size_t i = 0; i < sizeof(kNames) / sizeof(kNames[0]); i++) {
 		if (path.Leaf() != NULL && strcmp(path.Leaf(), kNames[i]) == 0)
 			return true;
@@ -1855,6 +1914,10 @@ apply_appearance(const Theme& theme, uint32 parts, BString& log)
 			save_scroll_bar_arrows(previous);
 			changed = true;
 		}
+		if (!previous.HasBool("subpixel smoothing")) {
+			save_font_smoothing(previous);
+			changed = true;
+		}
 		if (changed)
 			save_message(kPreviousName, previous);
 	}
@@ -1868,6 +1931,13 @@ apply_appearance(const Theme& theme, uint32 parts, BString& log)
 		set_scroll_bar_arrows(theme.ScrollBarArrows() != 0
 			? theme.ScrollBarArrows() == 2
 			: previous.GetBool("double arrows", false));
+	}
+
+	// Smoothing goes with the fonts: a pixel font wants it in grey, and any
+	// other theme brings back the setting from before any theme.
+	if ((requested & THEME_FONTS) != 0) {
+		set_font_smoothing(theme.GreyFontSmoothing() ? false
+			: previous.GetBool("subpixel smoothing", true));
 	}
 
 	if ((parts & THEME_WALLPAPER) != 0)
@@ -1894,6 +1964,17 @@ apply_appearance(const Theme& theme, uint32 parts, BString& log)
 		for (int32 i = 1; theme.DesktopColors().FindColor("color", i, &color)
 				== B_OK && i < count_workspaces(); i++) {
 			BScreen().SetDesktopColor(color, i, true);
+		}
+	}
+
+	// the Deskbar along the top or bottom doesn't lay itself out again for a
+	// new font size, and has to be restarted for it
+	bool fontResized = false;
+	if ((parts & THEME_FONTS) != 0) {
+		for (int32 i = 0; i < theme.CountFonts(); i++) {
+			const ThemeFont* font = theme.FontAt(i);
+			if (font->which == "plain" && font->size != be_plain_font->Size())
+				fontResized = true;
 		}
 	}
 
@@ -1932,7 +2013,10 @@ apply_appearance(const Theme& theme, uint32 parts, BString& log)
 			BPrivate::set_control_look(path);
 	}
 
-	update_deskbar_for_tab_height(tabHeight, ignoredTabHeight);
+	if (fontResized)
+		restart_deskbar();
+	else
+		update_deskbar_for_tab_height(tabHeight, ignoredTabHeight);
 
 	set_current(theme.Name(), NULL);
 	set_current_parts(requested & ~THEME_ICONS);
@@ -2082,6 +2166,7 @@ revert_appearance(BString& log)
 		BPrivate::set_control_look(controlLook);
 
 	BMessage font;
+	bool fontResized = false;
 	for (int32 i = 0; previous.FindMessage("font", i, &font) == B_OK; i++) {
 		BString which, family, style;
 		float size;
@@ -2090,6 +2175,8 @@ revert_appearance(BString& log)
 			|| font.FindString("style", &style) != B_OK
 			|| font.FindFloat("size", &size) != B_OK)
 			continue;
+		if (which == "plain" && size != be_plain_font->Size())
+			fontResized = true;
 		set_font(which, family, style, size);
 	}
 
@@ -2111,7 +2198,14 @@ revert_appearance(BString& log)
 	if (previous.FindBool("double arrows", &doubled) == B_OK)
 		set_scroll_bar_arrows(doubled);
 
-	update_deskbar_for_tab_height(tabHeight, ignoredTabHeight);
+	bool subpixel;
+	if (previous.FindBool("subpixel smoothing", &subpixel) == B_OK)
+		set_font_smoothing(subpixel);
+
+	if (fontResized)
+		restart_deskbar();
+	else
+		update_deskbar_for_tab_height(tabHeight, ignoredTabHeight);
 
 	BPath path;
 	if (themes_settings_path(path, kPreviousName) == B_OK)
