@@ -85,6 +85,10 @@ PLATINUM_DECOR := $(BUILD)/Platinum
 PLATINUM_LOOK := $(BUILD)/control_look/Platinum
 LEOPARD_DECOR := $(BUILD)/Leopard
 LEOPARD_LOOK := $(BUILD)/control_look/Leopard
+GERSHWIX_DECOR := $(BUILD)/Gershwix
+GERSHWIX_LOOK := $(BUILD)/control_look/Gershwix
+NEXT_DECOR := $(BUILD)/NeXT
+NEXT_LOOK := $(BUILD)/control_look/NeXT
 
 # What Power Theme needs to build the add-ons (decorators, control looks) on a
 # user's system, laid
@@ -95,7 +99,8 @@ all: $(DECOR) $(LOOK) $(THEMES) $(FLAT_DECOR) $(FLAT_LOOK) $(SMOKE_DECOR) \
 	$(SMOKE_LOOK) $(DANO_LOOK) $(TIDY_DECOR) $(TIDY_SQUARE_DECOR) $(TIDY_LOOK) \
 	$(GONX_LOOK) \
 	$(EXPOSE_DECOR) $(EXPOSE_LOOK) $(PLATINUM_DECOR) $(PLATINUM_LOOK) \
-	$(LEOPARD_DECOR) $(LEOPARD_LOOK) \
+	$(LEOPARD_DECOR) $(LEOPARD_LOOK) $(GERSHWIX_DECOR) $(GERSHWIX_LOOK) \
+	$(NEXT_DECOR) $(NEXT_LOOK) \
 	decorator-source
 
 decorator-source:
@@ -107,6 +112,8 @@ decorator-source:
 		$(DECOR_SOURCE)/source/decorators/Expose \
 		$(DECOR_SOURCE)/source/decorators/Platinum \
 		$(DECOR_SOURCE)/source/decorators/Leopard \
+		$(DECOR_SOURCE)/source/decorators/Gershwix \
+		$(DECOR_SOURCE)/source/decorators/NeXT \
 		$(DECOR_SOURCE)/source/decorators/Gonx \
 		$(DECOR_SOURCE)/source/decorators/FlatDecorator \
 		$(DECOR_SOURCE)/source/control_looks/Reactionary \
@@ -116,6 +123,8 @@ decorator-source:
 		$(DECOR_SOURCE)/source/control_looks/Expose \
 		$(DECOR_SOURCE)/source/control_looks/Platinum \
 		$(DECOR_SOURCE)/source/control_looks/Leopard \
+		$(DECOR_SOURCE)/source/control_looks/Gershwix \
+		$(DECOR_SOURCE)/source/control_looks/NeXT \
 		$(DECOR_SOURCE)/source/control_looks/Gonx \
 		$(DECOR_SOURCE)/source/control_looks/FlatControlLook
 	cp src/themes/build-decorators.sh $(DECOR_SOURCE)/
@@ -147,6 +156,14 @@ decorator-source:
 		src/leopard/resources.rdef $(DECOR_SOURCE)/source/decorators/Leopard/
 	cp src/leopard/LeopardControlLook.* \
 		$(DECOR_SOURCE)/source/control_looks/Leopard/
+	cp src/gershwix/GershwixDecorator.* src/gershwix/resources.rdef \
+		$(DECOR_SOURCE)/source/decorators/Gershwix/
+	cp src/gershwix/GershwixControlLook.* \
+		$(DECOR_SOURCE)/source/control_looks/Gershwix/
+	cp src/next/NextDecorator.* src/next/resources.rdef \
+		$(DECOR_SOURCE)/source/decorators/NeXT/
+	cp src/next/NextControlLook.* \
+		$(DECOR_SOURCE)/source/control_looks/NeXT/
 	cp $(GONX)/controllook/* $(GONX)/LICENSE \
 		$(DECOR_SOURCE)/source/control_looks/Gonx/
 	cp $(FLAT)/controllook/* $(DECOR_SOURCE)/source/control_looks/FlatControlLook/
@@ -309,6 +326,54 @@ $(LEOPARD_LOOK): $(BUILD)/LeopardControlLook.o $(BUILD)/LeopardControlLook.rsrc
 	$(CXX) $(SYSROOT_FLAGS) -shared -s -o $@ $(BUILD)/LeopardControlLook.o \
 		-lbe -lstdc++
 	$(XRES) -o $@ $(BUILD)/LeopardControlLook.rsrc
+
+# Gershwix, after Mintar's Platinum theme for Mac OS X.
+$(BUILD)/GershwixDecorator.o: src/gershwix/GershwixDecorator.cpp src/gershwix/GershwixDecorator.h
+	@mkdir -p $(BUILD)
+	$(CXX) $(CXXFLAGS) $(DECOR_INCLUDES) -c $< -o $@
+
+$(BUILD)/GershwixDecorator.rsrc: src/gershwix/resources.rdef
+
+$(GERSHWIX_DECOR): $(BUILD)/GershwixDecorator.o $(BUILD)/GershwixDecorator.rsrc
+	$(CXX) $(SYSROOT_FLAGS) -shared -s -o $@ $(BUILD)/GershwixDecorator.o \
+		-lbe $(APP_SERVER) -lstdc++
+	$(XRES) -o $@ $(BUILD)/GershwixDecorator.rsrc
+
+$(BUILD)/GershwixControlLook.o: src/gershwix/GershwixControlLook.cpp src/gershwix/GershwixControlLook.h
+	@mkdir -p $(BUILD)
+	$(CXX) $(CXXFLAGS) -std=gnu++17 -I$(PRIVATE)/interface -c $< -o $@
+
+$(BUILD)/GershwixControlLook.rsrc: src/gershwix/GershwixControlLook.rdef
+
+$(GERSHWIX_LOOK): $(BUILD)/GershwixControlLook.o $(BUILD)/GershwixControlLook.rsrc
+	@mkdir -p $(dir $@)
+	$(CXX) $(SYSROOT_FLAGS) -shared -s -o $@ $(BUILD)/GershwixControlLook.o \
+		-lbe -lstdc++
+	$(XRES) -o $@ $(BUILD)/GershwixControlLook.rsrc
+
+# NeXT, after Swizcore Studio's NeXTSTEP theme for Mac OS X.
+$(BUILD)/NextDecorator.o: src/next/NextDecorator.cpp src/next/NextDecorator.h
+	@mkdir -p $(BUILD)
+	$(CXX) $(CXXFLAGS) $(DECOR_INCLUDES) -c $< -o $@
+
+$(BUILD)/NextDecorator.rsrc: src/next/resources.rdef
+
+$(NEXT_DECOR): $(BUILD)/NextDecorator.o $(BUILD)/NextDecorator.rsrc
+	$(CXX) $(SYSROOT_FLAGS) -shared -s -o $@ $(BUILD)/NextDecorator.o \
+		-lbe $(APP_SERVER) -lstdc++
+	$(XRES) -o $@ $(BUILD)/NextDecorator.rsrc
+
+$(BUILD)/NextControlLook.o: src/next/NextControlLook.cpp src/next/NextControlLook.h
+	@mkdir -p $(BUILD)
+	$(CXX) $(CXXFLAGS) -std=gnu++17 -I$(PRIVATE)/interface -c $< -o $@
+
+$(BUILD)/NextControlLook.rsrc: src/next/NextControlLook.rdef
+
+$(NEXT_LOOK): $(BUILD)/NextControlLook.o $(BUILD)/NextControlLook.rsrc
+	@mkdir -p $(dir $@)
+	$(CXX) $(SYSROOT_FLAGS) -shared -s -o $@ $(BUILD)/NextControlLook.o \
+		-lbe -lstdc++
+	$(XRES) -o $@ $(BUILD)/NextControlLook.rsrc
 
 # Haiku's Flat decorator and control look, for the Flat themes (Renku's
 # repositories don't have the haiku_extras package they come in).

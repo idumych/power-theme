@@ -28,6 +28,10 @@ It comes with its own looks:
 - **Platinum**, in the style of Mac OS 9, after Niels's KDE theme;
 - **Leopard** and **Leopard Graphite**, in the style of Mac OS X 10.5, with
   elementary's icons;
+- **Gershwix**, after Mintar's Platinum theme for Mac OS X, in its seven colours
+  (Ivy, French Blue, Poppy, Crimson, Plum, Sunny and Silver);
+- **NeXT**, after Swizcore Studio's NeXTSTEP theme for Mac OS X, with its leather
+  folders;
 - and the Haiku, Gonx and four Flat themes.
 
 The Reactionary ME look is an independent, unofficial port. It is not
@@ -80,7 +84,7 @@ scratch after screenshots of Leopard; nothing of Apple's is included.
 Window borders that can draw one can have a BeOS-style tab instead of a title bar
 across the window, whatever the theme. It's as wide as the title, with close on the
 left and zoom on the right, and shift-dragging it slides it along the window. That's
-Reactionary's, Expose's, Platinum's and Leopard's borders; turn it on with **BeOS-style tabs** in the window, or
+Reactionary's, Expose's, Platinum's, Leopard's, Gershwix's and NeXT's borders; turn it on with **BeOS-style tabs** in the window, or
 `powertheme --beos-tabs=on`. Run **Build add-ons…** after updating to get it.
 
 ## What needs Renku OS changes
@@ -129,6 +133,8 @@ theme.
 | **Expose Dark**: the same title bar with dark glass controls and slate selections, with ZSnake on | **Platinum**: Mac OS 9's bevelled frame and striped title bar, lavender controls and NineIcons Redux, with ZSnake on |
 | ![Leopard](docs/screenshots/leopard.png) | ![Leopard Graphite](docs/screenshots/leopard-graphite.png) |
 | **Leopard**: Mac OS X 10.5's grey title bar and red, yellow and green gel buttons, white pill buttons, blue gel pop-ups, check boxes and scroll bars, elementary's blue-grey folders and an aurora of its own | **Leopard Graphite**: the same in Graphite's steel blue, window buttons too |
+| ![Gershwix French Blue](docs/screenshots/gershwix.png) | ![NeXT](docs/screenshots/next.png) |
+| **Gershwix French Blue**: a striped grey title bar with square boxes, light bevelled buttons, a ridged scroll thumb and slider knob and a tube-shaded progress bar in French blue, and NineIcons Redux; six other colours share the rest | **NeXT**: NeXTSTEP's black title bar with bevelled grey boxes, square grey buttons, stippled scroll bars with dimpled thumbs, a black progress bar and a slate desktop, with its leather folders |
 | ![The Power Theme window](docs/screenshots/themes-window.png) | |
 | **Power Theme** under Renku: the theme list with a preview, the icon theme, and the parts to apply | |
 
@@ -143,7 +149,7 @@ Power Theme comes as a package for Haiku R1/beta6 and later, and Renku OS
 (x86_64), on the [releases page](https://github.com/idumych/power-theme/releases):
 
 ```sh
-pkgman install ./powertheme-0.7-1-x86_64.hpkg
+pkgman install ./powertheme-0.8-1-x86_64.hpkg
 ```
 
 Then open **Power Theme** (Deskbar → Applications), click **Build
@@ -324,6 +330,47 @@ Rebuild the package when Hokku's decorator classes change; until then,
   last with its blue-grey folders), rendered by `tools/make-elementary-icons.py`.
   With a compositor, the top corners are rounded smoothly and the bottom ones stay
   square; without one, the top corners are cut pixel by pixel.
+- **Gershwix** (`add-ons/decorators/Gershwix`, `add-ons/control_look/Gershwix`,
+  and seven themes, `data/themes/Gershwix Ivy` to `data/themes/Gershwix Silver`):
+  after [Gershwix](http://www.geocities.com/gershwix/) 2.5 by Mintar (2002-2007), a
+  Platinum theme for Mac OS X's ShapeShifter, drawn from scratch after measuring its
+  pictures. A light grey title bar across the window, striped across, with square
+  etched close, minimize and zoom boxes at its left and its title in the middle; a
+  dark line round the window, and a grip on document windows. An inactive window's
+  boxes are flat grey squares and its title grey. The controls are Platinum's with
+  softened corners: light bevelled push buttons and pop-up menus (with a second
+  bevel holding two arrows), a dark ring round the default button, square check
+  boxes whose tick reaches out of the top, shaded radio buttons, sunken text
+  fields, a shaded scroll bar track, and in the accent colour a ridged scroll bar
+  thumb, a ridged slider knob and a progress bar shaded like a tube, with a flat
+  menu selection in the accent's dark shade. The seven themes differ only in that
+  accent, which the control look takes from the scroll bar thumb colour: Gershwix's
+  seven have the shades measured from it, and any other colour is shaded the same
+  way. They put the Deskbar across the top, use Lucida Grande and Monaco where
+  they're installed (Noto otherwise), have a plain desktop in a dark tone of their
+  accent, as Gershwix has no wallpaper, and use the NineIcons Redux icons.
+- **NeXT** (`add-ons/decorators/NeXT`, `add-ons/control_look/NeXT` and
+  `data/themes/NeXT`): after NeXT 2.0 by Swizcore Studio (2004), a NeXTSTEP theme
+  for Mac OS X's ShapeShifter, drawn from scratch after measuring its pictures. A
+  black title bar across the window, with a light edge along its top and left and
+  a grey one along its bottom and right, three bevelled grey boxes at its left
+  (close with a cross, minimize with a triangle and zoom with a window) and its
+  title in white bold in the middle; a black line round the window, and a ridged
+  grip on document windows. An inactive window's bar is grey, its boxes darker and
+  its title black. The controls are in NeXTSTEP's greys: square buttons and pop-up
+  menus with a white edge along their top and left and grey and black ones along
+  their bottom and right, which turn white with black along their top and left
+  when pressed; a black line round the default button; a small raised bar as the
+  pop-up mark; check boxes with a black and white tick; radio buttons with a dark
+  rim; stippled scroll bar tracks with dimpled grey thumbs; a stippled slider
+  groove with a square knob; a black progress bar in a stippled track; sunken text
+  fields; and a white menu selection. The theme puts the Deskbar across the top,
+  uses Helvetica and Courier where they're installed (Nimbus or Noto otherwise),
+  has a plain slate desktop, as NeXTSTEP's was, and its own icons
+  (`data/icons/NeXT`, drawn by `tools/make-next-icons.py`): NeXTSTEP's leather
+  folder tied with a cord (with home, mail and query versions) and a black display
+  for the computer, after the two icons the kit comes with, and NineIcons Redux
+  for the rest.
 - **The Gonx theme** (`data/themes/Gonx`): the look of
   [Gonx](https://github.com/idumych/gonx), with its colours, desktop colour
   and fonts over Haiku's defaults, and Haiku's icons. Power Theme builds
@@ -376,7 +423,7 @@ Rebuild the package when Hokku's decorator classes change; until then,
   - Saves your look and icons the first time, so **Revert** always gets
     back to them, whatever was applied in between.
   - **Build add-ons…** compiles the window decorators and control looks
-    (Reactionary, Smoke, Dano, Tidy, Expose, Platinum, Leopard, Gonx, and
+    (Reactionary, Smoke, Dano, Tidy, Expose, Platinum, Leopard, Gershwix, NeXT, Gonx, and
     Haiku's Flat ones if the system lacks them) on the system they will run on, with a progress bar and a log.
     Decorators run inside app_server and use its private classes, and
     control looks subclass Haiku's private HaikuControlLook, so ones built
@@ -426,7 +473,7 @@ Rebuild the package when Hokku's decorator classes change; until then,
   --beos-tabs=on`, gives window borders that can draw one a tab as wide as the
   title on top of the frame, with close on the left and zoom on the right, instead
   of a title bar across the window, and shift-dragging a tab slides it. It's for any theme using those borders, and so
-  far that's Reactionary's, Expose's, Platinum's and Leopard's. It stays on through a change of mode.
+  far that's Reactionary's, Expose's, Platinum's, Leopard's, Gershwix's and NeXT's. It stays on through a change of mode.
 - **Theme Manager themes**: themes made for
   [Theme Manager](https://github.com/HaikuArchives/HaikuThemeManager)
   (and BeOS and ZETA before it), such as the
@@ -488,6 +535,13 @@ Rebuild the package when Hokku's decorator classes change; until then,
   its scroll arrows are at each end of the bar, where Haiku puts them. Without a
   compositor, its windows have no shadow. Desktop icons already placed where the
   Deskbar now runs across the top stay under it until they're moved.
+- Gershwix's title bar has no toolbar button at its right end, as Haiku's
+  windows have no toolbar to hide, and its scroll arrows are at each end of the
+  bar rather than together. In Gershwix itself the theme named "Crimson" is purple
+  and "Plum" red; here each is named for its colour.
+- NeXT's scroll arrows are at each end of the bar, where Haiku puts them, rather
+  than together as NeXTSTEP had them, and its menu bar is grey like its menus, as
+  Haiku gives both one colour; in the original theme Mac OS X's menu bar is black.
 
 ## Building
 
@@ -563,6 +617,15 @@ should run on (Haiku R1/beta6), against that system's own headers.
   [elementary](https://github.com/elementary/icons) 4.3.1 by Daniel Foré and the
   elementary contributors (GNU GPL version 3 or later, in `data/icons/elementary`).
   Apple and elementary aren't affiliated with this project.
+- Gershwix's look follows [Gershwix](http://www.geocities.com/gershwix/) 2.5 by
+  Mintar (© 2002-2007), which states no licence. It is drawn from scratch after
+  measuring the theme's pictures; none of its artwork is included. Its icons are
+  NineIcons Redux (above). Apple and Mintar aren't affiliated with this project.
+- NeXT's look follows NeXT 2.0 by Swizcore Studio (© 2004), which states no
+  licence. It is drawn from scratch after measuring the theme's pictures; none of
+  its artwork is included; so are its folder and computer icons, drawn from scratch
+  after the kit's, with NineIcons Redux (above) for the rest. Apple, NeXT and
+  Swizcore Studio aren't affiliated with this project.
 - [nanosvg](https://github.com/memononen/nanosvg) by Mikko Mononen (zlib
   licence), in `src/themes/third_party`.
 - Gonx's window decorator and control look (`src/third_party/gonx`), MIT
@@ -570,7 +633,7 @@ should run on (Haiku R1/beta6), against that system's own headers.
 - Project layout, scripts and the start of the theme tool from
   [Gonx](https://github.com/idumych/gonx).
 
-Power Theme's own code is under the MIT licence (see `LICENSE`), Leopard's
-add-ons included, apart from Expose's and Platinum's add-ons, which are under the
+Power Theme's own code is under the MIT licence (see `LICENSE`), Leopard's,
+Gershwix's and NeXT's add-ons included, apart from Expose's and Platinum's add-ons, which are under the
 GNU GPL (`src/third_party/expose/LICENSE`, `src/third_party/platinum/LICENSE`), as
 are the elementary icons (`data/icons/elementary/COPYING`).

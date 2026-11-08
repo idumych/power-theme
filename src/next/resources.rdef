@@ -1,0 +1,10 @@
+resource("be:decor:info") message('deco') {
+	"name"				= "NeXT",
+	"authors"			= "idumych",
+	"short_descr"		= "In the style of Swizcore Studio's NeXT",
+	"long_descr"		= "A black title bar with three bevelled boxes on the left and the title in the middle, in NeXTSTEP's greys",
+	"lic_url"			= "",
+	"lic_name"			= "MIT",
+	"support_url"		= "https://github.com/idumych/power-theme",
+	float "version"		= 0.1
+};

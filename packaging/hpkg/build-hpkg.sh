@@ -17,7 +17,7 @@ set -eu
 
 build=${1:?usage: build-hpkg.sh <build-dir> <icons-dir> [<version>]}
 icons=${2:?usage: build-hpkg.sh <build-dir> <icons-dir> [<version>]}
-version=${3:-0.7}
+version=${3:-0.8}
 here=$(cd "$(dirname "$0")" && pwd)
 root=$(cd "$here/../.." && pwd)
 
@@ -45,6 +45,7 @@ cp -R "$root/data/themes/." "$work/data/themes/"
 # keeps the icon theme's aliases as symbolic links
 cp -R "$icons" "$work/data/icons/ClassicOS2000"
 cp -R "$root/data/icons/NineIconsRedux" "$root/data/icons/elementary" \
+	"$root/data/icons/NeXT" \
 	"$work/data/icons/"
 cp -R "$build/data/PowerTheme" "$work/data/PowerTheme"
 cp "$root/data/PowerTheme/icon-map" "$work/data/PowerTheme/icon-map"
@@ -61,8 +62,10 @@ borders, controls, colours, fonts, wallpaper, the Deskbar's place and \
 freedesktop icon themes. It reads Theme Manager themes too. It comes with \
 the Reactionary ME (Windows ME), Smoke (in the style of ZETA), Renku, \
 Gonx, Haiku, Dano, Tidy, Expose, Platinum (in the style of Mac OS 9), Leopard \
-(in the style of Mac OS X 10.5) and four Flat themes, and the ClassicOS 2000, \
-NineIcons Redux and elementary icons. The window \
+(in the style of Mac OS X 10.5), Gershwix (after Mintar's Platinum theme for \
+Mac OS X, in seven colours), NeXT (after Swizcore Studio's NeXTSTEP theme \
+for Mac OS X) and four Flat themes, and the ClassicOS 2000, \
+NineIcons Redux, elementary and NeXT icons. The window \
 borders and controls are built on your own system by Power Theme's \
 'Build add-ons...' (they use private parts of app_server and libbe, so they \
 must match the exact system build); it offers to install the compiler."

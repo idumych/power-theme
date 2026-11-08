@@ -130,6 +130,38 @@ gel pop-up ends, check boxes and scroll bar thumbs, and a blue menu selection; a
 inactive window lighter with grey buttons; and elementary's blue-grey folders.
 Under Graphite all that blue is steel blue, the window buttons too.
 
+### gershwix
+Steps: `powertheme --apply=Haiku --parts=decorator,controls`, `--apply="Gershwix
+French Blue"`, start StyledEdit, list its images and read `decorator_settings`;
+screenshot of the controls demo on its Media tab with a menu open and an inactive
+Tracker window. Then apply each of the other six Gershwix themes and take a
+screenshot of a small active Tracker window, so that its scroll bars have thumbs.
+PASS when: {p}-gershwix.txt says "window borders: Gershwix" and "new application
+loads control look: Gershwix", and "Gershwix themes listed: 7". The screenshots show
+a light grey striped title bar with three square boxes at its left (minimize and
+zoom with their marks) and the title in the middle, a dark line round the window,
+light bevelled buttons with a dark ring round the default one, a ticked check box,
+a progress bar shaded like a tube and ridged scroll and slider thumbs in French
+blue, and NineIcons Redux; an inactive window's boxes flat grey. Each other theme
+has its own colour in the thumbs: green, orange, red, purple, yellow and grey.
+
+### next
+Steps: `powertheme --apply=Haiku --parts=decorator,controls`, `--apply=NeXT`, start
+StyledEdit, list its images and read `decorator_settings`; screenshot of the
+controls demo on its Controls tab and on its Media tab with a menu open, an
+inactive Tracker window, and a close box, a button and a check box held down.
+PASS when: {p}-next.txt says "window borders: NeXT" and "new application loads
+control look: NeXT". The screenshots show a black title bar with a light top and
+left edge, three bevelled grey boxes at its left (a cross, a triangle in the top
+left and a window) and the title in white in the middle; an inactive window's bar
+grey with darker boxes and a black title; square grey buttons with a black line
+round the default one, pop-up menus with a small raised bar at their right; a
+ticked check box; stippled scroll bar tracks with dimpled thumbs; a stippled
+slider groove with a square knob; a black progress bar in a stippled track; a
+white menu selection; tan leather folders tied with a cord (a home badge on the
+home folder) and a black display for the computer; and held down, the box, button
+and check box are white with black along their top and left.
+
 ### flat-tab
 Steps: build `tools/left-tab-test.cpp`, `powertheme --apply=DarkFlat`, start it,
 take a screenshot and run `tools/left-tab-check.py` on it.

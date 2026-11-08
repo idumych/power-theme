@@ -156,9 +156,9 @@ for theme in "$here"/data/themes/*; do
 	cp -R "$theme" "$data/themes/"
 done
 rm -rf "$data/icons/ClassicOS2000" "$data/icons/NineIconsRedux" \
-	"$data/icons/elementary"
+	"$data/icons/elementary" "$data/icons/NeXT"
 cp -R "$here/data/icons/ClassicOS2000" "$here/data/icons/NineIconsRedux" \
-	"$here/data/icons/elementary" \
+	"$here/data/icons/elementary" "$here/data/icons/NeXT" \
 	"$data/icons/"
 cp "$here/data/PowerTheme/icon-map" "$data/PowerTheme/icon-map"
 # what Power Theme's "Build add-ons" needs: the script, the add-ons'

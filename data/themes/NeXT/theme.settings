@@ -1,0 +1,50 @@
+# "NeXT", after Swizcore Studio's NeXT 2.0 (2004), a NeXTSTEP theme for Mac OS
+# X's ShapeShifter. Colours and sizes measured from its pictures; the window
+# borders and controls are drawn from scratch and none of its artwork is used.
+
+name = NeXT
+description = Swizcore Studio's NeXT: a black title bar with bevelled grey boxes, square grey buttons that turn white when pressed, and stippled scroll bars with dimpled thumbs, in NeXTSTEP's greys.
+decorator = NeXT
+control look = NeXT
+wallpaper = none
+desktop color = #504D76
+deskbar = top, expanded
+font plain = Helvetica | Nimbus Sans | Noto Sans, Regular, 12
+font bold = Helvetica | Nimbus Sans | Noto Sans, Bold, 12
+font fixed = Courier | Nimbus Mono PS | Noto Sans Mono, Regular, 12
+font menu = Helvetica | Nimbus Sans | Noto Sans, Regular, 12
+icons = NeXT
+
+color B_DESKTOP_COLOR = #504D76
+color B_PANEL_BACKGROUND_COLOR = #C0C0C0
+color B_PANEL_TEXT_COLOR = #000000
+color B_DOCUMENT_BACKGROUND_COLOR = #FFFFFF
+color B_DOCUMENT_TEXT_COLOR = #000000
+color B_CONTROL_BACKGROUND_COLOR = #FFFFFF
+color B_CONTROL_TEXT_COLOR = #000000
+color B_CONTROL_BORDER_COLOR = #000000
+color B_CONTROL_HIGHLIGHT_COLOR = #FFFFFF
+color B_CONTROL_MARK_COLOR = #000000
+color B_KEYBOARD_NAVIGATION_COLOR = #4D4D80
+color B_NAVIGATION_PULSE_COLOR = #8080B3
+color B_SHINE_COLOR = #FFFFFF
+color B_SHADOW_COLOR = #000000
+color B_MENU_BACKGROUND_COLOR = #C0C0C0
+color B_MENU_SELECTED_BACKGROUND_COLOR = #FFFFFF
+color B_MENU_ITEM_TEXT_COLOR = #000000
+color B_MENU_SELECTED_ITEM_TEXT_COLOR = #000000
+color B_MENU_SELECTED_BORDER_COLOR = #000000
+color B_LIST_BACKGROUND_COLOR = #FFFFFF
+color B_LIST_ITEM_TEXT_COLOR = #000000
+color B_LIST_SELECTED_BACKGROUND_COLOR = #AAAAAA
+color B_LIST_SELECTED_ITEM_TEXT_COLOR = #000000
+color B_SCROLL_BAR_THUMB_COLOR = #C0C0C0
+color B_STATUS_BAR_COLOR = #000000
+color B_TOOLTIP_BACKGROUND_COLOR = #FFFFFF
+color B_TOOLTIP_TEXT_COLOR = #000000
+color B_WINDOW_TAB_COLOR = #000000
+color B_WINDOW_TEXT_COLOR = #FFFFFF
+color B_WINDOW_INACTIVE_TAB_COLOR = #8F8F8F
+color B_WINDOW_INACTIVE_TEXT_COLOR = #000000
+color B_WINDOW_BORDER_COLOR = #000000
+color B_WINDOW_INACTIVE_BORDER_COLOR = #000000
