@@ -44,7 +44,10 @@ color B_SCROLL_BAR_THUMB_COLOR = #A7B2C2
 color B_STATUS_BAR_COLOR = #7F8FA9
 color B_TOOLTIP_BACKGROUND_COLOR = #FFFFC7
 color B_TOOLTIP_TEXT_COLOR = #000000
-color B_WINDOW_TAB_COLOR = #B4B4B4
+# The window borders draw their own greys. This one is a little blue so that it
+# differs from Leopard's: app_server only tells window borders about new colours
+# when a window colour changes, and they need to hear of it to change buttons.
+color B_WINDOW_TAB_COLOR = #B4B6BA
 color B_WINDOW_TEXT_COLOR = #000000
 color B_WINDOW_INACTIVE_TAB_COLOR = #E0E0E0
 color B_WINDOW_INACTIVE_TEXT_COLOR = #4D4D4D
