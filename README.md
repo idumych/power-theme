@@ -108,8 +108,7 @@ this work, with what's finished, tested and still open.
 
 ## Screenshots
 
-On Renku OS unless they say otherwise, with a window of controls and a Tracker
-window (and, for Reactionary ME, Platinum and Leopard, a folder of different file
+All on Renku OS, with a window of controls and a Tracker window (and, for Reactionary ME, Platinum and Leopard, a folder of different file
 types, to show their icons). The
 picture at the top is Power Theme itself, under the stock Haiku theme.
 
@@ -128,7 +127,7 @@ picture at the top is Power Theme itself, under the stock Haiku theme.
 | ![Expose Dark](docs/screenshots/expose-dark.png) | ![Platinum](docs/screenshots/platinum.png) |
 | **Expose Dark**: the same title bar with dark glass controls and slate selections, with ZSnake on | **Platinum**: Mac OS 9's bevelled frame and striped title bar, lavender controls and NineIcons Redux, with ZSnake on |
 | ![Leopard](docs/screenshots/leopard.png) | ![Leopard Graphite](docs/screenshots/leopard-graphite.png) |
-| **Leopard**: Mac OS X 10.5's grey title bar and red, yellow and green gel buttons, white pill buttons, blue gel pop-ups, check boxes and scroll bars, elementary's blue-grey folders and an aurora of its own (on Haiku R1/beta6) | **Leopard Graphite**: the same in Graphite's steel blue, window buttons too (on Haiku R1/beta6) |
+| **Leopard**: Mac OS X 10.5's grey title bar and red, yellow and green gel buttons, white pill buttons, blue gel pop-ups, check boxes and scroll bars, elementary's blue-grey folders and an aurora of its own | **Leopard Graphite**: the same in Graphite's steel blue, window buttons too |
 | ![The Power Theme window](docs/screenshots/themes-window.png) | |
 | **Power Theme** under Renku: the theme list with a preview, the icon theme, and the parts to apply | |
 
