@@ -40,8 +40,8 @@ approved one (dark folders, without an outline), not inverted.
 ### beos-tabs
 Steps: `powertheme --apply="Reactionary ME"`, `--beos-tabs=on`, open a window and
 take a screenshot; `--beos-tabs=off` and take another.
-Then the same with "Expose", "Platinum" and "Leopard", shift-dragging the tab along
-the window.
+Then the same with "Expose", "Platinum", "Leopard", "Gershwix French Blue" and
+"NeXT", shift-dragging the tab along the window.
 PASS when: with the option on, each theme's title bar is a tab narrower than the
 window with the close button on its left and the zoom button on its right, and no
 minimize button, and it slides; off, a full-width title bar comes back. {p}-tabs.txt
