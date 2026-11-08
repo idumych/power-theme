@@ -4,9 +4,8 @@
  *
  * A dark version of a Haiku vector icon (HVIF). Its shapes stay as they are.
  * Each colour moves onto a chosen ramp for its colour family, darker than
- * Haiku's but keeping deep shadows and bright highlights, and a thin soft white
- * outline goes behind the shapes so that the icon stands out on a dark
- * background. Soft black shadows stay.
+ * Haiku's but keeping deep shadows and bright highlights. Soft black shadows
+ * stay.
  *
  * This knows nothing of Haiku, so it can be tested anywhere.
  */

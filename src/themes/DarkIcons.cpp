@@ -14,7 +14,6 @@
 #include <math.h>
 
 #include <algorithm>
-#include <set>
 
 
 namespace {
@@ -29,21 +28,7 @@ enum {
 
 	GRADIENT_TRANSFORM = 1 << 1,
 	GRADIENT_NO_ALPHA = 1 << 2,
-	GRADIENT_GRAYS = 1 << 4,
-
-	PATH_COMMANDS = 1 << 2,
-	PATH_NO_CURVES = 1 << 3,
-
-	SHAPE_PATH_SOURCE = 10,
-	SHAPE_TRANSFORM = 1 << 1,
-	SHAPE_LOD_SCALE = 1 << 3,
-	SHAPE_TRANSFORMERS = 1 << 4,
-	SHAPE_TRANSLATION = 1 << 5,
-
-	TRANSFORMER_AFFINE = 20,
-	TRANSFORMER_CONTOUR = 21,
-	TRANSFORMER_PERSPECTIVE = 22,
-	TRANSFORMER_STROKE = 23
+	GRADIENT_GRAYS = 1 << 4
 };
 
 struct Color {
@@ -52,30 +37,6 @@ struct Color {
 	uint8_t	blue;
 	uint8_t	alpha;
 };
-
-// The outline is a stroke behind the shapes, so half of its width shows. A width
-// is in units of the 64 unit grid, so one fixed width would become too thin to
-// draw evenly on small icons. So there's a stroke for each range of sizes, about
-// 3/4 of a pixel wide, or 1 at 64 pixels. Sizes are as shapes store them, 63.75
-// being the icon's full size of 64 pixels.
-const struct {
-	uint8_t	minScale;
-	uint8_t	maxScale;
-	uint8_t	width;
-} kOutlines[] = {
-	{ 0, 24, 6 },
-	{ 24, 48, 3 },
-	{ 48, 255, 2 }
-};
-
-const uint8_t kOutlineStrokeOptions = 0x11;
-	// round caps and joins
-const uint8_t kOutlineMiterLimit = 4;
-
-const Color kOutlineColor = { 0xe6, 0xe8, 0xea, 255 };
-
-const int kMaxItems = 255;
-
 
 typedef uint32_t Ramp[5];
 
@@ -230,12 +191,6 @@ public:
 			fAt += count;
 	}
 
-	void SkipCoord()
-	{
-		if ((Byte() & 128) != 0)
-			Skip(1);
-	}
-
 private:
 	const uint8_t*	fData;
 	size_t			fSize;
@@ -266,24 +221,15 @@ add_color(std::vector<uint8_t>& out, const Color& color)
 }
 
 
-struct Style {
-	// whether the outline should go around what uses it
-	bool	solid;
-	// nothing but soft shadows
-	bool	shadow;
-};
-
-
 /*!	Copies the styles to \a out in their dark colours, each with all its colour
-	values, and returns what is needed to know about them.
+	values.
 */
 bool
-copy_styles(Reader& in, std::vector<uint8_t>& out, std::vector<Style>& styles)
+copy_styles(Reader& in, std::vector<uint8_t>& out)
 {
 	const int count = in.Byte();
 	out.push_back((uint8_t)count);
 	for (int i = 0; i < count && !in.Failed(); i++) {
-		std::vector<Color> colors;
 		const uint8_t type = in.Byte();
 		switch (type) {
 			case STYLE_SOLID:
@@ -294,7 +240,6 @@ copy_styles(Reader& in, std::vector<uint8_t>& out, std::vector<Style>& styles)
 				const Color color = read_color(in,
 					type == STYLE_GRAY || type == STYLE_GRAY_NO_ALPHA,
 					type == STYLE_SOLID || type == STYLE_GRAY);
-				colors.push_back(color);
 				out.push_back(STYLE_SOLID);
 				add_color(out, dark_color(color));
 				break;
@@ -317,7 +262,6 @@ copy_styles(Reader& in, std::vector<uint8_t>& out, std::vector<Style>& styles)
 					const Color color = read_color(in,
 						(flags & GRADIENT_GRAYS) != 0,
 						(flags & GRADIENT_NO_ALPHA) == 0);
-					colors.push_back(color);
 					add_color(out, dark_color(color));
 				}
 				break;
@@ -325,106 +269,6 @@ copy_styles(Reader& in, std::vector<uint8_t>& out, std::vector<Style>& styles)
 			default:
 				return false;
 		}
-
-		Style style = { false, !colors.empty() };
-		int maxAlpha = 0;
-		for (size_t c = 0; c < colors.size(); c++) {
-			maxAlpha = std::max(maxAlpha, (int)colors[c].alpha);
-			style.shadow = style.shadow && is_shadow(dark_color(colors[c]));
-		}
-		style.solid = maxAlpha >= 200 && !style.shadow;
-		styles.push_back(style);
-	}
-	return !in.Failed();
-}
-
-
-void
-skip_paths(Reader& in)
-{
-	const int count = in.Byte();
-	for (int i = 0; i < count && !in.Failed(); i++) {
-		const uint8_t flags = in.Byte();
-		const int points = in.Byte();
-		if ((flags & PATH_NO_CURVES) != 0) {
-			for (int p = 0; p < points * 2 && !in.Failed(); p++)
-				in.SkipCoord();
-		} else if ((flags & PATH_COMMANDS) != 0) {
-			std::vector<uint8_t> commands((points + 3) / 4);
-			for (size_t c = 0; c < commands.size(); c++)
-				commands[c] = in.Byte();
-			for (int p = 0; p < points && !in.Failed(); p++) {
-				static const int kCoords[] = { 1, 1, 2, 6 };
-				const int command = (commands[p / 4] >> ((p % 4) * 2)) & 3;
-				for (int c = 0; c < kCoords[command]; c++)
-					in.SkipCoord();
-			}
-		} else {
-			for (int p = 0; p < points * 6 && !in.Failed(); p++)
-				in.SkipCoord();
-		}
-	}
-}
-
-
-struct Shape {
-	size_t	start;
-	size_t	end;
-	int		style;
-	size_t	flagsAt;
-	uint8_t	flags;
-	// where its range of sizes is, or where it would be without one
-	size_t	scaleAt;
-	// where the number of transformers is, or 0 without any
-	size_t	transformersAt;
-};
-
-
-bool
-read_shapes(Reader& in, std::vector<Shape>& shapes)
-{
-	const int count = in.Byte();
-	for (int i = 0; i < count && !in.Failed(); i++) {
-		Shape shape;
-		shape.start = in.At();
-		if (in.Byte() != SHAPE_PATH_SOURCE)
-			return false;
-		shape.style = in.Byte();
-		in.Skip(in.Byte());
-		shape.flagsAt = in.At();
-		shape.flags = in.Byte();
-		shape.transformersAt = 0;
-		if ((shape.flags & SHAPE_TRANSFORM) != 0)
-			in.Skip(18);
-		else if ((shape.flags & SHAPE_TRANSLATION) != 0) {
-			in.SkipCoord();
-			in.SkipCoord();
-		}
-		shape.scaleAt = in.At();
-		if ((shape.flags & SHAPE_LOD_SCALE) != 0)
-			in.Skip(2);
-		if ((shape.flags & SHAPE_TRANSFORMERS) != 0) {
-			shape.transformersAt = in.At();
-			const int transformers = in.Byte();
-			for (int t = 0; t < transformers && !in.Failed(); t++) {
-				switch (in.Byte()) {
-					case TRANSFORMER_AFFINE:
-						in.Skip(24);
-						break;
-					case TRANSFORMER_CONTOUR:
-					case TRANSFORMER_STROKE:
-						in.Skip(3);
-						break;
-					case TRANSFORMER_PERSPECTIVE:
-						in.Skip(27);
-						break;
-					default:
-						return false;
-				}
-			}
-		}
-		shape.end = in.At();
-		shapes.push_back(shape);
 	}
 	return !in.Failed();
 }
@@ -445,95 +289,13 @@ make_dark_icon(const uint8_t* data, size_t size, std::vector<uint8_t>& dark)
 	Reader in(data, size);
 	in.Skip(4);
 
-	std::vector<uint8_t> styleBytes;
-	std::vector<Style> styles;
-	if (!copy_styles(in, styleBytes, styles))
+	std::vector<uint8_t> styles;
+	if (!copy_styles(in, styles))
 		return false;
 
-	const size_t pathsAt = in.At();
-	skip_paths(in);
-	const size_t shapesAt = in.At();
-
-	std::vector<Shape> shapes;
-	if (in.Failed() || !read_shapes(in, shapes)
-		|| styles.size() >= (size_t)kMaxItems) {
-		// the colours alone, if a later version has more than can be read here
-		if (in.Failed())
-			return false;
-		dark.assign(data, data + 4);
-		dark.insert(dark.end(), styleBytes.begin(), styleBytes.end());
-		dark.insert(dark.end(), data + pathsAt, data + size);
-		return true;
-	}
-
-	// copies of each solid shape, stroked in the outline's style
-	std::vector<std::vector<uint8_t> > outlines;
-	std::set<std::vector<uint8_t> > seen;
-	for (size_t i = 0; i < shapes.size(); i++) {
-		const Shape& shape = shapes[i];
-		if (shape.style >= (int)styles.size() || !styles[shape.style].solid)
-			continue;
-
-		const bool hasScale = (shape.flags & SHAPE_LOD_SCALE) != 0;
-		const int minScale = hasScale ? data[shape.scaleAt] : 0;
-		const int maxScale = hasScale ? data[shape.scaleAt + 1] : 255;
-
-		for (size_t o = 0; o < sizeof(kOutlines) / sizeof(kOutlines[0]); o++) {
-			const int from = std::max(minScale, (int)kOutlines[o].minScale);
-			const int to = std::min(maxScale, (int)kOutlines[o].maxScale);
-			if (from >= to)
-				continue;
-
-			std::vector<uint8_t> copy(data + shape.start, data + shape.scaleAt);
-			copy[1] = (uint8_t)styles.size();
-			copy[shape.flagsAt - shape.start]
-				= shape.flags | SHAPE_LOD_SCALE | SHAPE_TRANSFORMERS;
-			copy.push_back((uint8_t)from);
-			copy.push_back((uint8_t)to);
-			if (shape.transformersAt != 0) {
-				copy.push_back(data[shape.transformersAt] + 1);
-				copy.insert(copy.end(), data + shape.transformersAt + 1,
-					data + shape.end);
-			} else
-				copy.push_back(1);
-			copy.push_back(TRANSFORMER_STROKE);
-			copy.push_back(128 + kOutlines[o].width);
-			copy.push_back(kOutlineStrokeOptions);
-			copy.push_back(kOutlineMiterLimit);
-			if (seen.insert(copy).second)
-				outlines.push_back(copy);
-		}
-	}
-
-	// There's only so much room; the topmost shapes matter most.
-	const size_t room = kMaxItems - shapes.size();
-	if (outlines.size() > room)
-		outlines.erase(outlines.begin(), outlines.end() - room);
-
+	// the paths and shapes stay as they are
 	dark.assign(data, data + 4);
-	dark.push_back((uint8_t)(styles.size() + 1));
-	dark.insert(dark.end(), styleBytes.begin() + 1, styleBytes.end());
-	dark.push_back(STYLE_SOLID);
-	add_color(dark, kOutlineColor);
-	dark.insert(dark.end(), data + pathsAt, data + shapesAt);
-
-	// behind everything but the shadows
-	size_t lead = 0;
-	while (lead < shapes.size() && shapes[lead].style < (int)styles.size()
-		&& styles[shapes[lead].style].shadow) {
-		lead++;
-	}
-	dark.push_back((uint8_t)(shapes.size() + outlines.size()));
-	for (size_t i = 0; i < lead; i++) {
-		dark.insert(dark.end(), data + shapes[i].start,
-			data + shapes[i].end);
-	}
-	for (size_t i = 0; i < outlines.size(); i++)
-		dark.insert(dark.end(), outlines[i].begin(), outlines[i].end());
-	for (size_t i = lead; i < shapes.size(); i++) {
-		dark.insert(dark.end(), data + shapes[i].start,
-			data + shapes[i].end);
-	}
+	dark.insert(dark.end(), styles.begin(), styles.end());
 	dark.insert(dark.end(), data + in.At(), data + size);
 	return true;
 }

@@ -35,7 +35,7 @@ Steps: `powertheme --apply="Haiku Dark"`, and read the `META:ICON` of
 again. Compare both with the system's own icon.
 PASS when: {p}-icons.txt says the dark icon differs and the light one matches.
 Look at a Tracker window in a screenshot too: the dark palette must be the
-approved one (dark folders with a thin soft-white outline), not inverted.
+approved one (dark folders, without an outline), not inverted.
 
 ### beos-tabs
 Steps: `powertheme --apply="Reactionary ME"`, `--beos-tabs=on`, open a window and

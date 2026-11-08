@@ -45,7 +45,7 @@ files; the code shares nothing with them.
 Haiku Dark and Haiku are the light and dark versions of one theme, so they share
 a row in Power Theme with a **Mode** menu, and can switch by the time of day.
 Haiku Dark's icons are Haiku's own, recoloured when the theme is applied: the same
-shapes, in deeper colours, with a thin soft white outline.
+shapes, in deeper colours.
 
 ![Haiku's icons above their dark versions](docs/screenshots/dark-icons.png)
 
@@ -360,8 +360,7 @@ desktop's own frames; on X11 the window manager draws them all.
 - **Haiku icons (dark)**: dark versions of Haiku's own icons, and what Haiku Dark
   uses (`icons = haiku-dark`). Power Theme recolours the icons of the running
   system when it applies them, so new file types and system updates are covered:
-  a chosen palette of deeper colours and a thin soft white outline, on the same
-  shapes. Icon themes with dark versions, such as Breeze Dark or Papirus-Dark,
+  a chosen palette of deeper colours, on the same shapes. Icon themes with dark versions, such as Breeze Dark or Papirus-Dark,
   can go in `~/config/non-packaged/data/icons`; they mostly differ in their
   one-colour icons.
 - **Switching by the time of day**: `powertheme --schedule=07:00,19:00` switches
