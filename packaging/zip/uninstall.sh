@@ -18,7 +18,7 @@ for app in "$apps/PowerTheme" "$apps/Themes"; do
 		break
 	fi
 done
-if setdecor -l 2>/dev/null | grep -q -E '^\*(Reactionary|FlatDecorator|Smoke)'; then
+if setdecor -l 2>/dev/null | grep -q -E '^\*(Reactionary|FlatDecorator|Smoke|Tidy|TidySquare|Expose|Platinum|Leopard)'; then
 	setdecor Default >/dev/null
 fi
 
@@ -30,6 +30,7 @@ rm -f "$addons/decorators/Reactionary" "$addons/control_look/Reactionary" \
 	"$addons/control_look/Tidy" \
 	"$addons/decorators/Expose" "$addons/control_look/Expose" \
 	"$addons/decorators/Platinum" "$addons/control_look/Platinum" \
+	"$addons/decorators/Leopard" "$addons/control_look/Leopard" \
 	"$apps/PowerTheme" "$bin/powertheme" \
 	"$settings/deskbar/menu/Applications/Power Theme" \
 	"$apps/Themes" "$bin/Themes" "$bin/reactionary-theme" \
@@ -44,7 +45,8 @@ rm -rf "$data/themes/Reactionary ME" "$data/themes/Haiku" "$data/themes/Gonx" \
 	"$data/themes/Tidy Renku" "$data/themes/Tidy Renku Light" \
 	"$data/themes/Tidy Renku Square" "$data/themes/Tidy Renku Square Light" \
 	"$data/icons/ClassicOS2000" "$data/icons/breeze-dark" \
-	"$data/icons/NineIconsRedux" \
+	"$data/icons/NineIconsRedux" "$data/icons/elementary" \
+	"$data/themes/Leopard" "$data/themes/Leopard Graphite" \
 	"$data/PowerTheme" "$settings/PowerTheme" "$data/Themes" "$settings/Themes"
 
 echo "Power Theme is removed. Restart running applications to get your"

@@ -40,7 +40,8 @@ approved one (dark folders, without an outline), not inverted.
 ### beos-tabs
 Steps: `powertheme --apply="Reactionary ME"`, `--beos-tabs=on`, open a window and
 take a screenshot; `--beos-tabs=off` and take another.
-Then the same with "Expose" and "Platinum", shift-dragging the tab along the window.
+Then the same with "Expose", "Platinum" and "Leopard", shift-dragging the tab along
+the window.
 PASS when: with the option on, each theme's title bar is a tab narrower than the
 window with the close button on its left and the zoom button on its right, and no
 minimize button, and it slides; off, a full-width title bar comes back. {p}-tabs.txt
@@ -115,6 +116,19 @@ loads control look: Platinum". The screenshots show a wide bevelled frame with a
 striped title bar, the close button on the left and two on the right, lavender
 scroll bars, an inactive window flat with no stripes or buttons, and lilac folders.
 Files with different types show different icons from NineIcons Redux.
+
+### leopard
+Steps: `powertheme --apply=Haiku --parts=decorator,controls`, `--apply=Leopard`,
+start StyledEdit, list its images and read `decorator_settings`; screenshot of the
+controls demo with a menu open, a Tracker window of different file types and an
+inactive window. Then `--apply="Leopard Graphite"` and the same screenshot.
+PASS when: {p}-leopard.txt says "window borders: Leopard", "new application loads
+control look: Leopard" and "graphite window borders: Leopard". The screenshots show a
+grey title bar with rounded top corners, red, yellow and green gel buttons at its
+left and the title in the middle; white pill buttons with a blue default one, blue
+gel pop-up ends, check boxes and scroll bar thumbs, and a blue menu selection; an
+inactive window lighter with grey buttons; and elementary's blue-grey folders.
+Under Graphite all that blue is steel blue, the window buttons too.
 
 ### flat-tab
 Steps: build `tools/left-tab-test.cpp`, `powertheme --apply=DarkFlat`, start it,

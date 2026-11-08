@@ -26,6 +26,8 @@ It comes with its own looks:
   **Tidy Renku Square** and **Tidy Renku Square Light**;
 - **Expose** and **Expose Dark**, after Mark Whittaker's KDE themes;
 - **Platinum**, in the style of Mac OS 9, after Niels's KDE theme;
+- **Leopard** and **Leopard Graphite**, in the style of Mac OS X 10.5, with
+  elementary's icons;
 - and the Haiku, Gonx and four Flat themes.
 
 The Reactionary ME look is an independent, unofficial port. It is not
@@ -60,6 +62,17 @@ These pictures are from a Renku OS build with the changes below, which is
 why the windows change in place and the Deskbar logo is light. The test app at the
 top left of the first pictures shows how an application can follow the mode.
 
+## Leopard
+
+![Leopard](docs/screenshots/leopard.png)
+
+**Leopard** looks like Mac OS X 10.5: a grey title bar with red, yellow and green
+gel buttons, white pill buttons with a blue default, blue gel pop-ups, check boxes
+and scroll bars, a vivid blue menu selection, the Deskbar across the top like a menu
+bar, and elementary's blue-grey folders, over an aurora of its own. **Leopard
+Graphite** is the same in Graphite's steel blue. Everything in them is drawn from
+scratch after screenshots of Leopard; nothing of Apple's is included.
+
 ## BeOS-style tabs
 
 ![Reactionary ME with BeOS-style tabs](docs/screenshots/beos-tabs.png)
@@ -67,7 +80,7 @@ top left of the first pictures shows how an application can follow the mode.
 Window borders that can draw one can have a BeOS-style tab instead of a title bar
 across the window, whatever the theme. It's as wide as the title, with close on the
 left and zoom on the right, and shift-dragging it slides it along the window. That's
-Reactionary's, Expose's and Platinum's borders; turn it on with **BeOS-style tabs** in the window, or
+Reactionary's, Expose's, Platinum's and Leopard's borders; turn it on with **BeOS-style tabs** in the window, or
 `powertheme --beos-tabs=on`. Run **Build add-ons…** after updating to get it.
 
 ## What needs Renku OS changes
@@ -95,8 +108,9 @@ this work, with what's finished, tested and still open.
 
 ## Screenshots
 
-All on Renku OS, with a window of controls and a Tracker window (and, for
-Reactionary ME, a folder of different file types, to show its icons). The
+On Renku OS unless they say otherwise, with a window of controls and a Tracker
+window (and, for Reactionary ME, Platinum and Leopard, a folder of different file
+types, to show their icons). The
 picture at the top is Power Theme itself, under the stock Haiku theme.
 
 | | |
@@ -113,6 +127,8 @@ picture at the top is Power Theme itself, under the stock Haiku theme.
 | **Tidy Dark**: the same in dark | **Expose**: a dark glossy title bar over soft grey controls with orange-topped tabs, with ZSnake on in the menus |
 | ![Expose Dark](docs/screenshots/expose-dark.png) | ![Platinum](docs/screenshots/platinum.png) |
 | **Expose Dark**: the same title bar with dark glass controls and slate selections, with ZSnake on | **Platinum**: Mac OS 9's bevelled frame and striped title bar, lavender controls and NineIcons Redux, with ZSnake on |
+| ![Leopard](docs/screenshots/leopard.png) | ![Leopard Graphite](docs/screenshots/leopard-graphite.png) |
+| **Leopard**: Mac OS X 10.5's grey title bar and red, yellow and green gel buttons, white pill buttons, blue gel pop-ups, check boxes and scroll bars, elementary's blue-grey folders and an aurora of its own (on Haiku R1/beta6) | **Leopard Graphite**: the same in Graphite's steel blue, window buttons too (on Haiku R1/beta6) |
 | ![The Power Theme window](docs/screenshots/themes-window.png) | |
 | **Power Theme** under Renku: the theme list with a preview, the icon theme, and the parts to apply | |
 
@@ -127,7 +143,7 @@ Power Theme comes as a package for Haiku R1/beta6 and later, and Renku OS
 (x86_64), on the [releases page](https://github.com/idumych/power-theme/releases):
 
 ```sh
-pkgman install ./powertheme-0.6.1-1-x86_64.hpkg
+pkgman install ./powertheme-0.7-1-x86_64.hpkg
 ```
 
 Then open **Power Theme** (Deskbar → Applications), click **Build
@@ -286,6 +302,28 @@ Rebuild the package when Hokku's decorator classes change; until then,
   scroll bars and pop-up arrows, a tiled wallpaper, and the
   [NineIcons Redux](https://store.kde.org/p/1960539) icons on folders and file
   types. It has no dark version. Its add-ons are under the GNU GPL, unlike the rest of Power Theme.
+- **Leopard** (`add-ons/decorators/Leopard`, `add-ons/control_look/Leopard`,
+  `data/themes/Leopard`, `data/themes/Leopard Graphite`): in the style of Mac OS X
+  10.5 Leopard, drawn from scratch after screenshots of it. A grey title bar across
+  the window with rounded top corners, three gel buttons at its left (red close,
+  yellow minimize and green zoom; a window without minimize or zoom shows them
+  greyed out, as Leopard does) and its title in the middle over a light edge; a thin
+  line round the content, and Leopard's grip of ridges on document windows. An
+  inactive window's bar is lighter and its buttons grey, and a pressed button shows
+  its glyph. The controls are Aqua gels: white pill buttons with a blue default and
+  pressed one, pop-up menus with a blue end holding two arrows, check boxes and radio
+  buttons that turn blue when on, blue capsules in shaded scroll bar tracks, round
+  blue slider knobs, segmented tabs, a striped blue progress bar, a light shaded menu
+  bar and a vivid blue menu selection. **Leopard Graphite** is Leopard's Graphite
+  appearance, with all of that in steel blue; the add-ons tell from how saturated the
+  control highlight colour is. Both put the Deskbar across the top of the screen,
+  like Leopard's menu bar, use Lucida Grande and Monaco where they're installed (Noto
+  otherwise), and have an aurora wallpaper of their own, drawn by
+  `tools/make-leopard-wallpaper.py`. Their icons are
+  [elementary's](https://github.com/elementary/icons) from 2017 (version 4.3.1, the
+  last with its blue-grey folders), rendered by `tools/make-elementary-icons.py`.
+  With a compositor, the top corners are rounded smoothly and the bottom ones stay
+  square; without one, the top corners are cut pixel by pixel.
 - **The Gonx theme** (`data/themes/Gonx`): the look of
   [Gonx](https://github.com/idumych/gonx), with its colours, desktop colour
   and fonts over Haiku's defaults, and Haiku's icons. Power Theme builds
@@ -338,8 +376,8 @@ Rebuild the package when Hokku's decorator classes change; until then,
   - Saves your look and icons the first time, so **Revert** always gets
     back to them, whatever was applied in between.
   - **Build add-ons…** compiles the window decorators and control looks
-    (Reactionary, Smoke, Dano, Tidy, Expose, Platinum, Gonx, and Haiku's Flat
-    ones if the system lacks them) on the system they will run on, with a progress bar and a log.
+    (Reactionary, Smoke, Dano, Tidy, Expose, Platinum, Leopard, Gonx, and
+    Haiku's Flat ones if the system lacks them) on the system they will run on, with a progress bar and a log.
     Decorators run inside app_server and use its private classes, and
     control looks subclass Haiku's private HaikuControlLook, so ones built
     for another system build can fail there. The headers that come with
@@ -388,7 +426,7 @@ Rebuild the package when Hokku's decorator classes change; until then,
   --beos-tabs=on`, gives window borders that can draw one a tab as wide as the
   title on top of the frame, with close on the left and zoom on the right, instead
   of a title bar across the window, and shift-dragging a tab slides it. It's for any theme using those borders, and so
-  far that's Reactionary's, Expose's and Platinum's. It stays on through a change of mode.
+  far that's Reactionary's, Expose's, Platinum's and Leopard's. It stays on through a change of mode.
 - **Theme Manager themes**: themes made for
   [Theme Manager](https://github.com/HaikuArchives/HaikuThemeManager)
   (and BeOS and ZETA before it), such as the
@@ -402,7 +440,7 @@ Rebuild the package when Hokku's decorator classes change; until then,
   installed. Many
   themes name ZETA decorators, which don't exist on Haiku; they get the
   nearest installed one (Smoke: Smoke, with its controls; Win2k and
-  Redmond: Reactionary; GONX: Gonx; BeOS-like ones: BeDecorator; others:
+  Redmond: Reactionary; GONX: Gonx; Baqua: Leopard; BeOS-like ones: BeDecorator; others:
   Default) and Haiku's controls. Terminal, sound and screensaver settings,
   and fonts that come with a theme, are left out.
 - **Icon themes**: any [freedesktop icon theme](https://specifications.freedesktop.org/icon-theme-spec/latest/)
@@ -444,6 +482,12 @@ Rebuild the package when Hokku's decorator classes change; until then,
   them only one pixel bigger on each side, but the layout keeps the room.
 - Slider fill colours don't show, because the channel is as thin as
   Windows'.
+- Leopard's window buttons have no glyphs until they're pressed: a decorator
+  isn't told when the pointer is over them. Its title bar can't run on into a
+  toolbar as Leopard's unified windows do, as toolbars are part of applications, and
+  its scroll arrows are at each end of the bar, where Haiku puts them. Without a
+  compositor, its windows have no shadow. Desktop icons already placed where the
+  Deskbar now runs across the top stay under it until they're moved.
 
 ## Building
 
@@ -513,6 +557,12 @@ should run on (Haiku R1/beta6), against that system's own headers.
   [NineIcons Redux](https://store.kde.org/p/1960539) by aitees (MIT licence, in
   `data/icons/NineIconsRedux`). Apple and these authors aren't affiliated with this
   project.
+- Leopard's look follows Mac OS X 10.5 Leopard. It is drawn from scratch after
+  screenshots ([512 Pixels' Aqua screenshot library](https://512pixels.net/projects/aqua-screenshot-library/mac-os-x-10-5-leopard/)),
+  and its wallpaper is its own; nothing of Apple's is included. Its icons are from
+  [elementary](https://github.com/elementary/icons) 4.3.1 by Daniel Foré and the
+  elementary contributors (GNU GPL version 3 or later, in `data/icons/elementary`).
+  Apple and elementary aren't affiliated with this project.
 - [nanosvg](https://github.com/memononen/nanosvg) by Mikko Mononen (zlib
   licence), in `src/themes/third_party`.
 - Gonx's window decorator and control look (`src/third_party/gonx`), MIT
@@ -520,6 +570,7 @@ should run on (Haiku R1/beta6), against that system's own headers.
 - Project layout, scripts and the start of the theme tool from
   [Gonx](https://github.com/idumych/gonx).
 
-Power Theme's own code is under the MIT licence (see `LICENSE`), apart from
-Expose's and Platinum's add-ons, which are under the GNU GPL
-(`src/third_party/expose/LICENSE`, `src/third_party/platinum/LICENSE`).
+Power Theme's own code is under the MIT licence (see `LICENSE`), Leopard's
+add-ons included, apart from Expose's and Platinum's add-ons, which are under the
+GNU GPL (`src/third_party/expose/LICENSE`, `src/third_party/platinum/LICENSE`), as
+are the elementary icons (`data/icons/elementary/COPYING`).
