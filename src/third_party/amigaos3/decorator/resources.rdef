@@ -1,0 +1,10 @@
+resource("be:decor:info") message('deco') {
+	"name"				= "AmigaOS3",
+	"authors"			= "idumych, from lordwolfchild's Amiga3.x xfwm4 theme",
+	"short_descr"		= "In the style of the Amiga's Workbench 3.x",
+	"long_descr"		= "A blue title bar with a close gadget at its left and zoom and depth gadgets at its right, in a bevelled frame",
+	"lic_url"			= "",
+	"lic_name"			= "MIT",
+	"support_url"		= "https://github.com/idumych/power-theme",
+	float "version"		= 0.1
+};

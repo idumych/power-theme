@@ -1,0 +1,51 @@
+# "AmigaOS 3", in the style of the Amiga's Workbench 3.x, from two public domain
+# themes: lordwolfchild's Amiga3.x window decorations for xfwm4 and untouchable89's
+# Amiga3.x GTK 2 theme. Text is Topaz, as HOTDOG draws it.
+
+name = AmigaOS 3
+description = The Amiga's Workbench 3.x: blue title bars with the close, zoom and depth gadgets, bevelled grey buttons and fields, a dotted scroll bar track, the Topaz font and Workbench's drawers.
+decorator = AmigaOS3
+control look = AmigaOS3
+wallpaper = none
+desktop color = #6688BB
+deskbar = top, expanded
+font plain = HOTDOG Topaz | Noto Sans Mono, Regular, 16
+font bold = HOTDOG Topaz | Noto Sans Mono, Bold, 16
+font fixed = HOTDOG Topaz | Noto Sans Mono, Regular, 16
+font menu = HOTDOG Topaz | Noto Sans Mono, Regular, 16
+icons = Workbench
+font smoothing = grey
+
+color B_DESKTOP_COLOR = #6688BB
+color B_PANEL_BACKGROUND_COLOR = #B5B5B5
+color B_PANEL_TEXT_COLOR = #000000
+color B_DOCUMENT_BACKGROUND_COLOR = #B5B5B5
+color B_DOCUMENT_TEXT_COLOR = #000000
+color B_CONTROL_BACKGROUND_COLOR = #B5B5B5
+color B_CONTROL_TEXT_COLOR = #000000
+color B_CONTROL_BORDER_COLOR = #000000
+color B_CONTROL_HIGHLIGHT_COLOR = #6688BB
+color B_CONTROL_MARK_COLOR = #000000
+color B_KEYBOARD_NAVIGATION_COLOR = #6688BB
+color B_NAVIGATION_PULSE_COLOR = #6688BB
+color B_SHINE_COLOR = #FFFFFF
+color B_SHADOW_COLOR = #000000
+color B_MENU_BACKGROUND_COLOR = #BDBDBD
+color B_MENU_SELECTED_BACKGROUND_COLOR = #6688BB
+color B_MENU_ITEM_TEXT_COLOR = #000000
+color B_MENU_SELECTED_ITEM_TEXT_COLOR = #000000
+color B_MENU_SELECTED_BORDER_COLOR = #6688BB
+color B_LIST_BACKGROUND_COLOR = #B5B5B5
+color B_LIST_ITEM_TEXT_COLOR = #000000
+color B_LIST_SELECTED_BACKGROUND_COLOR = #6688BB
+color B_LIST_SELECTED_ITEM_TEXT_COLOR = #000000
+color B_SCROLL_BAR_THUMB_COLOR = #B5B5B5
+color B_STATUS_BAR_COLOR = #6688BB
+color B_TOOLTIP_BACKGROUND_COLOR = #FFFFE1
+color B_TOOLTIP_TEXT_COLOR = #000000
+color B_WINDOW_TAB_COLOR = #6688BB
+color B_WINDOW_TEXT_COLOR = #FFFFFF
+color B_WINDOW_INACTIVE_TAB_COLOR = #A2A2A2
+color B_WINDOW_INACTIVE_TEXT_COLOR = #626562
+color B_WINDOW_BORDER_COLOR = #6688BB
+color B_WINDOW_INACTIVE_BORDER_COLOR = #A2A2A2

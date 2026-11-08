@@ -1,0 +1,15 @@
+The AmigaOS 3 theme's window decorator and control look, in the style of the
+Amiga's Workbench 3.x, made from two public domain themes:
+
+- art/xfwm4: the "Amiga3.x" window decorations for Xfce's xfwm4 by lordwolfchild
+  (https://github.com/lordwolfchild/amigaos_xfwm4_themes), released into the public
+  domain (LICENSE, the Unlicense). The decorator draws its frame and gadgets from
+  these pixels, as its themerc lays them out.
+- art/gtk-2.0: the "Amiga3.x" GTK 2 theme by untouchable89 (xfce-look.org, item
+  1078934, 2010), which is in the public domain too. The control look draws its
+  buttons, check boxes, radio buttons, fields, menus, scroll bars, sliders,
+  progress bars and tabs from these pictures, stretched as its .rc files say.
+
+tools/make-amigaos3-art.py turns the pictures into decorator/AmigaOS3WindowArt.h
+and controllook/AmigaOS3ControlArt.h. The add-ons' own code is under the MIT
+licence, like the rest of Power Theme.

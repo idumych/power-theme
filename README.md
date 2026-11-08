@@ -35,6 +35,8 @@ It comes with its own looks:
 - **System 7**, in the style of Mac OS 7.5;
 - **Amiga**, the Amiga's Workbench 1.3 as Arthur Choung's HOTDOG draws it, with
   its Topaz font and Workbench icons;
+- **AmigaOS 3**, the Amiga's Workbench 3.x, from public domain xfwm4 and GTK
+  themes;
 - and the Haiku, Gonx and four Flat themes.
 
 The Reactionary ME look is an independent, unofficial port. It is not
@@ -87,7 +89,7 @@ scratch after screenshots of Leopard; nothing of Apple's is included.
 Window borders that can draw one can have a BeOS-style tab instead of a title bar
 across the window, whatever the theme. It's as wide as the title, with close on the
 left and zoom on the right, and shift-dragging it slides it along the window. That's
-Reactionary's, Expose's, Platinum's, Leopard's, Gershwix's, NeXT's, System 7's and Amiga's borders; turn it on with **BeOS-style tabs** in the window, or
+Reactionary's, Expose's, Platinum's, Leopard's, Gershwix's, NeXT's, System 7's, Amiga's and AmigaOS 3's borders; turn it on with **BeOS-style tabs** in the window, or
 `powertheme --beos-tabs=on`. Run **Build add-ons…** after updating to get it.
 
 ## What needs Renku OS changes
@@ -139,6 +141,8 @@ theme.
 | ![Gershwix French Blue](docs/screenshots/gershwix.png) | ![NeXT](docs/screenshots/next.png) |
 | **Gershwix French Blue**: a striped grey title bar with square boxes, light bevelled buttons, a ridged scroll thumb and slider knob and a tube-shaded progress bar in French blue, and NineIcons Redux; six other colours share the rest | **NeXT**: NeXTSTEP's black title bar with bevelled grey boxes, square grey buttons, stippled scroll bars with dimpled thumbs, a black progress bar and a slate desktop, with its leather folders |
 | ![System 7](docs/screenshots/system7.png) | ![Amiga](docs/screenshots/amiga.png) |
+| ![AmigaOS 3](docs/screenshots/amigaos3.png) | |
+| **AmigaOS 3**: Workbench 3.x: blue title bars with the close, zoom and depth gadgets, bevelled grey buttons and fields, a dotted scroll bar track, Topaz and Workbench's drawers | |
 | **System 7**: Mac OS 7.5's striped title bar with a close box and a zoom box, black frames with a drop shadow, white rounded buttons, a lavender scroll thumb and the dotted grey desktop | **Amiga**: Workbench 1.3 after HOTDOG: white title bars with blue stripes and gadgets, blue windows, orange and blue buttons, the Topaz pixel font and Workbench's drawers |
 | ![The Power Theme window](docs/screenshots/themes-window.png) | |
 | **Power Theme** under Renku: the theme list with a preview, the icon theme, and the parts to apply | |
@@ -414,6 +418,23 @@ Rebuild the package when Hokku's decorator classes change; until then,
   file and trashcan, scaled without smoothing (`tools/make-workbench-icons.py`),
   with NineIcons Redux for the rest. The desktop is Workbench's blue and the
   Deskbar runs across the top.
+- **AmigaOS 3** (`add-ons/decorators/AmigaOS3`, `add-ons/control_look/AmigaOS3`
+  and `data/themes/AmigaOS 3`): the Amiga's Workbench 3.x, made from two public
+  domain themes kept in `src/third_party/amigaos3/art`. The window borders are
+  lordwolfchild's [Amiga3.x xfwm4 theme](https://github.com/lordwolfchild/amigaos_xfwm4_themes)
+  pixel for pixel, laid out as its themerc says: a blue bar (grey when inactive)
+  with the close gadget at its left, the title in white after a groove, and the
+  zoom and depth gadgets at its right, the depth gadget minimizing; a bevelled
+  frame four pixels wide whose bottom corners are the resize handles, and the
+  resize grip where the scroll bars meet. The controls are untouchable89's
+  [Amiga3.x GTK 2 theme](https://www.xfce-look.org/p/1078934), each picture
+  stretched as its .rc files say, without smoothing: bevelled grey buttons with a
+  black line round the default one, pop-up menus with a groove and the combo
+  arrow, its check boxes and radio buttons, sunken fields, a bevelled menu bar and
+  menus with a blue selection, scroll bars with a raised thumb in a dotted track,
+  its sliders, blue progress bars and tabs. `tools/make-amigaos3-art.py` turns the
+  pictures into the add-ons' headers. It shares the Amiga theme's Topaz font
+  (with grey smoothing) and Workbench icons, on Workbench's blue desktop.
 - **The Gonx theme** (`data/themes/Gonx`): the look of
   [Gonx](https://github.com/idumych/gonx), with its colours, desktop colour
   and fonts over Haiku's defaults, and Haiku's icons. Power Theme builds
@@ -466,7 +487,7 @@ Rebuild the package when Hokku's decorator classes change; until then,
   - Saves your look and icons the first time, so **Revert** always gets
     back to them, whatever was applied in between.
   - **Build add-ons…** compiles the window decorators and control looks
-    (Reactionary, Smoke, Dano, Tidy, Expose, Platinum, Leopard, Gershwix, NeXT, System 7, Amiga, Gonx, and
+    (Reactionary, Smoke, Dano, Tidy, Expose, Platinum, Leopard, Gershwix, NeXT, System 7, Amiga, AmigaOS 3, Gonx, and
     Haiku's Flat ones if the system lacks them) on the system they will run on, with a progress bar and a log.
     Decorators run inside app_server and use its private classes, and
     control looks subclass Haiku's private HaikuControlLook, so ones built
@@ -516,7 +537,7 @@ Rebuild the package when Hokku's decorator classes change; until then,
   --beos-tabs=on`, gives window borders that can draw one a tab as wide as the
   title on top of the frame, with close on the left and zoom on the right, instead
   of a title bar across the window, and shift-dragging a tab slides it. It's for any theme using those borders, and so
-  far that's Reactionary's, Expose's, Platinum's, Leopard's, Gershwix's, NeXT's, System 7's and Amiga's. It stays on through a change of mode.
+  far that's Reactionary's, Expose's, Platinum's, Leopard's, Gershwix's, NeXT's, System 7's, Amiga's and AmigaOS 3's. It stays on through a change of mode.
 - **Theme Manager themes**: themes made for
   [Theme Manager](https://github.com/HaikuArchives/HaikuThemeManager)
   (and BeOS and ZETA before it), such as the
@@ -593,6 +614,9 @@ Rebuild the package when Hokku's decorator classes change; until then,
   window behind the others. Workbench's icons are wide, so at Tracker's smallest
   size they are thin. Applications that keep their own font sizes don't show
   Topaz at its pixel size.
+- AmigaOS 3's depth gadget minimizes, as Amiga's does. Haiku sizes slider knobs
+  itself, smaller than the GTK theme's pictures, and Topaz fills nearly all of
+  the bar's sixteen rows.
 
 ## Building
 
@@ -686,6 +710,9 @@ should run on (Haiku R1/beta6), against that system's own headers.
   GPL version 3 or later, in `src/third_party/amiga`, `data/icons/Workbench` and
   `data/fonts`). Commodore, Amiga and HOTDOG's author aren't affiliated with this
   project.
+- AmigaOS 3's window borders are lordwolfchild's Amiga3.x theme for xfwm4 and its
+  controls untouchable89's Amiga3.x GTK 2 theme, both in the public domain (in
+  `src/third_party/amigaos3/art`, with the Unlicense text as `LICENSE`).
 - [nanosvg](https://github.com/memononen/nanosvg) by Mikko Mononen (zlib
   licence), in `src/themes/third_party`.
 - Gonx's window decorator and control look (`src/third_party/gonx`), MIT

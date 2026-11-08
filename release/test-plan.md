@@ -189,6 +189,17 @@ right; all text in Topaz, its pixels sharp without coloured edges; orange and bl
 buttons, pixel check boxes and radio buttons, blue lists with white text, drawers
 for folders, and Deskbar labels that don't overlap after Tracker restarts.
 
+### amigaos3
+Steps: `powertheme --apply=Haiku --parts=decorator,controls`, `--apply="AmigaOS
+3"`, start StyledEdit, list its images and read `decorator_settings`; screenshot of
+the controls demo on both tabs with a menu open and a Tracker window behind it.
+PASS when: {p}-amigaos3.txt says "window borders: AmigaOS3" and "new application
+loads control look: AmigaOS3". The screenshots show a blue title bar with the close
+gadget at its left and the zoom and depth gadgets at its right, the title in white
+Topaz, an inactive window's bar grey; bevelled grey buttons, the GTK theme's check
+boxes and radio buttons, a dotted scroll bar track with a raised thumb, a blue
+progress bar and menu selection, and the resize grip where the scroll bars meet.
+
 ### flat-tab
 Steps: build `tools/left-tab-test.cpp`, `powertheme --apply=DarkFlat`, start it,
 take a screenshot and run `tools/left-tab-check.py` on it.

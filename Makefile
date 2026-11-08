@@ -94,6 +94,9 @@ SYSTEM7_LOOK := $(BUILD)/control_look/System7
 AMIGA_DECOR := $(BUILD)/Amiga
 AMIGA_LOOK := $(BUILD)/control_look/Amiga
 AMIGA := src/third_party/amiga
+AMIGAOS3_DECOR := $(BUILD)/AmigaOS3
+AMIGAOS3_LOOK := $(BUILD)/control_look/AmigaOS3
+AMIGAOS3 := src/third_party/amigaos3
 
 # What Power Theme needs to build the add-ons (decorators, control looks) on a
 # user's system, laid
@@ -106,7 +109,7 @@ all: $(DECOR) $(LOOK) $(THEMES) $(FLAT_DECOR) $(FLAT_LOOK) $(SMOKE_DECOR) \
 	$(EXPOSE_DECOR) $(EXPOSE_LOOK) $(PLATINUM_DECOR) $(PLATINUM_LOOK) \
 	$(LEOPARD_DECOR) $(LEOPARD_LOOK) $(GERSHWIX_DECOR) $(GERSHWIX_LOOK) \
 	$(NEXT_DECOR) $(NEXT_LOOK) $(SYSTEM7_DECOR) $(SYSTEM7_LOOK) \
-	$(AMIGA_DECOR) $(AMIGA_LOOK) \
+	$(AMIGA_DECOR) $(AMIGA_LOOK) $(AMIGAOS3_DECOR) $(AMIGAOS3_LOOK) \
 	decorator-source
 
 decorator-source:
@@ -122,6 +125,7 @@ decorator-source:
 		$(DECOR_SOURCE)/source/decorators/NeXT \
 		$(DECOR_SOURCE)/source/decorators/System7 \
 		$(DECOR_SOURCE)/source/decorators/Amiga \
+		$(DECOR_SOURCE)/source/decorators/AmigaOS3 \
 		$(DECOR_SOURCE)/source/decorators/Gonx \
 		$(DECOR_SOURCE)/source/decorators/FlatDecorator \
 		$(DECOR_SOURCE)/source/control_looks/Reactionary \
@@ -135,6 +139,7 @@ decorator-source:
 		$(DECOR_SOURCE)/source/control_looks/NeXT \
 		$(DECOR_SOURCE)/source/control_looks/System7 \
 		$(DECOR_SOURCE)/source/control_looks/Amiga \
+		$(DECOR_SOURCE)/source/control_looks/AmigaOS3 \
 		$(DECOR_SOURCE)/source/control_looks/Gonx \
 		$(DECOR_SOURCE)/source/control_looks/FlatControlLook
 	cp src/themes/build-decorators.sh $(DECOR_SOURCE)/
@@ -182,6 +187,10 @@ decorator-source:
 		$(DECOR_SOURCE)/source/decorators/Amiga/
 	cp $(AMIGA)/controllook/* $(AMIGA)/LICENSE \
 		$(DECOR_SOURCE)/source/control_looks/Amiga/
+	cp $(AMIGAOS3)/decorator/* $(AMIGAOS3)/LICENSE $(AMIGAOS3)/README \
+		$(DECOR_SOURCE)/source/decorators/AmigaOS3/
+	cp $(AMIGAOS3)/controllook/* $(AMIGAOS3)/LICENSE $(AMIGAOS3)/README \
+		$(DECOR_SOURCE)/source/control_looks/AmigaOS3/
 	cp $(GONX)/controllook/* $(GONX)/LICENSE \
 		$(DECOR_SOURCE)/source/control_looks/Gonx/
 	cp $(FLAT)/controllook/* $(DECOR_SOURCE)/source/control_looks/FlatControlLook/
@@ -440,6 +449,30 @@ $(AMIGA_LOOK): $(BUILD)/AmigaControlLook.o $(BUILD)/AmigaControlLook.rsrc
 	$(CXX) $(SYSROOT_FLAGS) -shared -s -o $@ $(BUILD)/AmigaControlLook.o \
 		-lbe -lstdc++
 	$(XRES) -o $@ $(BUILD)/AmigaControlLook.rsrc
+
+# AmigaOS 3, Workbench 3.x from two public domain Amiga3.x themes.
+$(BUILD)/AmigaOS3Decorator.o: $(AMIGAOS3)/decorator/AmigaOS3Decorator.cpp $(AMIGAOS3)/decorator/AmigaOS3Decorator.h $(AMIGAOS3)/decorator/AmigaOS3WindowArt.h
+	@mkdir -p $(BUILD)
+	$(CXX) $(CXXFLAGS) $(DECOR_INCLUDES) -c $< -o $@
+
+$(BUILD)/AmigaOS3Decorator.rsrc: $(AMIGAOS3)/decorator/resources.rdef
+
+$(AMIGAOS3_DECOR): $(BUILD)/AmigaOS3Decorator.o $(BUILD)/AmigaOS3Decorator.rsrc
+	$(CXX) $(SYSROOT_FLAGS) -shared -s -o $@ $(BUILD)/AmigaOS3Decorator.o \
+		-lbe $(APP_SERVER) -lstdc++
+	$(XRES) -o $@ $(BUILD)/AmigaOS3Decorator.rsrc
+
+$(BUILD)/AmigaOS3ControlLook.o: $(AMIGAOS3)/controllook/AmigaOS3ControlLook.cpp $(AMIGAOS3)/controllook/AmigaOS3ControlLook.h $(AMIGAOS3)/controllook/AmigaOS3ControlArt.h
+	@mkdir -p $(BUILD)
+	$(CXX) $(CXXFLAGS) -std=gnu++17 -I$(PRIVATE)/interface -c $< -o $@
+
+$(BUILD)/AmigaOS3ControlLook.rsrc: $(AMIGAOS3)/controllook/AmigaOS3ControlLook.rdef
+
+$(AMIGAOS3_LOOK): $(BUILD)/AmigaOS3ControlLook.o $(BUILD)/AmigaOS3ControlLook.rsrc
+	@mkdir -p $(dir $@)
+	$(CXX) $(SYSROOT_FLAGS) -shared -s -o $@ $(BUILD)/AmigaOS3ControlLook.o \
+		-lbe -lstdc++
+	$(XRES) -o $@ $(BUILD)/AmigaOS3ControlLook.rsrc
 
 # Haiku's Flat decorator and control look, for the Flat themes (Renku's
 # repositories don't have the haiku_extras package they come in).
