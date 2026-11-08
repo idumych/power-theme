@@ -108,9 +108,10 @@ this work, with what's finished, tested and still open.
 
 ## Screenshots
 
-All on Renku OS, with a window of controls and a Tracker window (and, for Reactionary ME, Platinum and Leopard, a folder of different file
-types, to show their icons). The
-picture at the top is Power Theme itself, under the stock Haiku theme.
+All on Renku OS, with a window of controls and a Tracker window (and, for
+Reactionary ME, Platinum and Leopard, a folder of different file types, to show
+their icons). The picture at the top is Power Theme itself, under the stock Haiku
+theme.
 
 | | |
 |---|---|
