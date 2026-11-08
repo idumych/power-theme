@@ -64,8 +64,7 @@ the Reactionary ME (Windows ME), Smoke (in the style of ZETA), Renku, \
 Gonx, Haiku, Dano, Tidy, Expose, Platinum (in the style of Mac OS 9), Leopard \
 (in the style of Mac OS X 10.5), Gershwix (after Mintar's Platinum theme for \
 Mac OS X, in seven colours), NeXT (after Swizcore Studio's NeXTSTEP theme \
-for Mac OS X), System 7 (in the style of Mac OS 7.5), SuMa (after the SuMa 1 GUI kit for \
-Mac OS X, in three colours) and four Flat themes, and the ClassicOS 2000, \
+for Mac OS X), System 7 (in the style of Mac OS 7.5) and four Flat themes, and the ClassicOS 2000, \
 NineIcons Redux, elementary and NeXT icons. The window \
 borders and controls are built on your own system by Power Theme's \
 'Build add-ons...' (they use private parts of app_server and libbe, so they \

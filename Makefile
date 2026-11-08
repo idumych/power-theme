@@ -91,8 +91,6 @@ NEXT_DECOR := $(BUILD)/NeXT
 NEXT_LOOK := $(BUILD)/control_look/NeXT
 SYSTEM7_DECOR := $(BUILD)/System7
 SYSTEM7_LOOK := $(BUILD)/control_look/System7
-SUMA_DECOR := $(BUILD)/SuMa
-SUMA_LOOK := $(BUILD)/control_look/SuMa
 
 # What Power Theme needs to build the add-ons (decorators, control looks) on a
 # user's system, laid
@@ -105,7 +103,6 @@ all: $(DECOR) $(LOOK) $(THEMES) $(FLAT_DECOR) $(FLAT_LOOK) $(SMOKE_DECOR) \
 	$(EXPOSE_DECOR) $(EXPOSE_LOOK) $(PLATINUM_DECOR) $(PLATINUM_LOOK) \
 	$(LEOPARD_DECOR) $(LEOPARD_LOOK) $(GERSHWIX_DECOR) $(GERSHWIX_LOOK) \
 	$(NEXT_DECOR) $(NEXT_LOOK) $(SYSTEM7_DECOR) $(SYSTEM7_LOOK) \
-	$(SUMA_DECOR) $(SUMA_LOOK) \
 	decorator-source
 
 decorator-source:
@@ -120,7 +117,6 @@ decorator-source:
 		$(DECOR_SOURCE)/source/decorators/Gershwix \
 		$(DECOR_SOURCE)/source/decorators/NeXT \
 		$(DECOR_SOURCE)/source/decorators/System7 \
-		$(DECOR_SOURCE)/source/decorators/SuMa \
 		$(DECOR_SOURCE)/source/decorators/Gonx \
 		$(DECOR_SOURCE)/source/decorators/FlatDecorator \
 		$(DECOR_SOURCE)/source/control_looks/Reactionary \
@@ -133,7 +129,6 @@ decorator-source:
 		$(DECOR_SOURCE)/source/control_looks/Gershwix \
 		$(DECOR_SOURCE)/source/control_looks/NeXT \
 		$(DECOR_SOURCE)/source/control_looks/System7 \
-		$(DECOR_SOURCE)/source/control_looks/SuMa \
 		$(DECOR_SOURCE)/source/control_looks/Gonx \
 		$(DECOR_SOURCE)/source/control_looks/FlatControlLook
 	cp src/themes/build-decorators.sh $(DECOR_SOURCE)/
@@ -177,10 +172,6 @@ decorator-source:
 		$(DECOR_SOURCE)/source/decorators/System7/
 	cp src/system7/System7ControlLook.* \
 		$(DECOR_SOURCE)/source/control_looks/System7/
-	cp src/suma/SumaDecorator.* src/suma/SumaButtons.h src/suma/resources.rdef \
-		$(DECOR_SOURCE)/source/decorators/SuMa/
-	cp src/suma/SumaControlLook.* \
-		$(DECOR_SOURCE)/source/control_looks/SuMa/
 	cp $(GONX)/controllook/* $(GONX)/LICENSE \
 		$(DECOR_SOURCE)/source/control_looks/Gonx/
 	cp $(FLAT)/controllook/* $(DECOR_SOURCE)/source/control_looks/FlatControlLook/
@@ -415,30 +406,6 @@ $(SYSTEM7_LOOK): $(BUILD)/System7ControlLook.o $(BUILD)/System7ControlLook.rsrc
 	$(CXX) $(SYSROOT_FLAGS) -shared -s -o $@ $(BUILD)/System7ControlLook.o \
 		-lbe -lstdc++
 	$(XRES) -o $@ $(BUILD)/System7ControlLook.rsrc
-
-# SuMa, after the SuMa 1 GUI kit for Mac OS X.
-$(BUILD)/SumaDecorator.o: src/suma/SumaDecorator.cpp src/suma/SumaDecorator.h src/suma/SumaButtons.h
-	@mkdir -p $(BUILD)
-	$(CXX) $(CXXFLAGS) $(DECOR_INCLUDES) -c $< -o $@
-
-$(BUILD)/SumaDecorator.rsrc: src/suma/resources.rdef
-
-$(SUMA_DECOR): $(BUILD)/SumaDecorator.o $(BUILD)/SumaDecorator.rsrc
-	$(CXX) $(SYSROOT_FLAGS) -shared -s -o $@ $(BUILD)/SumaDecorator.o \
-		-lbe $(APP_SERVER) -lstdc++
-	$(XRES) -o $@ $(BUILD)/SumaDecorator.rsrc
-
-$(BUILD)/SumaControlLook.o: src/suma/SumaControlLook.cpp src/suma/SumaControlLook.h
-	@mkdir -p $(BUILD)
-	$(CXX) $(CXXFLAGS) -std=gnu++17 -I$(PRIVATE)/interface -c $< -o $@
-
-$(BUILD)/SumaControlLook.rsrc: src/suma/SumaControlLook.rdef
-
-$(SUMA_LOOK): $(BUILD)/SumaControlLook.o $(BUILD)/SumaControlLook.rsrc
-	@mkdir -p $(dir $@)
-	$(CXX) $(SYSROOT_FLAGS) -shared -s -o $@ $(BUILD)/SumaControlLook.o \
-		-lbe -lstdc++
-	$(XRES) -o $@ $(BUILD)/SumaControlLook.rsrc
 
 # Haiku's Flat decorator and control look, for the Flat themes (Renku's
 # repositories don't have the haiku_extras package they come in).

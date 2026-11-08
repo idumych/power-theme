@@ -175,19 +175,6 @@ one, pop-ups with a shadow and a black triangle, check boxes with a cross, radio
 buttons with a dot, hollow scroll arrows and a lavender thumb, a white menu with a
 black outline, and the black and white dotted desktop.
 
-### suma
-Steps: `powertheme --apply=Haiku --parts=decorator,controls`, `--apply="SuMa Blue"`,
-start StyledEdit, list its images and read `decorator_settings`; screenshot of the
-controls demo on both tabs with a menu open, and a Tracker window behind it. Then
-apply "SuMa Orange" and "SuMa Green" and take the same screenshot.
-PASS when: {p}-suma.txt says "window borders: SuMa", "new application loads
-control look: SuMa" and "SuMa themes listed: 3". The screenshots show a dark grey
-title bar with three small dark beads at its left and a white title, black glass
-buttons with white labels and a blue ring round the default one, black check boxes
-with a blue tick, a black scroll thumb with a blue stripe, a blue progress bar in a
-black track, a black menu bar and dark menus with a blue selection, and gold tabs;
-under Orange and Green, orange and lime instead of blue, and blue and purple tabs.
-
 ### flat-tab
 Steps: build `tools/left-tab-test.cpp`, `powertheme --apply=DarkFlat`, start it,
 take a screenshot and run `tools/left-tab-check.py` on it.

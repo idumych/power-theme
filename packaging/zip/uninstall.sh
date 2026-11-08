@@ -18,7 +18,7 @@ for app in "$apps/PowerTheme" "$apps/Themes"; do
 		break
 	fi
 done
-if setdecor -l 2>/dev/null | grep -q -E '^\*(Reactionary|FlatDecorator|Smoke|Tidy|TidySquare|Expose|Platinum|Leopard|Gershwix|NeXT|System7|SuMa)'; then
+if setdecor -l 2>/dev/null | grep -q -E '^\*(Reactionary|FlatDecorator|Smoke|Tidy|TidySquare|Expose|Platinum|Leopard|Gershwix|NeXT|System7)'; then
 	setdecor Default >/dev/null
 fi
 
@@ -34,7 +34,6 @@ rm -f "$addons/decorators/Reactionary" "$addons/control_look/Reactionary" \
 	"$addons/decorators/Gershwix" "$addons/control_look/Gershwix" \
 	"$addons/decorators/NeXT" "$addons/control_look/NeXT" \
 	"$addons/decorators/System7" "$addons/control_look/System7" \
-	"$addons/decorators/SuMa" "$addons/control_look/SuMa" \
 	"$apps/PowerTheme" "$bin/powertheme" \
 	"$settings/deskbar/menu/Applications/Power Theme" \
 	"$apps/Themes" "$bin/Themes" "$bin/reactionary-theme" \
@@ -55,8 +54,7 @@ rm -rf "$data/themes/Reactionary ME" "$data/themes/Haiku" "$data/themes/Gonx" \
 	"$data/themes/Gershwix Poppy" "$data/themes/Gershwix Crimson" \
 	"$data/themes/Gershwix Plum" "$data/themes/Gershwix Sunny" \
 	"$data/themes/Gershwix Silver" "$data/themes/NeXT" \
-	"$data/themes/System 7" "$data/themes/SuMa Orange" \
-	"$data/themes/SuMa Blue" "$data/themes/SuMa Green" \
+	"$data/themes/System 7" \
 	"$data/PowerTheme" "$settings/PowerTheme" "$data/Themes" "$settings/Themes"
 
 echo "Power Theme is removed. Restart running applications to get your"
