@@ -56,7 +56,7 @@ powertheme --apply=Haiku --mode=dark
 powertheme --schedule=07:00,19:00
 ```
 
-These pictures are from a Renku OS build with the pending changes below, which is
+These pictures are from a Renku OS build with the changes below, which is
 why the windows change in place and the Deskbar logo is light. The test app at the
 top left of the first pictures shows how an application can follow the mode.
 
@@ -70,25 +70,26 @@ left and zoom on the right, and shift-dragging it slides it along the window. Th
 Reactionary's, Expose's and Platinum's borders; turn it on with **BeOS-style tabs** in the window, or
 `powertheme --beos-tabs=on`. Run **Build add-ons…** after updating to get it.
 
-## What needs pending Renku OS changes
+## What needs Renku OS changes
 
 Power Theme works without these changes, including Haiku Dark, its icons and the
 schedule, as tested on Haiku R1/beta6. A few things only happen in place, or at
-all, with changes still in review. Power Theme checks for the first two and says
-what to do if they're missing. The
+all, with changes to Renku OS. Some are merged, and come with Renku OS builds from
+November 2026 on; the rest are still in review. Power Theme checks for the first
+two and says what to do if they're missing. The
 [Power Theme: Live Themes page](https://idumych.github.io/power-theme/) shows all of
 this work, with what's finished, tested and still open.
 
 | What | Without them | Needs |
 |---|---|---|
-| Running applications change their controls | Restart them | [#284](https://github.com/RenkuOS/Source/pull/284), [#285](https://github.com/RenkuOS/Source/pull/285) |
+| Running applications change their controls | Restart them | [#284](https://github.com/RenkuOS/Source/pull/284) (merged), [#285](https://github.com/RenkuOS/Source/pull/285) |
 | Running applications change their fonts | Restart them | [#286](https://github.com/RenkuOS/Source/pull/286), [#287](https://github.com/RenkuOS/Source/pull/287) |
-| Open Tracker windows show new file type icons | Some wait for Tracker to restart | [#292](https://github.com/RenkuOS/Source/pull/292) |
+| Open Tracker windows show new file type icons | Some wait for Tracker to restart | [#292](https://github.com/RenkuOS/Source/pull/292) (merged) |
 | Open Tracker windows fit a new font | Restart Tracker | [#293](https://github.com/RenkuOS/Source/pull/293), with #286 and #287 |
-| The Deskbar logo is light on dark menus | It stays navy | [#288](https://github.com/RenkuOS/Source/pull/288) |
+| The Deskbar logo is light on dark menus | It stays navy | [#288](https://github.com/RenkuOS/Source/pull/288) (merged) |
 | Applications can ask whether the desktop is dark, such as to swap their artwork | They can't, with a standard call | [#289](https://github.com/RenkuOS/Source/pull/289) |
 | Check boxes and radio buttons stay readable on dark panels, in applications that place controls by hand | Their labels can stay black | [#295](https://github.com/RenkuOS/Source/pull/295) |
-| Menus join a submenu's selection to the item it opened from, as BeOS Dano's ZSnake did, as in the Expose and Platinum pictures | They don't | [#279](https://github.com/RenkuOS/Source/pull/279), [#280](https://github.com/RenkuOS/Source/pull/280), [#281](https://github.com/RenkuOS/Source/pull/281) |
+| Menus join a submenu's selection to the item it opened from, as BeOS Dano's ZSnake did, as in the Expose and Platinum pictures | They don't | [#279](https://github.com/RenkuOS/Source/pull/279) (merged), with [#280](https://github.com/RenkuOS/Source/pull/280) to turn it on in Appearance and [#281](https://github.com/RenkuOS/Source/pull/281) for the Deskbar's menu button |
 | Desktop labels stay readable on a plain pale desktop | They stay white, so Renku Light sets a darker system desktop colour to get black ones | [#296](https://github.com/RenkuOS/Source/pull/296) |
 | A slid BeOS-style tab keeps its place when the window borders change | It goes back to the start | [#297](https://github.com/RenkuOS/Source/pull/297) |
 
@@ -172,6 +173,19 @@ running ones too. "Default", Haiku's window borders, is Haiku there. A
 light/dark schedule starts at login from `~/.config/autostart`. Other Linux
 applications, and Hokku applications run from an AppImage, keep the
 desktop's own frames; on X11 the window manager draws them all.
+
+On Arch and CachyOS with Hokku installed, `packaging/arch/PKGBUILD` (the same
+as Hokku OS's `packages/power-theme`) makes a package instead. It comes with
+the window borders and controls already built into Hokku's add-ons folder, so
+themes work at once, and registers Power Theme with Hokku's file types and the
+Deskbar's Preferences:
+
+```sh
+cd packaging/arch && makepkg -si
+```
+
+Rebuild the package when Hokku's decorator classes change; until then,
+**Build add-ons…** builds them into `~/cosmoe/addons`, which comes first.
 
 ## What's here
 
@@ -324,8 +338,8 @@ desktop's own frames; on X11 the window manager draws them all.
   - Saves your look and icons the first time, so **Revert** always gets
     back to them, whatever was applied in between.
   - **Build add-ons…** compiles the window decorators and control looks
-    (Reactionary, Smoke, Gonx, and Haiku's Flat ones if the system lacks
-    them) on the system they will run on, with a progress bar and a log.
+    (Reactionary, Smoke, Dano, Tidy, Expose, Platinum, Gonx, and Haiku's Flat
+    ones if the system lacks them) on the system they will run on, with a progress bar and a log.
     Decorators run inside app_server and use its private classes, and
     control looks subclass Haiku's private HaikuControlLook, so ones built
     for another system build can fail there. The headers that come with
@@ -347,8 +361,9 @@ desktop's own frames; on X11 the window manager draws them all.
 - **Light and dark versions**: two themes are versions of the same one if their
   `theme.settings` say so, with `variant of = Flat` and `mode = dark` (or
   `light`). Each stays a complete theme in its own folder. **Flat** (LightFlat
-  and DarkFlat), **Haiku** (Haiku and Haiku Dark), **Renku** (Renku Light and Renku)
-  and **Reactionary ME** (with Reactionary ME Dark) come this way; other themes stay as they are until
+  and DarkFlat), **Haiku** (Haiku and Haiku Dark), **Renku** (Renku Light and Renku),
+  **Reactionary ME** (with Reactionary ME Dark), **Tidy**, **Tidy Square**, **Tidy
+  Renku**, **Tidy Renku Square** and **Expose** come this way; other themes stay as they are until
   they have both. `powertheme --mode=dark` switches the theme in use, keeping
   the parts it was applied with.
 - **Light and dark icons**: each version of a theme has its own icons: what its
@@ -373,7 +388,7 @@ desktop's own frames; on X11 the window manager draws them all.
   --beos-tabs=on`, gives window borders that can draw one a tab as wide as the
   title on top of the frame, with close on the left and zoom on the right, instead
   of a title bar across the window, and shift-dragging a tab slides it. It's for any theme using those borders, and so
-  far that's Reactionary's. It stays on through a change of mode.
+  far that's Reactionary's, Expose's and Platinum's. It stays on through a change of mode.
 - **Theme Manager themes**: themes made for
   [Theme Manager](https://github.com/HaikuArchives/HaikuThemeManager)
   (and BeOS and ZETA before it), such as the
@@ -414,9 +429,8 @@ desktop's own frames; on X11 the window manager draws them all.
   (Tracker resets it whenever the Trash fills or empties), disks keep the
   icons their drivers give them, and alerts keep Haiku's.
 - Tracker shows the new folder icons only once it restarts: Power Theme
-  offers to restart it (`powertheme --restart-tracker`). A
-  [pending change](https://github.com/RenkuOS/Source/pull/292) makes most of them
-  show at once.
+  offers to restart it (`powertheme --restart-tracker`). On Renku OS builds with
+  [#292](https://github.com/RenkuOS/Source/pull/292), most of them show at once.
 - Icons with many colours lose a few to fit Haiku's vector icon format
   (255 colours and shapes in all); designs that still don't fit are left
   out, largest first. SVG icons are drawn with nanosvg, which leaves out
