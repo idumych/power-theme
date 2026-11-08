@@ -1,0 +1,88 @@
+# Power Theme, built against the system Hokku: a theme manager for Hokku's
+# applications and, through labwc-hokku, every window in the Hokku session.
+# Its window decorators and control looks are built here too, into Hokku's
+# add-ons folder, so that themes work at once; its "Build add-ons…" builds
+# them again into the user's (~/cosmoe/addons), which come first. Rebuild
+# this package when Hokku's decorator classes change.
+#
+# HOKKU_ROOT=<a Hokku staging folder>/usr builds against Hokku packages that
+# aren't installed yet (makepkg -d).
+#
+# For Arch and CachyOS with Hokku installed (Hokku OS's packages/hokku, or the
+# AUR's hokku-git); the same as Hokku OS's packages/power-theme.
+
+pkgname=power-theme
+pkgver=0.6.1
+pkgrel=1
+pkgdesc='Theme manager: window borders, controls, colours, fonts and icons for Hokku apps and the Hokku session'
+arch=(x86_64)
+url='https://github.com/idumych/power-theme'
+license=(MIT GPL-3.0-or-later)
+# gcc and binutils for "Build add-ons…"
+depends=(hokku hokku-desktop attr gcc gcc-libs glibc binutils hicolor-icon-theme)
+makedepends=(git hokku)
+install=hokku-xattrs.install
+_app=PowerTheme
+_sig=application/x-vnd.idumych-PowerTheme
+_commit=f9ce18992f89de83ddce2c487be30871a1f4d56b  # main, with Hokku support
+source=("$pkgname::git+$url.git#commit=$_commit"
+        hokku-xattrs.install)
+sha256sums=('SKIP'
+            '028577557d76b750e826537195db565b77c8dc9cc044407e2f72b1b4a0c2123b')
+
+_root=${HOKKU_ROOT:-/usr}
+
+build() {
+    export PATH="$_root/bin:$PATH" LD_LIBRARY_PATH="$_root/lib"
+    cd $pkgname
+    make COSMOE_ROOT="$_root"
+    rm -rf "$srcdir/staging"
+    make COSMOE_ROOT="$_root" install DESTDIR="$srcdir/staging" PREFIX=/usr
+    # the add-ons, for the Hokku they are built against
+    sh src/themes/build-decorators.sh --source="$srcdir/$pkgname" \
+        --dest="$srcdir/staging/usr/lib/addons" | grep -v '^STEP'
+    _stage
+}
+
+# The app typed and with its signature in the system MIME database, as
+# Hokku's own apps are, and the xattrs that hold all that dumped:
+# packages can't carry xattrs (and fakeroot hides them), so
+# hokku-xattrs.install restores them on the target.
+_stage() {
+    local stage="$srcdir/staging" db="$srcdir/mime_db" app="/usr/bin/$_app"
+    local system="$_root/share/cosmoe/mime_db"
+    local name=${_sig#application/}
+    local entry="$stage/usr/share/cosmoe/mime_db/application/${name,,}" attr value
+    rm -rf "$db"
+    mimeset -f --mimedb "$system" "$stage$app"
+    # Only the app's own entry (the database's names are lowercase): those of
+    # the types it handles belong to hokku.
+    mkdir -p "$db" "$stage/usr/share/cosmoe/mime_db/application"
+    mimeset -a --mimedb "$db" --mimedb "$system" "$stage$app"
+    cp -a "$db/application/${name,,}" "$entry"
+    chmod 644 "$entry"   # mimeset creates it 0600, unreadable to users
+    # mimeset recorded where it found the app, which is in staging
+    for attr in META:PPATH META:S:DESC; do
+        value="$(catattr -d $attr "$entry" 2>/dev/null)" || continue
+        [ "$value" != "$stage$app" ] || addattr $attr "$app" "$entry"
+    done
+    (cd "$stage" && getfattr -R -P -h -d -m '^user\.' -e base64 *) >"$srcdir/xattrs.dump"
+    grep -q BEOS:APP_SIG "$srcdir/xattrs.dump"
+}
+
+package() {
+    cp -a "$srcdir/staging/." "$pkgdir"
+    install -Dm644 "$srcdir/xattrs.dump" "$pkgdir/usr/share/hokku/xattrs/$pkgname"
+    install -d "$pkgdir/usr/share/cosmoe/deskbar/menu/Preferences"
+    ln -s ../../../../../bin/$_app \
+        "$pkgdir/usr/share/cosmoe/deskbar/menu/Preferences/Power Theme"
+
+    cd $pkgname
+    install -Dm644 LICENSE "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
+    # the third-party looks' own (Expose and Platinum are GPL)
+    local theme
+    for theme in expose gonx platinum; do
+        install -Dm644 src/third_party/$theme/LICENSE \
+            "$pkgdir/usr/share/licenses/$pkgname/LICENSE.$theme"
+    done
+}

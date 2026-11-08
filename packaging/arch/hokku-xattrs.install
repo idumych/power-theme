@@ -1,0 +1,19 @@
+# Restore the xattrs that Hokku keeps its MIME database and app signatures in
+# (dumped at build time; packages can't carry them). Each Hokku package runs
+# this, so restore every installed package's dump.
+_restore_xattrs() {
+    local f
+    cd / || return 0
+    for f in usr/share/hokku/xattrs/*; do
+        [ -s "$f" ] && setfattr -h -P --restore="$f" 2>/dev/null
+    done
+    return 0
+}
+
+post_install() {
+    _restore_xattrs
+}
+
+post_upgrade() {
+    _restore_xattrs
+}
