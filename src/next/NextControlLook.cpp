@@ -12,6 +12,7 @@
 #include <algorithm>
 #include <cmath>
 #include <new>
+#include <Bitmap.h>
 #include <string.h>
 
 #include <InterfaceDefs.h>
@@ -285,6 +286,134 @@ draw_popup_mark(BView* view, const BRect& area, bool disabled)
 	draw_raised(view, bar, bevel);
 }
 
+
+
+/*!	Draws a tab, or the line the tabs sit on, on another side of a tab view as
+	it is drawn on the top: into a bitmap of the top side's shape, whose pixels
+	are then copied into place flipped for the bottom side and turned for the
+	left and right. Inset() turns the top side's insets back for the label.
+*/
+class TabSide {
+public:
+	TabSide(const BRect& rect, uint32 side)
+		:
+		fSide(side),
+		fWidth((int32)rect.IntegerWidth() + 1),
+		fHeight((int32)rect.IntegerHeight() + 1),
+		fBitmap(NULL),
+		fView(NULL)
+	{
+		const bool turned = side == BTabView::kLeftSide
+			|| side == BTabView::kRightSide;
+		fRect = turned ? BRect(0, 0, fHeight - 1, fWidth - 1)
+			: BRect(0, 0, fWidth - 1, fHeight - 1);
+		fStart = fRect;
+		fBitmap = new(std::nothrow) BBitmap(fRect, B_RGBA32, true);
+		if (fBitmap == NULL || fBitmap->InitCheck() != B_OK)
+			return;
+		memset(fBitmap->Bits(), 0, fBitmap->BitsLength());
+		fView = new BView(fRect, "tab", 0, B_WILL_DRAW);
+		fBitmap->AddChild(fView);
+		fBitmap->Lock();
+	}
+
+	~TabSide()
+	{
+		if (fView != NULL)
+			fBitmap->Unlock();
+		delete fBitmap;
+	}
+
+	bool IsValid() const
+	{
+		return fView != NULL;
+	}
+
+	BView* View() const
+	{
+		return fView;
+	}
+
+	BRect& Rect()
+	{
+		return fRect;
+	}
+
+	//!	Copies what was drawn into view, at rect, turned the right way.
+	void Draw(BView* view, const BRect& rect)
+	{
+		fView->Sync();
+		BBitmap out(BRect(0, 0, fWidth - 1, fHeight - 1), B_RGBA32);
+		if (out.InitCheck() != B_OK)
+			return;
+		const uint32* source = (const uint32*)fBitmap->Bits();
+		const int32 sourceRow = fBitmap->BytesPerRow() / 4;
+		uint32* target = (uint32*)out.Bits();
+		const int32 targetRow = out.BytesPerRow() / 4;
+		for (int32 y = 0; y < fHeight; y++) {
+			for (int32 x = 0; x < fWidth; x++) {
+				int32 sx, sy;
+				switch (fSide) {
+					case BTabView::kBottomSide:
+						sx = x;
+						sy = fHeight - 1 - y;
+						break;
+					case BTabView::kLeftSide:
+						sx = y;
+						sy = x;
+						break;
+					default:
+						sx = y;
+						sy = fWidth - 1 - x;
+						break;
+				}
+				target[y * targetRow + x] = source[sy * sourceRow + sx];
+			}
+		}
+		view->PushState();
+		view->SetDrawingMode(B_OP_ALPHA);
+		view->SetBlendingMode(B_PIXEL_ALPHA, B_ALPHA_OVERLAY);
+		view->DrawBitmap(&out, rect.LeftTop());
+		view->PopState();
+	}
+
+	void Inset(BRect& rect) const
+	{
+		const float left = fRect.left - fStart.left;
+		const float top = fRect.top - fStart.top;
+		const float right = fStart.right - fRect.right;
+		const float bottom = fStart.bottom - fRect.bottom;
+		switch (fSide) {
+			case BTabView::kBottomSide:
+				rect.left += left;
+				rect.right -= right;
+				rect.top += bottom;
+				rect.bottom -= top;
+				break;
+			case BTabView::kLeftSide:
+				rect.left += top;
+				rect.right -= bottom;
+				rect.top += left;
+				rect.bottom -= right;
+				break;
+			default:
+				rect.right -= top;
+				rect.left += bottom;
+				rect.top += left;
+				rect.bottom -= right;
+				break;
+		}
+	}
+
+private:
+	uint32		fSide;
+	int32		fWidth;
+	int32		fHeight;
+	BBitmap*	fBitmap;
+	BView*		fView;
+	BRect		fRect;
+	BRect		fStart;
+};
 
 //	#pragma mark -
 
@@ -1006,8 +1135,13 @@ NextControlLook::DrawTabFrame(BView* view, BRect& rect,
 	uint32 borders, border_style borderStyle, uint32 side)
 {
 	if (side != BTabView::kTopSide) {
-		HaikuControlLook::DrawTabFrame(view, rect, updateRect, base, flags,
-			borders, borderStyle, side);
+		TabSide turned(rect, side);
+		if (turned.IsValid()) {
+			DrawTabFrame(turned.View(), turned.Rect(), turned.Rect(),
+				base, flags, borders, borderStyle, BTabView::kTopSide);
+			turned.Draw(view, rect);
+			turned.Inset(rect);
+		}
 		return;
 	}
 	if (!ShouldDraw(view, rect, updateRect))
@@ -1042,8 +1176,14 @@ NextControlLook::DrawActiveTab(BView* view, BRect& rect,
 	int32 last)
 {
 	if (side != BTabView::kTopSide) {
-		HaikuControlLook::DrawActiveTab(view, rect, updateRect, base, flags,
-			borders, side, index, selected, first, last);
+		TabSide turned(rect, side);
+		if (turned.IsValid()) {
+			DrawActiveTab(turned.View(), turned.Rect(), turned.Rect(),
+				base, flags, borders, BTabView::kTopSide, index, selected,
+				first, last);
+			turned.Draw(view, rect);
+			turned.Inset(rect);
+		}
 		return;
 	}
 
@@ -1073,8 +1213,14 @@ NextControlLook::DrawInactiveTab(BView* view, BRect& rect,
 	int32 last)
 {
 	if (side != BTabView::kTopSide) {
-		HaikuControlLook::DrawInactiveTab(view, rect, updateRect, base, flags,
-			borders, side, index, selected, first, last);
+		TabSide turned(rect, side);
+		if (turned.IsValid()) {
+			DrawInactiveTab(turned.View(), turned.Rect(), turned.Rect(),
+				base, flags, borders, BTabView::kTopSide, index, selected,
+				first, last);
+			turned.Draw(view, rect);
+			turned.Inset(rect);
+		}
 		return;
 	}
 
