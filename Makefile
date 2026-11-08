@@ -83,6 +83,8 @@ EXPOSE_LOOK := $(BUILD)/control_look/Expose
 PLATINUM := src/third_party/platinum
 PLATINUM_DECOR := $(BUILD)/Platinum
 PLATINUM_LOOK := $(BUILD)/control_look/Platinum
+LEOPARD_DECOR := $(BUILD)/Leopard
+LEOPARD_LOOK := $(BUILD)/control_look/Leopard
 
 # What Power Theme needs to build the add-ons (decorators, control looks) on a
 # user's system, laid
@@ -93,6 +95,7 @@ all: $(DECOR) $(LOOK) $(THEMES) $(FLAT_DECOR) $(FLAT_LOOK) $(SMOKE_DECOR) \
 	$(SMOKE_LOOK) $(DANO_LOOK) $(TIDY_DECOR) $(TIDY_SQUARE_DECOR) $(TIDY_LOOK) \
 	$(GONX_LOOK) \
 	$(EXPOSE_DECOR) $(EXPOSE_LOOK) $(PLATINUM_DECOR) $(PLATINUM_LOOK) \
+	$(LEOPARD_DECOR) $(LEOPARD_LOOK) \
 	decorator-source
 
 decorator-source:
@@ -103,6 +106,7 @@ decorator-source:
 		$(DECOR_SOURCE)/source/decorators/TidySquare \
 		$(DECOR_SOURCE)/source/decorators/Expose \
 		$(DECOR_SOURCE)/source/decorators/Platinum \
+		$(DECOR_SOURCE)/source/decorators/Leopard \
 		$(DECOR_SOURCE)/source/decorators/Gonx \
 		$(DECOR_SOURCE)/source/decorators/FlatDecorator \
 		$(DECOR_SOURCE)/source/control_looks/Reactionary \
@@ -111,6 +115,7 @@ decorator-source:
 		$(DECOR_SOURCE)/source/control_looks/Tidy \
 		$(DECOR_SOURCE)/source/control_looks/Expose \
 		$(DECOR_SOURCE)/source/control_looks/Platinum \
+		$(DECOR_SOURCE)/source/control_looks/Leopard \
 		$(DECOR_SOURCE)/source/control_looks/Gonx \
 		$(DECOR_SOURCE)/source/control_looks/FlatControlLook
 	cp src/themes/build-decorators.sh $(DECOR_SOURCE)/
@@ -138,6 +143,10 @@ decorator-source:
 		$(DECOR_SOURCE)/source/decorators/Platinum/
 	cp $(PLATINUM)/controllook/* $(PLATINUM)/LICENSE $(PLATINUM)/README \
 		$(DECOR_SOURCE)/source/control_looks/Platinum/
+	cp src/leopard/LeopardDecorator.* src/leopard/LeopardButtons.h \
+		src/leopard/resources.rdef $(DECOR_SOURCE)/source/decorators/Leopard/
+	cp src/leopard/LeopardControlLook.* \
+		$(DECOR_SOURCE)/source/control_looks/Leopard/
 	cp $(GONX)/controllook/* $(GONX)/LICENSE \
 		$(DECOR_SOURCE)/source/control_looks/Gonx/
 	cp $(FLAT)/controllook/* $(DECOR_SOURCE)/source/control_looks/FlatControlLook/
@@ -276,6 +285,30 @@ $(PLATINUM_LOOK): $(BUILD)/PlatinumControlLook.o $(BUILD)/PlatinumControlLook.rs
 	$(CXX) $(SYSROOT_FLAGS) -shared -s -o $@ $(BUILD)/PlatinumControlLook.o \
 		-lbe -lstdc++
 	$(XRES) -o $@ $(BUILD)/PlatinumControlLook.rsrc
+
+# Leopard, in the style of Mac OS X 10.5.
+$(BUILD)/LeopardDecorator.o: src/leopard/LeopardDecorator.cpp src/leopard/LeopardDecorator.h src/leopard/LeopardButtons.h
+	@mkdir -p $(BUILD)
+	$(CXX) $(CXXFLAGS) $(DECOR_INCLUDES) -c $< -o $@
+
+$(BUILD)/LeopardDecorator.rsrc: src/leopard/resources.rdef
+
+$(LEOPARD_DECOR): $(BUILD)/LeopardDecorator.o $(BUILD)/LeopardDecorator.rsrc
+	$(CXX) $(SYSROOT_FLAGS) -shared -s -o $@ $(BUILD)/LeopardDecorator.o \
+		-lbe $(APP_SERVER) -lstdc++
+	$(XRES) -o $@ $(BUILD)/LeopardDecorator.rsrc
+
+$(BUILD)/LeopardControlLook.o: src/leopard/LeopardControlLook.cpp src/leopard/LeopardControlLook.h
+	@mkdir -p $(BUILD)
+	$(CXX) $(CXXFLAGS) -std=gnu++17 -I$(PRIVATE)/interface -c $< -o $@
+
+$(BUILD)/LeopardControlLook.rsrc: src/leopard/LeopardControlLook.rdef
+
+$(LEOPARD_LOOK): $(BUILD)/LeopardControlLook.o $(BUILD)/LeopardControlLook.rsrc
+	@mkdir -p $(dir $@)
+	$(CXX) $(SYSROOT_FLAGS) -shared -s -o $@ $(BUILD)/LeopardControlLook.o \
+		-lbe -lstdc++
+	$(XRES) -o $@ $(BUILD)/LeopardControlLook.rsrc
 
 # Haiku's Flat decorator and control look, for the Flat themes (Renku's
 # repositories don't have the haiku_extras package they come in).

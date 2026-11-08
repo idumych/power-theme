@@ -90,7 +90,7 @@ static const struct {
 	{ "WinXP", "Reactionary | Windows 95", "Reactionary | haiku" },
 	{ "GONX", "Gonx", "Gonx | haiku" },
 	{ "gonxish", "Gonx", "Gonx | haiku" },
-	{ "Baqua", "Mac OS Platinum", "haiku" },
+	{ "Baqua", "Leopard | Mac OS Platinum", "Leopard | haiku" },
 	{ "Shark", "BeDecorator", "BeControlLook | haiku" },
 	{ "blueBeOS", "BeDecorator", "BeControlLook | haiku" },
 	{ "yellowTAB", "BeDecorator", "BeControlLook | haiku" },

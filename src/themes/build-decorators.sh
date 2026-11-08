@@ -94,6 +94,7 @@ decorators:Tidy:decorators/Tidy:src/tidy:TidyDecorator.cpp:resources.rdef
 decorators:TidySquare:decorators/TidySquare:src/tidy:TidySquareDecorator.cpp:square-resources.rdef
 decorators:Expose:decorators/Expose:src/third_party/expose/decorator:*Decorator.cpp:resources.rdef
 decorators:Platinum:decorators/Platinum:src/third_party/platinum/decorator:*Decorator.cpp:resources.rdef
+decorators:Leopard:decorators/Leopard:src/leopard:*Decorator.cpp:resources.rdef
 decorators:Gonx:decorators/Gonx:src/third_party/gonx/decorator:*Decorator.cpp:resources.rdef
 decorators:FlatDecorator:decorators/FlatDecorator:src/third_party/haiku-flat/decorator:*Decorator.cpp:resources.rdef
 control_look:Reactionary:control_looks/Reactionary:src/controllook:*ControlLook.cpp:*ControlLook.rdef
@@ -102,6 +103,7 @@ control_look:Dano:control_looks/Dano:src/dano:*ControlLook.cpp:*ControlLook.rdef
 control_look:Tidy:control_looks/Tidy:src/tidy:*ControlLook.cpp:*ControlLook.rdef
 control_look:Expose:control_looks/Expose:src/third_party/expose/controllook:*ControlLook.cpp:*ControlLook.rdef
 control_look:Platinum:control_looks/Platinum:src/third_party/platinum/controllook:*ControlLook.cpp:*ControlLook.rdef
+control_look:Leopard:control_looks/Leopard:src/leopard:*ControlLook.cpp:*ControlLook.rdef
 control_look:Gonx:control_looks/Gonx:src/third_party/gonx/controllook:*ControlLook.cpp:*ControlLook.rdef
 control_look:FlatControlLook:control_looks/FlatControlLook:src/third_party/haiku-flat/controllook:*ControlLook.cpp:*ControlLook.rdef"
 

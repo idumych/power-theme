@@ -1,0 +1,9 @@
+resource app_version {
+	major = 0,
+	middle = 1,
+	minor = 0,
+	variety = B_APPV_ALPHA,
+	internal = 0,
+	short_info = "Leopard Control Look",
+	long_info = "Aqua gel controls in the style of Mac OS X 10.5 Leopard"
+};

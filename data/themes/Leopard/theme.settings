@@ -1,0 +1,52 @@
+# "Leopard", in the style of Mac OS X 10.5 Leopard. Colours measured from
+# screenshots of Leopard. The window borders, controls and wallpaper are drawn
+# from scratch (tools/make-leopard-art.py, tools/make-leopard-wallpaper.py);
+# nothing of Apple's is used. Lucida Grande is used where it's installed.
+
+name = Leopard
+description = Mac OS X 10.5 Leopard's look: a grey title bar with red, yellow and green gel buttons, white pill buttons, blue gel pop-ups, check boxes and scroll bars, and a blue menu selection, over an aurora.
+decorator = Leopard
+control look = Leopard
+wallpaper = wallpaper.jpg
+wallpaper mode = scaled
+desktop color = #3B2667
+deskbar = top, expanded
+font plain = Lucida Grande | Noto Sans, Regular, 12
+font bold = Lucida Grande | Noto Sans, Bold, 12
+font fixed = Monaco | Noto Sans Mono, Regular, 12
+font menu = Lucida Grande | Noto Sans, Regular, 12
+icons = elementary
+
+color B_DESKTOP_COLOR = #3B2667
+color B_PANEL_BACKGROUND_COLOR = #E8E8E8
+color B_PANEL_TEXT_COLOR = #000000
+color B_DOCUMENT_BACKGROUND_COLOR = #FFFFFF
+color B_DOCUMENT_TEXT_COLOR = #000000
+color B_CONTROL_BACKGROUND_COLOR = #FFFFFF
+color B_CONTROL_TEXT_COLOR = #000000
+color B_CONTROL_BORDER_COLOR = #8E8E8E
+color B_CONTROL_HIGHLIGHT_COLOR = #3875D7
+color B_CONTROL_MARK_COLOR = #141E2A
+color B_KEYBOARD_NAVIGATION_COLOR = #3875D7
+color B_NAVIGATION_PULSE_COLOR = #5C93E5
+color B_SHINE_COLOR = #FFFFFF
+color B_SHADOW_COLOR = #000000
+color B_MENU_BACKGROUND_COLOR = #F5F5F6
+color B_MENU_SELECTED_BACKGROUND_COLOR = #3D5FF5
+color B_MENU_ITEM_TEXT_COLOR = #000000
+color B_MENU_SELECTED_ITEM_TEXT_COLOR = #FFFFFF
+color B_MENU_SELECTED_BORDER_COLOR = #3D5FF5
+color B_LIST_BACKGROUND_COLOR = #FFFFFF
+color B_LIST_ITEM_TEXT_COLOR = #000000
+color B_LIST_SELECTED_BACKGROUND_COLOR = #3875D7
+color B_LIST_SELECTED_ITEM_TEXT_COLOR = #FFFFFF
+color B_SCROLL_BAR_THUMB_COLOR = #75A7E4
+color B_STATUS_BAR_COLOR = #3875D7
+color B_TOOLTIP_BACKGROUND_COLOR = #FFFFC7
+color B_TOOLTIP_TEXT_COLOR = #000000
+color B_WINDOW_TAB_COLOR = #B4B4B4
+color B_WINDOW_TEXT_COLOR = #000000
+color B_WINDOW_INACTIVE_TAB_COLOR = #E0E0E0
+color B_WINDOW_INACTIVE_TEXT_COLOR = #4D4D4D
+color B_WINDOW_BORDER_COLOR = #767676
+color B_WINDOW_INACTIVE_BORDER_COLOR = #A4A4A4
