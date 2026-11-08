@@ -113,11 +113,11 @@ footer { border-top: 1px solid var(--line); padding: 24px 0 48px; color: var(--m
 	<p class="caption">Drag across the picture. One command switches between these two, with every window left open. The windows are the same ones, on Renku OS in a virtual machine.</p>
 
 	<section>
-		<h2>Get Power Theme 0.5</h2>
+		<h2>Get Power Theme 0.6.1</h2>
 		<div class="sheet">
-			<p>Dano, Tidy, light and dark versions, the daily schedule, Haiku Dark, Renku Light, the dark icons and BeOS-style tabs are in <a href="https://github.com/idumych/power-theme/releases/tag/v0.5">this release</a>, for Haiku R1/beta6 and later and Renku OS on x86_64.</p>
-			<pre>pkgman install ./powertheme-0.5-1-x86_64.hpkg</pre>
-			<p>Then open Power Theme, click <b>Build add-ons…</b> once and apply a theme. The Renku changes described below are separate, and still in review.</p>
+			<p>Expose, Platinum, Dano, the Tidy family, light and dark versions, the daily schedule, Haiku Dark, Renku Light, the dark icons, BeOS-style tabs and rounded corners on a compositor are in <a href="https://github.com/idumych/power-theme/releases/tag/v0.6.1">this release</a>, for Haiku R1/beta6 and later and Renku OS on x86_64. On Linux, it themes the applications of <a href="https://github.com/idumych/hokku">Hokku</a>, built from source or as an Arch and CachyOS package.</p>
+			<pre>pkgman install ./powertheme-0.6.1-1-x86_64.hpkg</pre>
+			<p>Then open Power Theme, click <b>Build add-ons…</b> once and apply a theme. The Renku changes described below are separate: some are merged into Renku, and the rest are still in review.</p>
 		</div>
 	</section>
 
@@ -192,7 +192,7 @@ footer { border-top: 1px solid var(--line); padding: 24px 0 48px; color: var(--m
 				<figure><img src="img/look-be.png" width="160" height="450" alt="A test window with the Be control look." loading="lazy"><figcaption>The Be look.</figcaption></figure>
 				<figure><img src="img/look-flat.png" width="160" height="450" alt="The same test window with the Flat control look." loading="lazy"><figcaption>Flat, switched while it ran.</figcaption></figure>
 			</div>
-			<p class="status"><b>In review:</b> <a href="https://github.com/RenkuOS/Source/pull/284">#284</a> is ready, and <a href="https://github.com/RenkuOS/Source/pull/285">#285</a> is a draft stacked on it.</p>
+			<p class="status"><b>Half merged:</b> <a href="https://github.com/RenkuOS/Source/pull/284">#284</a> is merged, and <a href="https://github.com/RenkuOS/Source/pull/285">#285</a>, which tells running applications to switch, is still in review.</p>
 		</div>
 	</section>
 
@@ -211,7 +211,7 @@ footer { border-top: 1px solid var(--line); padding: 24px 0 48px; color: var(--m
 	<section>
 		<h2>Light and dark versions</h2>
 		<div class="sheet">
-			<p>A theme can now say it's one version of another. The two appear as one row in Power Theme, with a <b>Mode</b> menu. Flat, Haiku, Renku and Reactionary ME come as pairs, and Haiku Dark is black and yellow, like DarkFlat.</p>
+			<p>A theme can now say it's one version of another. The two appear as one row in Power Theme, with a <b>Mode</b> menu. Flat, Haiku, Renku, Reactionary ME, Expose and the Tidy themes come as pairs, and Haiku Dark is black and yellow, like DarkFlat.</p>
 <pre>variant of = Haiku
 mode = dark
 
@@ -301,7 +301,7 @@ powertheme --mode=toggle</pre>
 				<figure><img src="img/deskbar-light.png" width="408" height="150" alt="The Deskbar with a navy RenkuOS logo on a light menu." loading="lazy"><figcaption>On a light menu.</figcaption></figure>
 				<figure><img src="img/deskbar-dark.png" width="408" height="150" alt="The Deskbar with a pale RenkuOS logo on a dark menu." loading="lazy"><figcaption>On a dark menu.</figcaption></figure>
 			</div>
-			<p class="status"><b>Open for review:</b> <a href="https://github.com/RenkuOS/Source/pull/288">#288</a>.</p>
+			<p class="status"><b>Merged:</b> <a href="https://github.com/RenkuOS/Source/pull/288">#288</a>.</p>
 		</div>
 	</section>
 
@@ -314,7 +314,7 @@ powertheme --mode=toggle</pre>
 				<figure><img src="img/zsnake-deskbar.png" width="470" height="470" alt="The Deskbar's menu open, with its button in the selection colour and the path running into a submenu." loading="lazy"><figcaption>The Deskbar's button takes the selection colour, so the path starts there.</figcaption></figure>
 				<figure><img src="img/zsnake-appearance.png" width="515" height="507" alt="Appearance's Look and feel tab, with a checkbox to join submenus to the item they open from." loading="lazy"><figcaption>A switch in Appearance, off by default.</figcaption></figure>
 			</div>
-			<p class="status"><b>In review:</b> <a href="https://github.com/RenkuOS/Source/pull/279">#279</a> is merged, and <a href="https://github.com/RenkuOS/Source/pull/280">#280</a> and <a href="https://github.com/RenkuOS/Source/pull/281">#281</a> are still drafts. All three are in <a href="#compositor">the respin</a>.</p>
+			<p class="status"><b>Partly merged:</b> <a href="https://github.com/RenkuOS/Source/pull/279">#279</a> is merged, and <a href="https://github.com/RenkuOS/Source/pull/280">#280</a> and <a href="https://github.com/RenkuOS/Source/pull/281">#281</a> are still drafts. All three are in <a href="#compositor">the respin</a>.</p>
 		</div>
 	</section>
 
@@ -330,7 +330,7 @@ powertheme --mode=toggle</pre>
 				<figure><img src="img/tracker-font-default.png" width="704" height="390" alt="A Tracker list view at the default font." loading="lazy"><figcaption>A list view at the default font.</figcaption></figure>
 				<figure><img src="img/tracker-font-big.png" width="704" height="390" alt="The same list view at a larger serif font." loading="lazy"><figcaption>The same window after the font changed.</figcaption></figure>
 			</div>
-			<p class="status"><b>In review:</b> <a href="https://github.com/RenkuOS/Source/pull/292">#292</a> for icons and <a href="https://github.com/RenkuOS/Source/pull/293">#293</a> for fonts, which needs the font changes above.</p>
+			<p class="status"><b>Icons merged:</b> <a href="https://github.com/RenkuOS/Source/pull/292">#292</a> for icons is merged. <a href="https://github.com/RenkuOS/Source/pull/293">#293</a> for fonts is in review, and needs the font changes above.</p>
 			<p class="status"><b>Also in review:</b> <a href="https://github.com/RenkuOS/Source/pull/295">#295</a> keeps check box labels readable on dark panels, and <a href="https://github.com/RenkuOS/Source/pull/296">#296</a> keeps desktop labels readable on a plain pale desktop.</p>
 		</div>
 	</section>
@@ -368,10 +368,9 @@ powertheme --mode=toggle</pre>
 		<h2>What isn't finished</h2>
 		<div class="sheet">
 			<ul>
-				<li>The Renku changes are awaiting review, so live controls, fonts and Tracker updates need a build that has them. On a stock system, running apps need a restart to pick up a new theme.</li>
+				<li>Most of the Renku changes are still awaiting review, so live controls and fonts, and Tracker following a new font, need a build that has them. On a stock system, running apps need a restart to pick up a new theme.</li>
 				<li>None of it has run on real hardware.</li>
-				<li>The dark icons' outlines can still show slight stair-stepping on diagonals at small sizes, as any thin line does at low resolution.</li>
-				<li>Until the Tracker changes land, open windows show some new icons only after Tracker restarts.</li>
+				<li>On a Renku build without #292, open Tracker windows show some new icons only after Tracker restarts.</li>
 				<li>Application icons don't change at all, as they're part of the applications, so they keep their original colours next to the dark icons.</li>
 				<li>Tracker sometimes crashes in its Attributes menu code when a script resizes a window just after a restart, with Haiku's icons or the dark ones, and with or without the Tracker changes. The cause is unknown, and it's <a href="https://github.com/RenkuOS/Source/issues/294">reported as #294</a>.</li>
 				<li>One crash of a test Deskbar on closing a ZSnake menu was seen once.</li>
