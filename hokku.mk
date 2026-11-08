@@ -44,7 +44,7 @@ decorator-source:
 	rm -rf $(SOURCE)
 	mkdir -p $(SOURCE)/source/src
 	cp src/themes/build-decorators.sh $(SOURCE)/
-	cp -R src/decorator src/controllook src/smoke src/dano src/tidy src/leopard src/gershwix src/next src/system7 \
+	cp -R src/decorator src/controllook src/smoke src/dano src/tidy src/leopard src/gershwix src/next src/system7 src/suma \
 		src/third_party $(SOURCE)/source/src/
 	cp LICENSE $(SOURCE)/source/
 

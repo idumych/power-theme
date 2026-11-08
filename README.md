@@ -33,6 +33,7 @@ It comes with its own looks:
 - **NeXT**, after Swizcore Studio's NeXTSTEP theme for Mac OS X, with its leather
   folders;
 - **System 7**, in the style of Mac OS 7.5;
+- **SuMa**, after the SuMa 1 GUI kit for Mac OS X, in Orange, Blue and Green;
 - and the Haiku, Gonx and four Flat themes.
 
 The Reactionary ME look is an independent, unofficial port. It is not
@@ -85,7 +86,7 @@ scratch after screenshots of Leopard; nothing of Apple's is included.
 Window borders that can draw one can have a BeOS-style tab instead of a title bar
 across the window, whatever the theme. It's as wide as the title, with close on the
 left and zoom on the right, and shift-dragging it slides it along the window. That's
-Reactionary's, Expose's, Platinum's, Leopard's, Gershwix's, NeXT's and System 7's borders; turn it on with **BeOS-style tabs** in the window, or
+Reactionary's, Expose's, Platinum's, Leopard's, Gershwix's, NeXT's, System 7's and SuMa's borders; turn it on with **BeOS-style tabs** in the window, or
 `powertheme --beos-tabs=on`. Run **Build add-ons…** after updating to get it.
 
 ## What needs Renku OS changes
@@ -136,8 +137,8 @@ theme.
 | **Leopard**: Mac OS X 10.5's grey title bar and red, yellow and green gel buttons, white pill buttons, blue gel pop-ups, check boxes and scroll bars, elementary's blue-grey folders and an aurora of its own | **Leopard Graphite**: the same in Graphite's steel blue, window buttons too |
 | ![Gershwix French Blue](docs/screenshots/gershwix.png) | ![NeXT](docs/screenshots/next.png) |
 | **Gershwix French Blue**: a striped grey title bar with square boxes, light bevelled buttons, a ridged scroll thumb and slider knob and a tube-shaded progress bar in French blue, and NineIcons Redux; six other colours share the rest | **NeXT**: NeXTSTEP's black title bar with bevelled grey boxes, square grey buttons, stippled scroll bars with dimpled thumbs, a black progress bar and a slate desktop, with its leather folders |
-| ![System 7](docs/screenshots/system7.png) | |
-| **System 7**: Mac OS 7.5's striped title bar with a close box and a zoom box, black frames with a drop shadow, white rounded buttons, a lavender scroll thumb and the dotted grey desktop | |
+| ![System 7](docs/screenshots/system7.png) | ![SuMa Blue](docs/screenshots/suma.png) |
+| **System 7**: Mac OS 7.5's striped title bar with a close box and a zoom box, black frames with a drop shadow, white rounded buttons, a lavender scroll thumb and the dotted grey desktop | **SuMa Blue**: dark grey metal windows with small beads, shiny black glass buttons and controls marked in blue, dark menus, and gold tabs to set the blue off; Orange and Green share the rest |
 | ![The Power Theme window](docs/screenshots/themes-window.png) | |
 | **Power Theme** under Renku: the theme list with a preview, the icon theme, and the parts to apply | |
 
@@ -391,6 +392,24 @@ Rebuild the package when Hokku's decorator classes change; until then,
   and progress bars, and white menus with a black selection. The theme has the
   black and white dotted desktop, the Deskbar across the top, ChicagoFLF or Chicago
   where installed (Noto otherwise), and NineIcons Redux.
+- **SuMa** (`add-ons/decorators/SuMa`, `add-ons/control_look/SuMa`, and three
+  themes, `data/themes/SuMa Orange`, `SuMa Blue` and `SuMa Green`): after the SuMa 1
+  GUI kit (2006), a ShapeShifter theme for Mac OS X "based off scrap materials from
+  Susumu Yoshida", drawn from scratch after measuring its pictures, with its
+  windows as its metal ones looked. A dark grey title bar with rounded top corners,
+  three small dark beads in sunken sockets for close, minimize and zoom, which fill
+  with the accent when pressed, and a white title. The controls are black glass:
+  pill buttons with a ring in the accent round the default one and an accent glow
+  when pressed, pop-up menus, check boxes with an accent tick, radio buttons with an
+  accent dot, a black scroll thumb with an accent stripe in a light track, a black
+  slider knob with an accent dot, and a glossy accent progress bar in a black
+  track; menus and menu bars are dark, with a flat accent selection, and tabs are
+  glossy in a colour that sets the accent off (blue for Orange, gold for Blue,
+  purple for Green), as the kit had them. The three themes differ in that accent,
+  which the add-ons take from the control highlight colour. They have a dark grey
+  desktop, the Deskbar across the top, Lucida Grande where installed (Noto
+  otherwise), and elementary's icons. The beads are drawn by
+  `tools/make-suma-art.py`.
 - **The Gonx theme** (`data/themes/Gonx`): the look of
   [Gonx](https://github.com/idumych/gonx), with its colours, desktop colour
   and fonts over Haiku's defaults, and Haiku's icons. Power Theme builds
@@ -443,7 +462,7 @@ Rebuild the package when Hokku's decorator classes change; until then,
   - Saves your look and icons the first time, so **Revert** always gets
     back to them, whatever was applied in between.
   - **Build add-ons…** compiles the window decorators and control looks
-    (Reactionary, Smoke, Dano, Tidy, Expose, Platinum, Leopard, Gershwix, NeXT, System 7, Gonx, and
+    (Reactionary, Smoke, Dano, Tidy, Expose, Platinum, Leopard, Gershwix, NeXT, System 7, SuMa, Gonx, and
     Haiku's Flat ones if the system lacks them) on the system they will run on, with a progress bar and a log.
     Decorators run inside app_server and use its private classes, and
     control looks subclass Haiku's private HaikuControlLook, so ones built
@@ -493,7 +512,7 @@ Rebuild the package when Hokku's decorator classes change; until then,
   --beos-tabs=on`, gives window borders that can draw one a tab as wide as the
   title on top of the frame, with close on the left and zoom on the right, instead
   of a title bar across the window, and shift-dragging a tab slides it. It's for any theme using those borders, and so
-  far that's Reactionary's, Expose's, Platinum's, Leopard's, Gershwix's, NeXT's and System 7's. It stays on through a change of mode.
+  far that's Reactionary's, Expose's, Platinum's, Leopard's, Gershwix's, NeXT's, System 7's and SuMa's. It stays on through a change of mode.
 - **Theme Manager themes**: themes made for
   [Theme Manager](https://github.com/HaikuArchives/HaikuThemeManager)
   (and BeOS and ZETA before it), such as the
@@ -566,6 +585,10 @@ Rebuild the package when Hokku's decorator classes change; until then,
   Tracker no longer draws a background behind them, so they get a light glow on the
   dotted desktop instead. Its scroll thumb grows with the content, where Mac OS's
   was a fixed square.
+- SuMa's menu bars are dark like its menus, where the kit's menu bar was light, as
+  Haiku gives menus and menu bars one text colour; its window bar is the dark grey
+  of the kit's metal windows, which its other windows didn't have. The empty part
+  of Renku's horizontal Deskbar stays white, under every theme.
 
 ## Building
 
@@ -654,6 +677,11 @@ should run on (Haiku R1/beta6), against that system's own headers.
   screenshots of Mac OS 7.5.5 from Nathan Lineback's
   [toastytech.com](http://toastytech.com/guis/mac755.html); nothing of Apple's is
   included. Apple isn't affiliated with this project.
+- SuMa's look follows the SuMa 1 GUI kit (© 2006), which states no licence and is
+  "based off scrap materials from Susumu Yoshida". It is drawn from scratch after
+  measuring the kit's pictures; none of its artwork is included. Its icons are
+  elementary's (above). Apple and the kit's authors aren't affiliated with this
+  project.
 - [nanosvg](https://github.com/memononen/nanosvg) by Mikko Mononen (zlib
   licence), in `src/themes/third_party`.
 - Gonx's window decorator and control look (`src/third_party/gonx`), MIT
@@ -662,6 +690,6 @@ should run on (Haiku R1/beta6), against that system's own headers.
   [Gonx](https://github.com/idumych/gonx).
 
 Power Theme's own code is under the MIT licence (see `LICENSE`), Leopard's,
-Gershwix's, NeXT's and System 7's add-ons included, apart from Expose's and Platinum's add-ons, which are under the
+Gershwix's, NeXT's, System 7's and SuMa's add-ons included, apart from Expose's and Platinum's add-ons, which are under the
 GNU GPL (`src/third_party/expose/LICENSE`, `src/third_party/platinum/LICENSE`), as
 are the elementary icons (`data/icons/elementary/COPYING`).

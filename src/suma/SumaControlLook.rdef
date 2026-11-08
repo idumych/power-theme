@@ -1,0 +1,9 @@
+resource app_version {
+	major = 0,
+	middle = 1,
+	minor = 0,
+	variety = B_APPV_ALPHA,
+	internal = 0,
+	short_info = "SuMa Control Look",
+	long_info = "Black glass controls with a coloured accent, in the style of the SuMa 1 GUI kit"
+};

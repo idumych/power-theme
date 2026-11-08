@@ -1,0 +1,10 @@
+resource("be:decor:info") message('deco') {
+	"name"				= "SuMa",
+	"authors"			= "idumych",
+	"short_descr"		= "In the style of the SuMa 1 GUI kit",
+	"long_descr"		= "A white title bar with rounded top corners and gel close, minimize and zoom beads in the kit's colours",
+	"lic_url"			= "",
+	"lic_name"			= "MIT",
+	"support_url"		= "https://github.com/idumych/power-theme",
+	float "version"		= 0.1
+};

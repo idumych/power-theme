@@ -319,8 +319,12 @@ System7ControlLook::DrawLabel(BView* view, const char* label,
 	const rgb_color& base, uint32 flags, const BAlignment& alignment,
 	const rgb_color* textColor)
 {
-	if (textColor == NULL && is_pressed(flags)
-		&& dynamic_cast<BButton*>(view) != NULL) {
+	// BButton passes the control text colour; anything else is its own
+	const rgb_color standard = ui_color(B_CONTROL_TEXT_COLOR);
+	if ((textColor == NULL || (textColor->red == standard.red
+			&& textColor->green == standard.green
+			&& textColor->blue == standard.blue))
+		&& is_pressed(flags) && dynamic_cast<BButton*>(view) != NULL) {
 		HaikuControlLook::DrawLabel(view, label, icon, rect, updateRect, base,
 			flags, alignment, &kWhite);
 		return;

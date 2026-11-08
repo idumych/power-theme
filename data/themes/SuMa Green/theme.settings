@@ -1,0 +1,52 @@
+# "SuMa Green", after the Green version of the SuMa 1 GUI kit (2006), a ShapeShifter
+# theme for Mac OS X "based off scrap materials from Susumu Yoshida". Colours and
+# sizes measured from its pictures; the window borders and controls are drawn from
+# scratch and none of its artwork is used. The control look takes its accent from
+# the control highlight colour, and the window borders their beads.
+
+name = SuMa Green
+description = The SuMa 1 GUI kit in green: dark grey metal windows with small beads, shiny black glass buttons and controls marked in green, dark menus, and a black scroll thumb with a green stripe.
+decorator = SuMa
+control look = SuMa
+wallpaper = none
+desktop color = #2E2E2E
+deskbar = top, expanded
+font plain = Lucida Grande | Noto Sans, Regular, 12
+font bold = Lucida Grande | Noto Sans, Bold, 12
+font fixed = Monaco | Noto Sans Mono, Regular, 12
+font menu = Lucida Grande | Noto Sans, Regular, 12
+icons = elementary
+
+color B_DESKTOP_COLOR = #2E2E2E
+color B_PANEL_BACKGROUND_COLOR = #ECECEC
+color B_PANEL_TEXT_COLOR = #000000
+color B_DOCUMENT_BACKGROUND_COLOR = #FFFFFF
+color B_DOCUMENT_TEXT_COLOR = #000000
+color B_CONTROL_BACKGROUND_COLOR = #FFFFFF
+color B_CONTROL_TEXT_COLOR = #000000
+color B_CONTROL_BORDER_COLOR = #000000
+color B_CONTROL_HIGHLIGHT_COLOR = #96C800
+color B_CONTROL_MARK_COLOR = #000000
+color B_KEYBOARD_NAVIGATION_COLOR = #B98BE0
+color B_NAVIGATION_PULSE_COLOR = #B98BE0
+color B_SHINE_COLOR = #FFFFFF
+color B_SHADOW_COLOR = #000000
+color B_MENU_BACKGROUND_COLOR = #212121
+color B_MENU_SELECTED_BACKGROUND_COLOR = #96C800
+color B_MENU_ITEM_TEXT_COLOR = #FFFFFF
+color B_MENU_SELECTED_ITEM_TEXT_COLOR = #000000
+color B_MENU_SELECTED_BORDER_COLOR = #96C800
+color B_LIST_BACKGROUND_COLOR = #FFFFFF
+color B_LIST_ITEM_TEXT_COLOR = #000000
+color B_LIST_SELECTED_BACKGROUND_COLOR = #96C800
+color B_LIST_SELECTED_ITEM_TEXT_COLOR = #000000
+color B_SCROLL_BAR_THUMB_COLOR = #96C800
+color B_STATUS_BAR_COLOR = #96C800
+color B_TOOLTIP_BACKGROUND_COLOR = #212121
+color B_TOOLTIP_TEXT_COLOR = #FFFFFF
+color B_WINDOW_TAB_COLOR = #4F4F4F
+color B_WINDOW_TEXT_COLOR = #FFFFFF
+color B_WINDOW_INACTIVE_TAB_COLOR = #7A7A7A
+color B_WINDOW_INACTIVE_TEXT_COLOR = #D0D0D0
+color B_WINDOW_BORDER_COLOR = #2A2A2A
+color B_WINDOW_INACTIVE_BORDER_COLOR = #5A5A5A

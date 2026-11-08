@@ -98,6 +98,7 @@ decorators:Leopard:decorators/Leopard:src/leopard:*Decorator.cpp:resources.rdef
 decorators:Gershwix:decorators/Gershwix:src/gershwix:*Decorator.cpp:resources.rdef
 decorators:NeXT:decorators/NeXT:src/next:*Decorator.cpp:resources.rdef
 decorators:System7:decorators/System7:src/system7:*Decorator.cpp:resources.rdef
+decorators:SuMa:decorators/SuMa:src/suma:*Decorator.cpp:resources.rdef
 decorators:Gonx:decorators/Gonx:src/third_party/gonx/decorator:*Decorator.cpp:resources.rdef
 decorators:FlatDecorator:decorators/FlatDecorator:src/third_party/haiku-flat/decorator:*Decorator.cpp:resources.rdef
 control_look:Reactionary:control_looks/Reactionary:src/controllook:*ControlLook.cpp:*ControlLook.rdef
@@ -110,6 +111,7 @@ control_look:Leopard:control_looks/Leopard:src/leopard:*ControlLook.cpp:*Control
 control_look:Gershwix:control_looks/Gershwix:src/gershwix:*ControlLook.cpp:*ControlLook.rdef
 control_look:NeXT:control_looks/NeXT:src/next:*ControlLook.cpp:*ControlLook.rdef
 control_look:System7:control_looks/System7:src/system7:*ControlLook.cpp:*ControlLook.rdef
+control_look:SuMa:control_looks/SuMa:src/suma:*ControlLook.cpp:*ControlLook.rdef
 control_look:Gonx:control_looks/Gonx:src/third_party/gonx/controllook:*ControlLook.cpp:*ControlLook.rdef
 control_look:FlatControlLook:control_looks/FlatControlLook:src/third_party/haiku-flat/controllook:*ControlLook.cpp:*ControlLook.rdef"
 
