@@ -17,7 +17,7 @@ set -eu
 
 build=${1:?usage: build-hpkg.sh <build-dir> <icons-dir> [<version>]}
 icons=${2:?usage: build-hpkg.sh <build-dir> <icons-dir> [<version>]}
-version=${3:-0.8}
+version=${3:-0.9}
 here=$(cd "$(dirname "$0")" && pwd)
 root=$(cd "$here/../.." && pwd)
 
