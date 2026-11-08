@@ -162,6 +162,19 @@ white menu selection; tan leather folders tied with a cord (a home badge on the
 home folder) and a black display for the computer; and held down, the box, button
 and check box are white with black along their top and left.
 
+### system7
+Steps: `powertheme --apply=Haiku --parts=decorator,controls`, `--apply="System 7"`,
+start StyledEdit, list its images and read `decorator_settings`; screenshot of the
+controls demo on both tabs with a menu open, and a Tracker window behind it.
+PASS when: {p}-system7.txt says "window borders: System7" and "new application
+loads control look: System7". The screenshots show a light grey title bar striped
+every other row with a close box at its left, a zoom box at its right and the title
+in the middle, a black frame with a drop shadow, an inactive window's bar plain
+white with a grey title; white rounded buttons with a thick ring round the default
+one, pop-ups with a shadow and a black triangle, check boxes with a cross, radio
+buttons with a dot, hollow scroll arrows and a lavender thumb, a white menu with a
+black outline, and the black and white dotted desktop.
+
 ### flat-tab
 Steps: build `tools/left-tab-test.cpp`, `powertheme --apply=DarkFlat`, start it,
 take a screenshot and run `tools/left-tab-check.py` on it.

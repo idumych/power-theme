@@ -1643,7 +1643,8 @@ draws_beos_tabs(DecorInfo* decor)
 		return false;
 	BPath path(decor->Ref());
 	static const char* const kNames[] = { "Reactionary", "Expose", "Platinum",
-		"Leopard", "Gershwix", "NeXT" };
+		"Leopard", "Gershwix", "NeXT",
+		"System7" };
 	for (size_t i = 0; i < sizeof(kNames) / sizeof(kNames[0]); i++) {
 		if (path.Leaf() != NULL && strcmp(path.Leaf(), kNames[i]) == 0)
 			return true;

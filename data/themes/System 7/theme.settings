@@ -1,0 +1,52 @@
+# "System 7", after Mac OS 7.5 with its standard window colour. Colours and
+# sizes measured from screenshots of Mac OS 7.5.5 (toastytech.com/guis/mac755.html);
+# the window borders, controls and the desktop pattern are drawn from scratch and
+# nothing of Apple's is used.
+
+name = System 7
+description = Mac OS 7.5: striped grey title bars with a close box and a zoom box, black frames with a drop shadow, white rounded buttons, boxes with a cross, and the grey dotted desktop.
+decorator = System7
+control look = System7
+wallpaper = wallpaper.png
+wallpaper mode = tiled
+desktop color = #FFFFFF
+deskbar = top, expanded
+font plain = ChicagoFLF | Chicago | Noto Sans, Regular, 12
+font bold = ChicagoFLF | Chicago | Noto Sans, Bold, 12
+font fixed = Monaco | Noto Sans Mono, Regular, 12
+font menu = ChicagoFLF | Chicago | Noto Sans, Regular, 12
+icons = NineIconsRedux
+
+color B_DESKTOP_COLOR = #FFFFFF
+color B_PANEL_BACKGROUND_COLOR = #DDDDDD
+color B_PANEL_TEXT_COLOR = #000000
+color B_DOCUMENT_BACKGROUND_COLOR = #FFFFFF
+color B_DOCUMENT_TEXT_COLOR = #000000
+color B_CONTROL_BACKGROUND_COLOR = #FFFFFF
+color B_CONTROL_TEXT_COLOR = #000000
+color B_CONTROL_BORDER_COLOR = #000000
+color B_CONTROL_HIGHLIGHT_COLOR = #CECEFF
+color B_CONTROL_MARK_COLOR = #000000
+color B_KEYBOARD_NAVIGATION_COLOR = #6363A5
+color B_NAVIGATION_PULSE_COLOR = #A5A5D6
+color B_SHINE_COLOR = #FFFFFF
+color B_SHADOW_COLOR = #000000
+color B_MENU_BACKGROUND_COLOR = #FFFFFF
+color B_MENU_SELECTED_BACKGROUND_COLOR = #000000
+color B_MENU_ITEM_TEXT_COLOR = #000000
+color B_MENU_SELECTED_ITEM_TEXT_COLOR = #FFFFFF
+color B_MENU_SELECTED_BORDER_COLOR = #000000
+color B_LIST_BACKGROUND_COLOR = #FFFFFF
+color B_LIST_ITEM_TEXT_COLOR = #000000
+color B_LIST_SELECTED_BACKGROUND_COLOR = #000000
+color B_LIST_SELECTED_ITEM_TEXT_COLOR = #FFFFFF
+color B_SCROLL_BAR_THUMB_COLOR = #CECEFF
+color B_STATUS_BAR_COLOR = #313163
+color B_TOOLTIP_BACKGROUND_COLOR = #FFFFC7
+color B_TOOLTIP_TEXT_COLOR = #000000
+color B_WINDOW_TAB_COLOR = #EFEFEF
+color B_WINDOW_TEXT_COLOR = #000000
+color B_WINDOW_INACTIVE_TAB_COLOR = #FFFFFF
+color B_WINDOW_INACTIVE_TEXT_COLOR = #8C8C8C
+color B_WINDOW_BORDER_COLOR = #000000
+color B_WINDOW_INACTIVE_BORDER_COLOR = #8C8C8C

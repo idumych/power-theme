@@ -89,6 +89,8 @@ GERSHWIX_DECOR := $(BUILD)/Gershwix
 GERSHWIX_LOOK := $(BUILD)/control_look/Gershwix
 NEXT_DECOR := $(BUILD)/NeXT
 NEXT_LOOK := $(BUILD)/control_look/NeXT
+SYSTEM7_DECOR := $(BUILD)/System7
+SYSTEM7_LOOK := $(BUILD)/control_look/System7
 
 # What Power Theme needs to build the add-ons (decorators, control looks) on a
 # user's system, laid
@@ -100,7 +102,7 @@ all: $(DECOR) $(LOOK) $(THEMES) $(FLAT_DECOR) $(FLAT_LOOK) $(SMOKE_DECOR) \
 	$(GONX_LOOK) \
 	$(EXPOSE_DECOR) $(EXPOSE_LOOK) $(PLATINUM_DECOR) $(PLATINUM_LOOK) \
 	$(LEOPARD_DECOR) $(LEOPARD_LOOK) $(GERSHWIX_DECOR) $(GERSHWIX_LOOK) \
-	$(NEXT_DECOR) $(NEXT_LOOK) \
+	$(NEXT_DECOR) $(NEXT_LOOK) $(SYSTEM7_DECOR) $(SYSTEM7_LOOK) \
 	decorator-source
 
 decorator-source:
@@ -114,6 +116,7 @@ decorator-source:
 		$(DECOR_SOURCE)/source/decorators/Leopard \
 		$(DECOR_SOURCE)/source/decorators/Gershwix \
 		$(DECOR_SOURCE)/source/decorators/NeXT \
+		$(DECOR_SOURCE)/source/decorators/System7 \
 		$(DECOR_SOURCE)/source/decorators/Gonx \
 		$(DECOR_SOURCE)/source/decorators/FlatDecorator \
 		$(DECOR_SOURCE)/source/control_looks/Reactionary \
@@ -125,6 +128,7 @@ decorator-source:
 		$(DECOR_SOURCE)/source/control_looks/Leopard \
 		$(DECOR_SOURCE)/source/control_looks/Gershwix \
 		$(DECOR_SOURCE)/source/control_looks/NeXT \
+		$(DECOR_SOURCE)/source/control_looks/System7 \
 		$(DECOR_SOURCE)/source/control_looks/Gonx \
 		$(DECOR_SOURCE)/source/control_looks/FlatControlLook
 	cp src/themes/build-decorators.sh $(DECOR_SOURCE)/
@@ -164,6 +168,10 @@ decorator-source:
 		$(DECOR_SOURCE)/source/decorators/NeXT/
 	cp src/next/NextControlLook.* \
 		$(DECOR_SOURCE)/source/control_looks/NeXT/
+	cp src/system7/System7Decorator.* src/system7/resources.rdef \
+		$(DECOR_SOURCE)/source/decorators/System7/
+	cp src/system7/System7ControlLook.* \
+		$(DECOR_SOURCE)/source/control_looks/System7/
 	cp $(GONX)/controllook/* $(GONX)/LICENSE \
 		$(DECOR_SOURCE)/source/control_looks/Gonx/
 	cp $(FLAT)/controllook/* $(DECOR_SOURCE)/source/control_looks/FlatControlLook/
@@ -374,6 +382,30 @@ $(NEXT_LOOK): $(BUILD)/NextControlLook.o $(BUILD)/NextControlLook.rsrc
 	$(CXX) $(SYSROOT_FLAGS) -shared -s -o $@ $(BUILD)/NextControlLook.o \
 		-lbe -lstdc++
 	$(XRES) -o $@ $(BUILD)/NextControlLook.rsrc
+
+# System 7, after Mac OS 7.5.
+$(BUILD)/System7Decorator.o: src/system7/System7Decorator.cpp src/system7/System7Decorator.h
+	@mkdir -p $(BUILD)
+	$(CXX) $(CXXFLAGS) $(DECOR_INCLUDES) -c $< -o $@
+
+$(BUILD)/System7Decorator.rsrc: src/system7/resources.rdef
+
+$(SYSTEM7_DECOR): $(BUILD)/System7Decorator.o $(BUILD)/System7Decorator.rsrc
+	$(CXX) $(SYSROOT_FLAGS) -shared -s -o $@ $(BUILD)/System7Decorator.o \
+		-lbe $(APP_SERVER) -lstdc++
+	$(XRES) -o $@ $(BUILD)/System7Decorator.rsrc
+
+$(BUILD)/System7ControlLook.o: src/system7/System7ControlLook.cpp src/system7/System7ControlLook.h
+	@mkdir -p $(BUILD)
+	$(CXX) $(CXXFLAGS) -std=gnu++17 -I$(PRIVATE)/interface -c $< -o $@
+
+$(BUILD)/System7ControlLook.rsrc: src/system7/System7ControlLook.rdef
+
+$(SYSTEM7_LOOK): $(BUILD)/System7ControlLook.o $(BUILD)/System7ControlLook.rsrc
+	@mkdir -p $(dir $@)
+	$(CXX) $(SYSROOT_FLAGS) -shared -s -o $@ $(BUILD)/System7ControlLook.o \
+		-lbe -lstdc++
+	$(XRES) -o $@ $(BUILD)/System7ControlLook.rsrc
 
 # Haiku's Flat decorator and control look, for the Flat themes (Renku's
 # repositories don't have the haiku_extras package they come in).

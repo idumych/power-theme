@@ -32,6 +32,7 @@ It comes with its own looks:
   (Ivy, French Blue, Poppy, Crimson, Plum, Sunny and Silver);
 - **NeXT**, after Swizcore Studio's NeXTSTEP theme for Mac OS X, with its leather
   folders;
+- **System 7**, in the style of Mac OS 7.5;
 - and the Haiku, Gonx and four Flat themes.
 
 The Reactionary ME look is an independent, unofficial port. It is not
@@ -84,7 +85,7 @@ scratch after screenshots of Leopard; nothing of Apple's is included.
 Window borders that can draw one can have a BeOS-style tab instead of a title bar
 across the window, whatever the theme. It's as wide as the title, with close on the
 left and zoom on the right, and shift-dragging it slides it along the window. That's
-Reactionary's, Expose's, Platinum's, Leopard's, Gershwix's and NeXT's borders; turn it on with **BeOS-style tabs** in the window, or
+Reactionary's, Expose's, Platinum's, Leopard's, Gershwix's, NeXT's and System 7's borders; turn it on with **BeOS-style tabs** in the window, or
 `powertheme --beos-tabs=on`. Run **Build add-ons…** after updating to get it.
 
 ## What needs Renku OS changes
@@ -135,6 +136,8 @@ theme.
 | **Leopard**: Mac OS X 10.5's grey title bar and red, yellow and green gel buttons, white pill buttons, blue gel pop-ups, check boxes and scroll bars, elementary's blue-grey folders and an aurora of its own | **Leopard Graphite**: the same in Graphite's steel blue, window buttons too |
 | ![Gershwix French Blue](docs/screenshots/gershwix.png) | ![NeXT](docs/screenshots/next.png) |
 | **Gershwix French Blue**: a striped grey title bar with square boxes, light bevelled buttons, a ridged scroll thumb and slider knob and a tube-shaded progress bar in French blue, and NineIcons Redux; six other colours share the rest | **NeXT**: NeXTSTEP's black title bar with bevelled grey boxes, square grey buttons, stippled scroll bars with dimpled thumbs, a black progress bar and a slate desktop, with its leather folders |
+| ![System 7](docs/screenshots/system7.png) | |
+| **System 7**: Mac OS 7.5's striped title bar with a close box and a zoom box, black frames with a drop shadow, white rounded buttons, a lavender scroll thumb and the dotted grey desktop | |
 | ![The Power Theme window](docs/screenshots/themes-window.png) | |
 | **Power Theme** under Renku: the theme list with a preview, the icon theme, and the parts to apply | |
 
@@ -371,6 +374,23 @@ Rebuild the package when Hokku's decorator classes change; until then,
   folder tied with a cord (with home, mail and query versions) and a black display
   for the computer, after the two icons the kit comes with, and NineIcons Redux
   for the rest.
+- **System 7** (`add-ons/decorators/System7`, `add-ons/control_look/System7` and
+  `data/themes/System 7`): in the style of Mac OS 7.5 with its standard window
+  colour, drawn from scratch after screenshots of Mac OS 7.5.5. A light grey title
+  bar striped every other row, with a light lavender edge along its top and left
+  and a darker one along its bottom and right, a close box at its left and a zoom
+  box at its right, sunk into the bar with a raised grey face, and the title in the
+  middle; a black line round the window with a drop shadow a pixel wide, and a
+  grow box of two overlapping squares. An inactive window's bar is plain white,
+  with a grey title and frame. There's no minimize box, as System 7.5 had none: a
+  double click on the bar minimizes. The controls are System 7's: white buttons
+  with a black rounded outline that turn black when pressed, a thick ring round
+  the default one, pop-up menus as white boxes with a shadow and a black triangle,
+  check boxes with a cross, radio buttons with a dot, scroll bars with hollow
+  arrows, a stippled track and a lavender thumb, black outlines round text fields
+  and progress bars, and white menus with a black selection. The theme has the
+  black and white dotted desktop, the Deskbar across the top, ChicagoFLF or Chicago
+  where installed (Noto otherwise), and NineIcons Redux.
 - **The Gonx theme** (`data/themes/Gonx`): the look of
   [Gonx](https://github.com/idumych/gonx), with its colours, desktop colour
   and fonts over Haiku's defaults, and Haiku's icons. Power Theme builds
@@ -423,7 +443,7 @@ Rebuild the package when Hokku's decorator classes change; until then,
   - Saves your look and icons the first time, so **Revert** always gets
     back to them, whatever was applied in between.
   - **Build add-ons…** compiles the window decorators and control looks
-    (Reactionary, Smoke, Dano, Tidy, Expose, Platinum, Leopard, Gershwix, NeXT, Gonx, and
+    (Reactionary, Smoke, Dano, Tidy, Expose, Platinum, Leopard, Gershwix, NeXT, System 7, Gonx, and
     Haiku's Flat ones if the system lacks them) on the system they will run on, with a progress bar and a log.
     Decorators run inside app_server and use its private classes, and
     control looks subclass Haiku's private HaikuControlLook, so ones built
@@ -473,7 +493,7 @@ Rebuild the package when Hokku's decorator classes change; until then,
   --beos-tabs=on`, gives window borders that can draw one a tab as wide as the
   title on top of the frame, with close on the left and zoom on the right, instead
   of a title bar across the window, and shift-dragging a tab slides it. It's for any theme using those borders, and so
-  far that's Reactionary's, Expose's, Platinum's, Leopard's, Gershwix's and NeXT's. It stays on through a change of mode.
+  far that's Reactionary's, Expose's, Platinum's, Leopard's, Gershwix's, NeXT's and System 7's. It stays on through a change of mode.
 - **Theme Manager themes**: themes made for
   [Theme Manager](https://github.com/HaikuArchives/HaikuThemeManager)
   (and BeOS and ZETA before it), such as the
@@ -542,6 +562,10 @@ Rebuild the package when Hokku's decorator classes change; until then,
 - NeXT's scroll arrows are at each end of the bar, where Haiku puts them, rather
   than together as NeXTSTEP had them, and its menu bar is grey like its menus, as
   Haiku gives both one colour; in the original theme Mac OS X's menu bar is black.
+- System 7's desktop icon labels aren't on white boxes as Mac OS's were: Haiku's
+  Tracker no longer draws a background behind them, so they get a light glow on the
+  dotted desktop instead. Its scroll thumb grows with the content, where Mac OS's
+  was a fixed square.
 
 ## Building
 
@@ -626,6 +650,10 @@ should run on (Haiku R1/beta6), against that system's own headers.
   its artwork is included; so are its folder and computer icons, drawn from scratch
   after the kit's, with NineIcons Redux (above) for the rest. Apple, NeXT and
   Swizcore Studio aren't affiliated with this project.
+- System 7's look follows Mac OS 7.5. It is drawn from scratch after measuring
+  screenshots of Mac OS 7.5.5 from Nathan Lineback's
+  [toastytech.com](http://toastytech.com/guis/mac755.html); nothing of Apple's is
+  included. Apple isn't affiliated with this project.
 - [nanosvg](https://github.com/memononen/nanosvg) by Mikko Mononen (zlib
   licence), in `src/themes/third_party`.
 - Gonx's window decorator and control look (`src/third_party/gonx`), MIT
@@ -634,6 +662,6 @@ should run on (Haiku R1/beta6), against that system's own headers.
   [Gonx](https://github.com/idumych/gonx).
 
 Power Theme's own code is under the MIT licence (see `LICENSE`), Leopard's,
-Gershwix's and NeXT's add-ons included, apart from Expose's and Platinum's add-ons, which are under the
+Gershwix's, NeXT's and System 7's add-ons included, apart from Expose's and Platinum's add-ons, which are under the
 GNU GPL (`src/third_party/expose/LICENSE`, `src/third_party/platinum/LICENSE`), as
 are the elementary icons (`data/icons/elementary/COPYING`).

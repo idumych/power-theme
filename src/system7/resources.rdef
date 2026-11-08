@@ -1,0 +1,10 @@
+resource("be:decor:info") message('deco') {
+	"name"				= "System7",
+	"authors"			= "idumych",
+	"short_descr"		= "In the style of Mac OS 7.5",
+	"long_descr"		= "A striped grey title bar with a close box on the left and a zoom box on the right, a black frame with a drop shadow",
+	"lic_url"			= "",
+	"lic_name"			= "MIT",
+	"support_url"		= "https://github.com/idumych/power-theme",
+	float "version"		= 0.1
+};
