@@ -874,44 +874,120 @@ System7ControlLook::DrawGroupFrame(BView* view, BRect& rect,
 //	#pragma mark - tabs
 
 
-//!	A black line along the page's top that the tabs sit on.
-void
-System7ControlLook::DrawTabFrame(BView* view, BRect& rect,
-	const BRect& updateRect, const rgb_color& base, uint32 flags,
-	uint32 borders, border_style borderStyle, uint32 side)
+//!	The page's edge on the tabs' side, as the rectangle's row or column.
+static BRect
+page_edge(const BRect& r, uint32 side)
 {
-	if (side != BTabView::kTopSide) {
-		HaikuControlLook::DrawTabFrame(view, rect, updateRect, base, flags,
-			borders, borderStyle, side);
-		return;
+	switch (side) {
+		case BTabView::kBottomSide:
+			return BRect(r.left, r.top, r.right, r.top);
+		case BTabView::kLeftSide:
+			return BRect(r.right, r.top, r.right, r.bottom);
+		case BTabView::kRightSide:
+			return BRect(r.left, r.top, r.left, r.bottom);
+		default:
+			return BRect(r.left, r.bottom, r.right, r.bottom);
 	}
-	if (!ShouldDraw(view, rect, updateRect))
-		return;
-
-	view->PushState();
-	fill_line(view, rect.left, rect.top, rect.right, rect.bottom, base);
-	if (borderStyle != B_NO_BORDER)
-		fill_line(view, rect.left, rect.bottom, rect.right, rect.bottom, kBlack);
-	view->PopState();
 }
 
 
-//!	A tab: a black outline with rounded top corners round its face, open below.
+/*!	A tab: a black outline round its face, with its corners rounded away from
+	the page and open towards it. One behind the chosen tab is pushed two pixels
+	back from the page, and sits on its line.
+*/
 static void
-draw_tab(BView* view, const BRect& r, const rgb_color& face, bool open)
+draw_tab(BView* view, const BRect& rect, uint32 side, const rgb_color& face,
+	bool open)
 {
+	BRect r(rect);
+	BRect shape(rect);
+	const float back = open ? 0 : 2;
+	switch (side) {
+		case BTabView::kBottomSide:
+			r.bottom -= back;
+			shape = BRect(r.left, r.top - 4, r.right, r.bottom);
+			break;
+		case BTabView::kLeftSide:
+			r.left += back;
+			shape = BRect(r.left, r.top, r.right + 4, r.bottom);
+			break;
+		case BTabView::kRightSide:
+			r.right -= back;
+			shape = BRect(r.left - 4, r.top, r.right, r.bottom);
+			break;
+		default:
+			r.top += back;
+			shape = BRect(r.left, r.top, r.right, r.bottom + 4);
+			break;
+	}
+
 	view->PushState();
+	view->ClipToRect(rect);
 	view->SetDrawingMode(B_OP_ALPHA);
 	view->SetBlendingMode(B_PIXEL_ALPHA, B_ALPHA_OVERLAY);
-	const BRect shape(r.left, r.top, r.right, r.bottom + 4);
 	view->SetHighColor(kBlack);
 	view->FillRoundRect(shape, kButtonRadius, kButtonRadius);
 	view->SetHighColor(face);
 	view->FillRoundRect(shape.InsetByCopy(1, 1), kButtonRadius - 1,
 		kButtonRadius - 1);
 	view->PopState();
-	if (!open)
-		fill_line(view, r.left, r.bottom, r.right, r.bottom, kBlack);
+
+	if (!open) {
+		const BRect edge = page_edge(rect, side);
+		fill_line(view, edge.left, edge.top, edge.right, edge.bottom, kBlack);
+	}
+}
+
+
+//!	Where a tab's label goes: inside its outline, a little away from the page.
+static void
+inset_tab(BRect& rect, uint32 side)
+{
+	switch (side) {
+		case BTabView::kBottomSide:
+			rect.top += 1;
+			rect.bottom -= 3;
+			rect.left += 4;
+			rect.right -= 4;
+			break;
+		case BTabView::kLeftSide:
+			rect.left += 3;
+			rect.right -= 1;
+			rect.top += 4;
+			rect.bottom -= 4;
+			break;
+		case BTabView::kRightSide:
+			rect.left += 1;
+			rect.right -= 3;
+			rect.top += 4;
+			rect.bottom -= 4;
+			break;
+		default:
+			rect.top += 3;
+			rect.bottom -= 1;
+			rect.left += 4;
+			rect.right -= 4;
+			break;
+	}
+}
+
+
+//!	A black line along the page's edge that the tabs sit on.
+void
+System7ControlLook::DrawTabFrame(BView* view, BRect& rect,
+	const BRect& updateRect, const rgb_color& base, uint32 flags,
+	uint32 borders, border_style borderStyle, uint32 side)
+{
+	if (!ShouldDraw(view, rect, updateRect))
+		return;
+
+	view->PushState();
+	fill_line(view, rect.left, rect.top, rect.right, rect.bottom, base);
+	if (borderStyle != B_NO_BORDER) {
+		const BRect edge = page_edge(rect, side);
+		fill_line(view, edge.left, edge.top, edge.right, edge.bottom, kBlack);
+	}
+	view->PopState();
 }
 
 
@@ -921,53 +997,33 @@ System7ControlLook::DrawActiveTab(BView* view, BRect& rect,
 	uint32 borders, uint32 side, int32 index, int32 selected, int32 first,
 	int32 last)
 {
-	if (side != BTabView::kTopSide) {
-		HaikuControlLook::DrawActiveTab(view, rect, updateRect, base, flags,
-			borders, side, index, selected, first, last);
-		return;
-	}
-
 	if (ShouldDraw(view, rect, updateRect)) {
 		view->PushState();
 		view->ClipToRect(rect);
 		fill_line(view, rect.left, rect.top, rect.right, rect.bottom, base);
-		draw_tab(view, rect, base, true);
+		draw_tab(view, rect, side, base, true);
 		view->PopState();
 	}
 
-	rect.top += 3;
-	rect.bottom -= 1;
-	rect.left += 4;
-	rect.right -= 4;
+	inset_tab(rect, side);
 }
 
 
-//!	A tab behind the chosen one is lower and white, and sits on the line.
 void
 System7ControlLook::DrawInactiveTab(BView* view, BRect& rect,
 	const BRect& updateRect, const rgb_color& base, uint32 flags,
 	uint32 borders, uint32 side, int32 index, int32 selected, int32 first,
 	int32 last)
 {
-	if (side != BTabView::kTopSide) {
-		HaikuControlLook::DrawInactiveTab(view, rect, updateRect, base, flags,
-			borders, side, index, selected, first, last);
-		return;
-	}
-
 	if (ShouldDraw(view, rect, updateRect)) {
 		view->PushState();
 		view->ClipToRect(rect);
 		fill_line(view, rect.left, rect.top, rect.right, rect.bottom, base);
-		draw_tab(view, BRect(rect.left, rect.top + 2, rect.right, rect.bottom),
-			kTrack, false);
+		draw_tab(view, rect, side, kTrack, false);
 		view->PopState();
 	}
 
-	rect.top += 3;
-	rect.bottom -= 1;
-	rect.left += 4;
-	rect.right -= 4;
+	inset_tab(rect, side);
 }
 
 
