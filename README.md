@@ -469,8 +469,11 @@ Rebuild the package when Hokku's decorator classes change; until then,
   (applications, utilities and preferences), and a system monitor of the
   processors, memory, disk and swap. While it runs, launch_daemon is kept from
   starting the Deskbar, which comes back as it quits; it starts at login while
-  it's on. Replicants in the Deskbar's tray don't show, and windows can go under
-  the shelf, as Haiku has no way to keep them clear of it.
+  it's on. Haiku has no way to set part of the screen aside, so it keeps windows
+  clear itself: one that opens under the taskbar or the shelf is moved out (and
+  shrunk if it doesn't fit), and one that is zoomed or resized by its
+  application is fitted to the rest of the screen, a moment after; one you drag
+  under them stays where you put it. Replicants in the Deskbar's tray don't show.
 
   ![The Photon shell](docs/screenshots/photon-shell.png)
 - **The Gonx theme** (`data/themes/Gonx`): the look of

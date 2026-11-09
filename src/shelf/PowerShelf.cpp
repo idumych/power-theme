@@ -50,6 +50,7 @@
 #include <unistd.h>
 #include <math.h>
 #include <map>
+#include <set>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -528,6 +529,7 @@ public:
 					&& info->show_hide_level <= 0
 					&& (info->workspaces & (1UL << current_workspace())) != 0
 					&& info->name[0] != '\0') {
+					_KeepClear(info);
 					TaskButton button;
 					button.token = info->server_token;
 					button.team = team;
@@ -584,6 +586,78 @@ public:
 	}
 
 private:
+	/*!	Keeps a window clear of the taskbar and the shelf, as Haiku has no way
+		to set part of the screen aside: one that opens under them is moved
+		out, and shrunk if it doesn't fit, and one that is zoomed or resized
+		by its application, rather than with the mouse, is fitted to the rest
+		of the screen. One dragged under them stays there.
+	*/
+	void _KeepClear(const client_window_info* info)
+	{
+		if (info->is_mini)
+			return;
+		const BRect frame(info->window_left, info->window_top,
+			info->window_right, info->window_bottom);
+		auto known = fFrames.find(info->server_token);
+		const bool seen = known != fFrames.end();
+		// a new size with no button held: a zoom, or the application's own
+		BPoint where;
+		uint32 buttons = 0;
+		GetMouse(&where, &buttons, false);
+		const bool resized = seen && buttons == 0
+			&& (known->second.Width() != frame.Width()
+				|| known->second.Height() != frame.Height());
+		if (buttons == 0 || !seen)
+			fFrames[info->server_token] = frame;
+
+		const BRect screen = BScreen(Window()).Frame();
+		// what's left of the screen, and the window with its border and tab
+		const BRect free(screen.left, screen.top,
+			screen.right - kShelfWidth, screen.bottom - kBand - kTaskbarHeight);
+		const float border = info->border_size;
+		const float tab = info->tab_height;
+		const BRect outer(frame.left - border, frame.top - tab - border,
+			frame.right + border, frame.bottom + border);
+		if (free.Contains(outer))
+			return;
+
+		// zoomed, as Haiku zooms with no Deskbar: across the whole screen
+		const bool zoomed = outer.left <= screen.left + border
+			&& outer.right >= screen.right - border
+			&& outer.Height() >= screen.Height() * 0.9f;
+		if (seen && !zoomed && !resized)
+			return;
+
+		const bool resizable = (info->flags & B_NOT_RESIZABLE) == 0;
+		BRect fitted(frame);
+		if (zoomed && resizable) {
+			fitted.Set(free.left + border, free.top + tab + border,
+				free.right - border, free.bottom - border);
+		} else {
+			// in from the right and bottom, then the left and top
+			if (outer.right > free.right)
+				fitted.OffsetBy(free.right - outer.right, 0);
+			if (outer.bottom > free.bottom)
+				fitted.OffsetBy(0, free.bottom - outer.bottom);
+			if (fitted.left - border < free.left)
+				fitted.OffsetBy(free.left + border - fitted.left, 0);
+			if (fitted.top - tab - border < free.top)
+				fitted.OffsetBy(0, free.top + tab + border - fitted.top);
+			if (resizable) {
+				fitted.right = std::min(fitted.right, free.right - border);
+				fitted.bottom = std::min(fitted.bottom, free.bottom - border);
+			}
+		}
+		if (fitted == frame)
+			return;
+
+		BMessage message(B_SET_PROPERTY);
+		message.AddRect("data", fitted);
+		message.AddSpecifier("Frame");
+		message.AddSpecifier("Window", info->name);
+		BMessenger(NULL, info->team).SendMessage(&message);
+	}
+
 	BRect _LaunchFrame() const
 	{
 		const BRect b = Bounds();
@@ -735,6 +809,8 @@ private:
 
 	std::vector<TaskButton>	fButtons;
 	std::map<team_id, BBitmap*> fIcons;
+	// each window's frame when last seen with no button held
+	std::map<int32, BRect> fFrames;
 	int32				fActive;
 	int32				fPressed;
 	bool				fLaunchPressed;
