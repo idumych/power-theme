@@ -86,6 +86,7 @@ private:
 			IconStripView*		fIconStrip;
 			BCheckBox*			fDecorator;
 			BCheckBox*			fBeOSTabs;
+			BCheckBox*			fPhotonShell;
 			BCheckBox*			fControls;
 			BCheckBox*			fColors;
 			BCheckBox*			fFonts;

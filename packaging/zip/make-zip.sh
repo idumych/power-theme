@@ -16,7 +16,7 @@ root=$(cd "$(dirname "$0")/../.." && pwd)
 name=power-theme-$version
 out=$root/dist/$name
 
-for f in build/Reactionary build/control_look/Reactionary build/PowerTheme \
+for f in build/Reactionary build/control_look/Reactionary build/PowerTheme build/PowerShelf \
 		build/FlatDecorator build/control_look/FlatControlLook \
 		build/Smoke build/control_look/Smoke build/control_look/Gonx \
 		build/data/PowerTheme/build-decorators.sh \
@@ -33,7 +33,8 @@ cp "$root/packaging/zip/install.sh" "$root/packaging/zip/uninstall.sh" \
 cp "$root/README.md" "$root/LICENSE" "$out/"
 cp "$root/docs/screenshots/power-theme.png" "$out/screenshot.png"
 
-cp "$root/build/Reactionary" "$root/build/PowerTheme" "$root/build/FlatDecorator" \
+cp "$root/build/Reactionary" "$root/build/PowerTheme" "$root/build/PowerShelf" \
+	"$root/build/FlatDecorator" \
 	"$root/build/Smoke" "$out/prebuilt/"
 cp "$root/build/control_look/Reactionary" \
 	"$root/build/control_look/FlatControlLook" \

@@ -26,7 +26,7 @@ haiku=$(pkgman search -i -D haiku 2>/dev/null \
 haiku=${haiku%-*}	# drop the package revision
 [ -n "$haiku" ] || { echo "can't tell the installed haiku version" >&2; exit 1; }
 
-for f in "$build/PowerTheme" "$build/data/PowerTheme/build-decorators.sh" \
+for f in "$build/PowerTheme" "$build/PowerShelf" "$build/data/PowerTheme/build-decorators.sh" \
 		"$icons/index.theme"; do
 	[ -e "$f" ] || { echo "missing $f" >&2; exit 1; }
 done
@@ -39,6 +39,8 @@ mkdir -p "$work/apps" "$work/bin" "$work/data/themes" "$work/data/icons" \
 	"$work/data/deskbar/menu/Applications" \
 	"$work/documentation/packages/powertheme"
 cp "$build/PowerTheme" "$work/apps/PowerTheme"
+# the Photon shell, which Power Theme starts for themes that ask for it
+cp "$build/PowerShelf" "$work/apps/PowerShelf"
 ln -s ../apps/PowerTheme "$work/bin/powertheme"
 ln -s ../../../../apps/PowerTheme \
 	"$work/data/deskbar/menu/Applications/Power Theme"

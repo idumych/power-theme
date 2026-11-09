@@ -11,6 +11,7 @@ wallpaper = wallpaper.png
 wallpaper mode = manual
 desktop color = #7979A7
 deskbar = bottom, expanded
+shell = photon
 font plain = Noto Sans, Regular, 12
 font bold = Noto Sans, Bold, 12
 font fixed = Noto Sans Mono, Regular, 12

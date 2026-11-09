@@ -1,0 +1,1341 @@
+/*
+ * Copyright 2026, idumych.
+ * Distributed under the terms of the MIT License.
+ *
+ * PowerShelf: a desktop shell in the style of QNX 6's Photon, in place of
+ * Deskbar. Power Theme starts it for themes that ask for it ("shell =
+ * photon"), and it stops Deskbar while it runs and brings it back as it quits.
+ *
+ * It has two parts, drawn as Photon drew them: a taskbar along the bottom of
+ * the screen, with a Launch button opening the Deskbar's menu of applications,
+ * a button for each window, and a clock; and a shelf down the right, with
+ * groups of launchers that open and close (applications, utilities and
+ * preferences) and a system monitor of the processors, memory and disk. Both
+ * sit in a sunken grey trough inside a ridged band, lit from the top left.
+ *
+ * Drawn from scratch after QNX 6.2.1's Photon, measured in a virtual machine;
+ * nothing of QNX's is used. It shows its own clock and status only: replicants
+ * that other applications add to the Deskbar's tray don't appear.
+ */
+
+
+#include <Alert.h>
+#include <Application.h>
+#include <Bitmap.h>
+#include <Directory.h>
+#include <Entry.h>
+#include <File.h>
+#include <FindDirectory.h>
+#include <Font.h>
+#include <Menu.h>
+#include <MenuItem.h>
+#include <Message.h>
+#include <MessageRunner.h>
+#include <Messenger.h>
+#include <Node.h>
+#include <NodeInfo.h>
+#include <OS.h>
+#include <Path.h>
+#include <PopUpMenu.h>
+#include <Roster.h>
+#include <Screen.h>
+#include <String.h>
+#include <View.h>
+#include <Volume.h>
+#include <Window.h>
+#include <fs_info.h>
+
+#include <algorithm>
+#include <fcntl.h>
+#include <unistd.h>
+#include <math.h>
+#include <map>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <strings.h>
+#include <time.h>
+#include <vector>
+
+
+// libbe's window list, as Deskbar uses it: BeOS's private window API, not in
+// the public headers (headers/private/interface/WindowInfo.h)
+struct window_info {
+	team_id		team;
+	int32		server_token;
+	int32		thread;
+	int32		client_token;
+	int32		client_port;
+	uint32		workspaces;
+	int32		layer;
+	uint32		feel;
+	uint32		flags;
+	int32		window_left;
+	int32		window_top;
+	int32		window_right;
+	int32		window_bottom;
+	int32		show_hide_level;
+	bool		is_mini;
+} _PACKED;
+
+struct client_window_info : window_info {
+	float		tab_height;
+	float		border_size;
+	char		name[0];
+} _PACKED;
+
+enum window_action {
+	B_MINIMIZE_WINDOW,
+	B_BRING_TO_FRONT
+};
+
+client_window_info* get_window_info(int32 token);
+int32* get_token_list(team_id app, int32* count);
+void do_window_action(int32 window_id, int32 action, BRect zoomRect,
+	bool zoom);
+
+namespace BPrivate {
+status_t get_window_order(int32 workspace, int32** _tokens, int32* _count);
+}
+
+
+static const char* kSignature = "application/x-vnd.idumych-PowerTheme-shelf";
+static const char* kDeskbarSignature = "application/x-vnd.Be-TSKB";
+static const char* kSettingsName = "PowerTheme/shelf";
+
+static const uint32 kTick = 'tick';
+static const uint32 kLaunch = 'lnch';
+static const uint32 kShutDown = 'shut';
+
+// the band round each part: dark lines either side of a ridge
+static const rgb_color kOutline = { 0x4b, 0x4b, 0x4b, 255 };
+static const rgb_color kWhite = { 0xff, 0xff, 0xff, 255 };
+static const rgb_color kRidge = { 0xd8, 0xd8, 0xd8, 255 };
+static const rgb_color kRidgeShade = { 0xa6, 0xa6, 0xa6, 255 };
+// the trough the buttons sit in, shaded along its top and left
+static const rgb_color kTrough = { 0xc0, 0xc0, 0xc0, 255 };
+static const rgb_color kTroughShade = { 0x8e, 0x8e, 0x8e, 255 };
+// buttons: a face lit along the top and left, shaded along the bottom
+static const rgb_color kFace = { 0xd9, 0xd9, 0xd9, 255 };
+static const rgb_color kFaceShade = { 0xa7, 0xa7, 0xa7, 255 };
+static const rgb_color kHeaderFace = { 0xdb, 0xdb, 0xdb, 255 };
+static const rgb_color kToggleFace = { 0xc7, 0xc7, 0xc7, 255 };
+static const rgb_color kToggleMark = { 0x60, 0x60, 0x60, 255 };
+static const rgb_color kIconCell = { 0xcc, 0xcc, 0xcc, 255 };
+// the active window's button: sunk, black edged, cream
+static const rgb_color kActiveFace = { 0xf9, 0xf4, 0xe4, 255 };
+static const rgb_color kActiveShade = { 0xc7, 0xc2, 0xb2, 255 };
+static const rgb_color kBlack = { 0, 0, 0, 255 };
+// the monitor's gauges
+static const rgb_color kGauge = { 0xbc, 0xbc, 0xbc, 255 };
+static const rgb_color kGaugeShade = { 0x8d, 0x8d, 0x8d, 255 };
+static const rgb_color kGaugeEdge = { 0x3f, 0x3f, 0x3f, 255 };
+static const rgb_color kLevel = { 0xb5, 0xc4, 0xb0, 255 };
+static const rgb_color kLevelLight = { 0xdd, 0xec, 0xd8, 255 };
+static const rgb_color kLevelShade = { 0x8d, 0x9c, 0x88, 255 };
+
+// the ridged band, and each part's sizes
+static const float kBand = 6;
+static const float kTaskbarHeight = 25;
+static const float kShelfWidth = 135;
+static const float kLaunchWidth = 80;
+static const float kTaskWidth = 128;
+static const float kClockWidth = 104;
+static const float kHeaderHeight = 19;
+static const float kItemHeight = 25;
+static const float kToggleWidth = 16;
+static const float kIconCellWidth = 29;
+static const float kIconSize = 16;
+
+
+static void
+fill(BView* view, float l, float t, float r, float b, rgb_color color)
+{
+	if (l > r || t > b)
+		return;
+	view->SetHighColor(color);
+	view->FillRect(BRect(l, t, r, b));
+}
+
+
+//!	A raised button: lit along its top and left, shaded along its bottom and right.
+static void
+draw_raised(BView* view, BRect r, rgb_color face, bool pressed = false)
+{
+	fill(view, r.left, r.top, r.right, r.bottom, face);
+	fill(view, r.left, r.top, r.right, r.top, pressed ? kFaceShade : kWhite);
+	fill(view, r.left, r.top, r.left, r.bottom, pressed ? kFaceShade : kWhite);
+	fill(view, r.left + 1, r.bottom, r.right, r.bottom,
+		pressed ? kWhite : kFaceShade);
+	fill(view, r.right, r.top + 1, r.right, r.bottom,
+		pressed ? kWhite : kFaceShade);
+}
+
+
+//!	The trough: grey, shaded a pixel along its top and left.
+static void
+draw_trough(BView* view, BRect r)
+{
+	fill(view, r.left, r.top, r.right, r.bottom, kTrough);
+	fill(view, r.left, r.top, r.right, r.top, kTroughShade);
+	fill(view, r.left, r.top, r.left, r.bottom, kTroughShade);
+}
+
+
+//!	A line of the band, along \a horizontal or down, \a at its \a index.
+static void
+draw_band(BView* view, BRect r, bool horizontal)
+{
+	const rgb_color lines[6] = { kOutline, kWhite, kRidge, kRidge, kRidgeShade,
+		kOutline };
+	for (int32 i = 0; i < 6; i++) {
+		if (horizontal)
+			fill(view, r.left, r.top + i, r.right, r.top + i, lines[i]);
+		else
+			fill(view, r.left + i, r.top, r.left + i, r.bottom, lines[i]);
+	}
+}
+
+
+static BBitmap*
+icon_for(const entry_ref& ref, float size)
+{
+	BBitmap* icon = new BBitmap(BRect(0, 0, size - 1, size - 1), B_RGBA32);
+	if (BNodeInfo::GetTrackerIcon(&ref, icon, (icon_size)(int32)size) != B_OK) {
+		delete icon;
+		return NULL;
+	}
+	return icon;
+}
+
+
+static void
+draw_icon(BView* view, const BBitmap* icon, BPoint where)
+{
+	if (icon == NULL)
+		return;
+	view->SetDrawingMode(B_OP_ALPHA);
+	view->SetBlendingMode(B_PIXEL_ALPHA, B_ALPHA_OVERLAY);
+	view->DrawBitmap(icon, where);
+	view->SetDrawingMode(B_OP_COPY);
+}
+
+
+//!	\a text in \a font, shortened to \a width, its baseline centred in \a r.
+static void
+draw_text(BView* view, const char* text, const BFont& font, BRect r,
+	float x, rgb_color color)
+{
+	BString shown(text);
+	font.TruncateString(&shown, B_TRUNCATE_END, r.right - x - 3);
+	font_height height;
+	font.GetHeight(&height);
+	view->SetFont(&font);
+	view->SetHighColor(color);
+	view->SetLowColor(B_TRANSPARENT_COLOR);
+	view->SetDrawingMode(B_OP_OVER);
+	const float baseline = floorf((r.top + r.bottom + 1 + height.ascent
+		- height.descent) / 2);
+	view->DrawString(shown.String(), BPoint(x, baseline));
+	view->SetDrawingMode(B_OP_COPY);
+}
+
+
+//	#pragma mark - the Launch menu
+
+
+//!	The folders the Deskbar's menu is made of, the user's own last.
+static std::vector<BPath>
+menu_folders()
+{
+	std::vector<BPath> folders;
+	const directory_which places[] = { B_SYSTEM_DATA_DIRECTORY,
+		B_SYSTEM_NONPACKAGED_DATA_DIRECTORY, B_USER_DATA_DIRECTORY,
+		B_USER_NONPACKAGED_DATA_DIRECTORY };
+	for (size_t i = 0; i < sizeof(places) / sizeof(places[0]); i++) {
+		BPath path;
+		if (find_directory(places[i], &path) == B_OK
+			&& path.Append("deskbar/menu") == B_OK)
+			folders.push_back(path);
+	}
+	BPath user;
+	if (find_directory(B_USER_DESKBAR_DIRECTORY, &user) == B_OK)
+		folders.push_back(user);
+	return folders;
+}
+
+
+//!	A menu item with the icon of what it opens, as Photon's Launch menu had.
+class IconMenuItem : public BMenuItem {
+public:
+	IconMenuItem(const char* label, BMessage* message, const entry_ref& ref)
+		:
+		BMenuItem(label, message),
+		fIcon(icon_for(ref, kIconSize))
+	{
+	}
+
+	IconMenuItem(BMenu* submenu, const entry_ref* ref)
+		:
+		BMenuItem(submenu),
+		fIcon(ref != NULL ? icon_for(*ref, kIconSize) : NULL)
+	{
+	}
+
+	~IconMenuItem()
+	{
+		delete fIcon;
+	}
+
+protected:
+	virtual void GetContentSize(float* width, float* height)
+	{
+		BMenuItem::GetContentSize(width, height);
+		*width += kIconSize + 6;
+		*height = std::max(*height, kIconSize + 2);
+	}
+
+	virtual void DrawContent()
+	{
+		BMenu* menu = Menu();
+		const BPoint start = menu->PenLocation();
+		const BRect frame = Frame();
+		draw_icon(menu, fIcon, BPoint(start.x,
+			floorf((frame.top + frame.bottom - kIconSize) / 2) + 1));
+		menu->MovePenTo(start.x + kIconSize + 6, start.y);
+		BMenuItem::DrawContent();
+	}
+
+private:
+	BBitmap*			fIcon;
+};
+
+
+/*!	Fills \a menu from \a folders, merged: a folder in any becomes a submenu
+	made from all of them, an entry an item that opens it; sorted by name.
+*/
+static void
+fill_menu(BMenu* menu, const std::vector<BPath>& folders, BHandler* target)
+{
+	std::map<BString, std::vector<BPath>> submenus;
+	std::map<BString, entry_ref> items;
+	for (const BPath& folder : folders) {
+		BDirectory directory(folder.Path());
+		BEntry entry;
+		while (directory.GetNextEntry(&entry, false) == B_OK) {
+			char name[B_FILE_NAME_LENGTH];
+			entry.GetName(name);
+			BEntry resolved(entry);
+			resolved.SetTo(&directory, name, true);
+			BPath path;
+			if (resolved.IsDirectory() && entry.GetPath(&path) == B_OK)
+				submenus[name].push_back(path);
+			else {
+				entry_ref ref;
+				if (resolved.GetRef(&ref) == B_OK && resolved.Exists())
+					items[name] = ref;
+			}
+		}
+	}
+	for (auto& submenu : submenus) {
+		BMenu* sub = new BMenu(submenu.first.String());
+		fill_menu(sub, submenu.second, target);
+		entry_ref folder;
+		const bool hasRef = get_ref_for_path(submenu.second.front().Path(),
+			&folder) == B_OK;
+		menu->AddItem(new IconMenuItem(sub, hasRef ? &folder : NULL));
+	}
+	if (!submenus.empty() && !items.empty())
+		menu->AddSeparatorItem();
+	for (auto& item : items) {
+		BMessage* message = new BMessage(kLaunch);
+		message->AddRef("refs", &item.second);
+		BMenuItem* menuItem = new IconMenuItem(item.first.String(), message,
+			item.second);
+		menuItem->SetTarget(target);
+		menu->AddItem(menuItem);
+	}
+}
+
+
+static void
+launch(const entry_ref& ref)
+{
+	BEntry entry(&ref, true);
+	entry_ref target;
+	if (entry.GetRef(&target) != B_OK)
+		target = ref;
+	// a folder opens in Tracker
+	if (entry.IsDirectory()) {
+		BMessage open(B_REFS_RECEIVED);
+		open.AddRef("refs", &target);
+		BMessenger("application/x-vnd.Be-TRAK").SendMessage(&open);
+		return;
+	}
+	be_roster->Launch(&target);
+}
+
+
+//	#pragma mark - the taskbar
+
+
+struct TaskButton {
+	int32		token;
+	team_id		team;
+	BString		title;
+	bool		minimized;
+	BRect		frame;
+};
+
+
+class TaskbarView : public BView {
+public:
+	TaskbarView(BRect frame)
+		:
+		BView(frame, "taskbar", B_FOLLOW_ALL, B_WILL_DRAW | B_FRAME_EVENTS),
+		fActive(-1),
+		fPressed(-1),
+		fLaunchPressed(false)
+	{
+		SetViewColor(B_TRANSPARENT_COLOR);
+	}
+
+	~TaskbarView()
+	{
+		for (auto& icon : fIcons)
+			delete icon.second;
+	}
+
+	virtual void Draw(BRect update)
+	{
+		const BRect b = Bounds();
+		// the band stops where the shelf comes down to the trough
+		const float shelfLeft = b.right - kShelfWidth + 1;
+		draw_band(this, BRect(b.left, b.top, shelfLeft + kBand - 1,
+			b.top + kBand - 1), true);
+		fill(this, shelfLeft + kBand, b.top, b.right, b.top + kBand - 1,
+			kFace);
+		const BRect trough(b.left, b.top + kBand, b.right, b.bottom);
+		draw_trough(this, trough);
+
+		// Launch, at the left end, with a sun
+		const BRect launchButton = _LaunchFrame();
+		draw_raised(this, launchButton, kFace, fLaunchPressed);
+		_DrawSun(BPoint(launchButton.left + 13, (launchButton.top
+			+ launchButton.bottom) / 2 + (fLaunchPressed ? 1 : 0)));
+		draw_text(this, "Launch", *be_plain_font, launchButton,
+			launchButton.left + 24 + (fLaunchPressed ? 1 : 0), kBlack);
+
+		for (size_t i = 0; i < fButtons.size(); i++)
+			_DrawButton(fButtons[i], (int32)i == fPressed);
+
+		// the clock, at the right end
+		const BRect clock = _ClockFrame();
+		draw_raised(this, clock, kFace);
+		char text[64];
+		time_t now = time(NULL);
+		strftime(text, sizeof(text), "%a-%d %I:%M%p", localtime(&now));
+		const float width = be_plain_font->StringWidth(text);
+		draw_text(this, text, *be_plain_font, clock,
+			floorf((clock.left + clock.right - width) / 2), kBlack);
+	}
+
+	virtual void MouseDown(BPoint where)
+	{
+		if (_LaunchFrame().Contains(where)) {
+			fLaunchPressed = true;
+			Invalidate(_LaunchFrame());
+			Window()->UpdateIfNeeded();
+			_OpenLaunchMenu();
+			fLaunchPressed = false;
+			Invalidate(_LaunchFrame());
+			return;
+		}
+		for (size_t i = 0; i < fButtons.size(); i++) {
+			if (fButtons[i].frame.Contains(where)) {
+				fPressed = (int32)i;
+				Invalidate(fButtons[i].frame);
+				SetMouseEventMask(B_POINTER_EVENTS, B_LOCK_WINDOW_FOCUS);
+				return;
+			}
+		}
+	}
+
+	virtual void MouseUp(BPoint where)
+	{
+		if (fPressed < 0 || fPressed >= (int32)fButtons.size()) {
+			fPressed = -1;
+			return;
+		}
+		const TaskButton button = fButtons[fPressed];
+		Invalidate(button.frame);
+		fPressed = -1;
+		if (!button.frame.Contains(where))
+			return;
+		// the window in front is minimized; any other comes to the front
+		if (button.token == fActive && !button.minimized)
+			do_window_action(button.token, B_MINIMIZE_WINDOW, BRect(), false);
+		else
+			do_window_action(button.token, B_BRING_TO_FRONT, BRect(), false);
+	}
+
+	virtual void MessageReceived(BMessage* message)
+	{
+		switch (message->what) {
+			case kLaunch:
+			{
+				entry_ref ref;
+				if (message->FindRef("refs", &ref) == B_OK)
+					launch(ref);
+				break;
+			}
+			case kShutDown:
+				_ShutDown();
+				break;
+			default:
+				BView::MessageReceived(message);
+		}
+	}
+
+	//!	Follows the windows, and redraws if they or the time changed.
+	void Update(bool clock)
+	{
+		std::vector<TaskButton> buttons;
+		int32 active = -1;
+
+		// the window in front, of those listed
+		int32* order = NULL;
+		int32 orderCount = 0;
+		BPrivate::get_window_order(current_workspace(), &order, &orderCount);
+
+		app_info appInfo;
+		BList teams;
+		be_roster->GetAppList(&teams);
+		for (int32 t = 0; t < teams.CountItems(); t++) {
+			const team_id team = (team_id)(addr_t)teams.ItemAt(t);
+			if (team == be_app->Team())
+				continue;
+			if (be_roster->GetRunningAppInfo(team, &appInfo) == B_OK
+				&& strcasecmp(appInfo.signature, kDeskbarSignature) == 0)
+				continue;
+			int32 count = 0;
+			int32* tokens = get_token_list(team, &count);
+			for (int32 i = 0; i < count; i++) {
+				client_window_info* info = get_window_info(tokens[i]);
+				if (info == NULL)
+					continue;
+				if (info->feel == B_NORMAL_WINDOW_FEEL
+					&& info->show_hide_level <= 0
+					&& (info->workspaces & (1UL << current_workspace())) != 0
+					&& info->name[0] != '\0') {
+					TaskButton button;
+					button.token = info->server_token;
+					button.team = team;
+					button.title = info->name;
+					button.minimized = info->is_mini;
+					buttons.push_back(button);
+				}
+				free(info);
+			}
+			free(tokens);
+		}
+		for (int32 i = 0; i < orderCount && active < 0; i++) {
+			for (const TaskButton& button : buttons) {
+				if (button.token == order[i] && !button.minimized) {
+					active = button.token;
+					break;
+				}
+			}
+		}
+		free(order);
+
+		// keep the order they first appeared in, new ones at the end
+		std::vector<TaskButton> ordered;
+		for (const TaskButton& old : fButtons) {
+			for (const TaskButton& button : buttons) {
+				if (button.token == old.token) {
+					ordered.push_back(button);
+					break;
+				}
+			}
+		}
+		for (const TaskButton& button : buttons) {
+			bool known = false;
+			for (const TaskButton& old : ordered)
+				known |= old.token == button.token;
+			if (!known)
+				ordered.push_back(button);
+		}
+		_Layout(ordered);
+
+		bool changed = active != fActive || ordered.size() != fButtons.size();
+		for (size_t i = 0; !changed && i < ordered.size(); i++) {
+			changed = ordered[i].token != fButtons[i].token
+				|| ordered[i].title != fButtons[i].title
+				|| ordered[i].minimized != fButtons[i].minimized
+				|| ordered[i].frame != fButtons[i].frame;
+		}
+		fButtons = ordered;
+		fActive = active;
+		if (changed)
+			Invalidate();
+		else if (clock)
+			Invalidate(_ClockFrame());
+	}
+
+private:
+	BRect _LaunchFrame() const
+	{
+		const BRect b = Bounds();
+		return BRect(b.left, b.top + kBand, b.left + kLaunchWidth - 1,
+			b.bottom);
+	}
+
+	BRect _ClockFrame() const
+	{
+		const BRect b = Bounds();
+		return BRect(b.right - kClockWidth + 1, b.top + kBand, b.right,
+			b.bottom);
+	}
+
+	//!	Side by side after Launch, narrower when there are many.
+	void _Layout(std::vector<TaskButton>& buttons)
+	{
+		const BRect b = Bounds();
+		const float left = b.left + kLaunchWidth + 2;
+		const float right = b.right - kClockWidth - 2;
+		const float room = right - left + 1;
+		float width = kTaskWidth;
+		if (!buttons.empty())
+			width = std::min(kTaskWidth, floorf(room / buttons.size()) - 2);
+		width = std::max(width, 24.0f);
+		float x = left;
+		for (TaskButton& button : buttons) {
+			button.frame.Set(x, b.top + kBand, x + width - 1, b.bottom);
+			x += width + 2;
+		}
+	}
+
+	void _DrawButton(const TaskButton& button, bool pressed)
+	{
+		BRect r = button.frame;
+		const bool active = button.token == fActive || pressed;
+		if (active) {
+			// the ridge round it, then a black edge round a cream face
+			fill(this, r.left, r.top, r.right, r.top, kWhite);
+			fill(this, r.left, r.top, r.left, r.bottom, kWhite);
+			fill(this, r.left + 1, r.top + 1, r.right, r.bottom, kFace);
+			fill(this, r.right, r.top + 1, r.right, r.bottom, kFaceShade);
+			fill(this, r.left + 1, r.bottom, r.right, r.bottom, kFaceShade);
+			BRect inner(r.left + 3, r.top + 2, r.right - 2, r.bottom - 1);
+			SetHighColor(kBlack);
+			StrokeRect(inner);
+			fill(this, inner.left + 1, inner.top + 1, inner.right - 1,
+				inner.bottom - 1, kActiveFace);
+			fill(this, inner.left + 1, inner.top + 1, inner.right - 1,
+				inner.top + 1, kActiveShade);
+			fill(this, inner.left + 1, inner.top + 1, inner.left + 1,
+				inner.bottom - 1, kActiveShade);
+		} else
+			draw_raised(this, r, kFace);
+
+		const float shift = active ? 1 : 0;
+		BBitmap* icon = _IconFor(button.team);
+		float x = r.left + 7 + shift;
+		if (icon != NULL) {
+			draw_icon(this, icon, BPoint(x, floorf((r.top + r.bottom
+				- kIconSize) / 2) + shift));
+			x += kIconSize + 5;
+		}
+		BString title(button.title);
+		if (button.minimized)
+			title.Prepend("[").Append("]");
+		draw_text(this, title.String(), *be_plain_font, r, x, kBlack);
+	}
+
+	BBitmap* _IconFor(team_id team)
+	{
+		auto found = fIcons.find(team);
+		if (found != fIcons.end())
+			return found->second;
+		app_info info;
+		BBitmap* icon = NULL;
+		if (be_roster->GetRunningAppInfo(team, &info) == B_OK)
+			icon = icon_for(info.ref, kIconSize);
+		fIcons[team] = icon;
+		return icon;
+	}
+
+	//!	The sun: an eight-pointed yellow star edged in black, grey inside.
+	void _DrawSun(BPoint c)
+	{
+		const rgb_color yellow = { 0xff, 0xd0, 0x40, 255 };
+		const rgb_color grey = { 0xb8, 0xb8, 0xb8, 255 };
+		c.x = floorf(c.x) + 0.5f;
+		c.y = floorf(c.y) + 0.5f;
+		BPoint star[16];
+		for (int32 i = 0; i < 16; i++) {
+			const float a = i * M_PI / 8 - M_PI / 2;
+			const float radius = i % 2 == 0 ? 7.5f : 4.5f;
+			star[i] = BPoint(c.x + cosf(a) * radius, c.y + sinf(a) * radius);
+		}
+		SetDrawingMode(B_OP_ALPHA);
+		SetBlendingMode(B_PIXEL_ALPHA, B_ALPHA_OVERLAY);
+		SetHighColor(yellow);
+		FillPolygon(star, 16);
+		SetHighColor(kBlack);
+		StrokePolygon(star, 16);
+		SetHighColor(grey);
+		FillEllipse(c, 2, 2);
+		SetHighColor(kBlack);
+		StrokeEllipse(c, 2.5f, 2.5f);
+		SetDrawingMode(B_OP_COPY);
+	}
+
+	void _OpenLaunchMenu()
+	{
+		BPopUpMenu* menu = new BPopUpMenu("Launch", false, false);
+		fill_menu(menu, menu_folders(), this);
+		menu->AddSeparatorItem();
+		BMenuItem* shutDown = new BMenuItem("Shutdown" B_UTF8_ELLIPSIS,
+			new BMessage(kShutDown));
+		shutDown->SetTarget(this);
+		menu->AddItem(shutDown);
+		menu->SetTargetForItems(this);
+		for (int32 i = 0; i < menu->CountItems(); i++) {
+			BMenu* sub = menu->SubmenuAt(i);
+			if (sub != NULL)
+				sub->SetTargetForItems(this);
+		}
+
+		// it opens upwards, from Launch's top left corner
+		const BRect launchButton = _LaunchFrame();
+		BPoint where = ConvertToScreen(launchButton.LeftTop());
+		menu->SetAsyncAutoDestruct(true);
+		BRect screen = BScreen(Window()).Frame();
+		float width, height;
+		menu->GetPreferredSize(&width, &height);
+		where.y = std::max(screen.top, where.y - height - 1);
+		menu->Go(where, true, true,
+			ConvertToScreen(launchButton), true);
+	}
+
+	void _ShutDown()
+	{
+		BAlert* alert = new BAlert("Shutdown",
+			"Shut down or restart the computer?", "Cancel", "Restart",
+			"Shut down", B_WIDTH_AS_USUAL, B_OFFSET_SPACING, B_WARNING_ALERT);
+		alert->SetShortcut(0, B_ESCAPE);
+		const int32 choice = alert->Go();
+		if (choice == 1)
+			system("shutdown -r &");
+		else if (choice == 2)
+			system("shutdown &");
+	}
+
+	std::vector<TaskButton>	fButtons;
+	std::map<team_id, BBitmap*> fIcons;
+	int32				fActive;
+	int32				fPressed;
+	bool				fLaunchPressed;
+};
+
+
+//	#pragma mark - the shelf
+
+
+struct ShelfItem {
+	BString		label;
+	entry_ref	ref;
+	BBitmap*	icon;
+	BRect		frame;
+};
+
+struct ShelfGroup {
+	BString		title;
+	bool		open;
+	bool		monitor;
+	std::vector<ShelfItem> items;
+	BRect		header;
+};
+
+
+//!	The first of \a names found in the system's apps, preferences or bin.
+static bool
+find_program(const char* name, entry_ref& ref)
+{
+	const directory_which places[] = { B_SYSTEM_APPS_DIRECTORY,
+		B_SYSTEM_PREFERENCES_DIRECTORY, B_USER_APPS_DIRECTORY,
+		B_SYSTEM_BIN_DIRECTORY };
+	for (size_t i = 0; i < sizeof(places) / sizeof(places[0]); i++) {
+		BPath path;
+		if (find_directory(places[i], &path) != B_OK
+			|| path.Append(name) != B_OK)
+			continue;
+		BEntry entry(path.Path(), true);
+		if (entry.Exists() && entry.GetRef(&ref) == B_OK)
+			return true;
+	}
+	return false;
+}
+
+
+class ShelfView : public BView {
+public:
+	ShelfView(BRect frame)
+		:
+		BView(frame, "shelf", B_FOLLOW_ALL, B_WILL_DRAW | B_FRAME_EVENTS),
+		fPressedGroup(-1),
+		fPressedItem(-1),
+		fCPU(0),
+		fMemory(0),
+		fDisk(0),
+		fSwap(0),
+		fLastActive(0),
+		fLastTime(0)
+	{
+		SetViewColor(B_TRANSPARENT_COLOR);
+
+		struct { const char* label; const char* program; } applications[] = {
+			{ "Home", NULL }, { "WebPositive", "WebPositive" },
+			{ "Mail", "Mail" }, { "Editor", "StyledEdit" },
+			{ "Terminal", "Terminal" }, { "Media Player", "MediaPlayer" },
+			{ "Images", "ShowImage" }, { "People", "People" } };
+		struct { const char* label; const char* program; } utilities[] = {
+			{ "Calculator", "DeskCalc" },
+			{ "Activity Monitor", "ActivityMonitor" },
+			{ "Screenshot", "Screenshot" }, { "Expander", "Expander" },
+			{ "Disk Setup", "DriveSetup" }, { "Software", "HaikuDepot" },
+			{ "Updates", "SoftwareUpdater" }, { "Installer", "Installer" } };
+		struct { const char* label; const char* program; } preferences[] = {
+			{ "Network", "Network" }, { "Mouse", "Input" },
+			{ "Graphics", "Screen" }, { "Appearance", "Appearance" },
+			{ "Backgrounds", "Backgrounds" }, { "Time & Date", "Time" },
+			{ "Themes", "PowerTheme" }, { "Localization", "Locale" } };
+
+		ShelfGroup apps = { "Applications", true, false, {}, BRect() };
+		for (auto& a : applications) {
+			ShelfItem item = { a.label, entry_ref(), NULL, BRect() };
+			if (a.program == NULL) {
+				BPath home;
+				if (find_directory(B_USER_DIRECTORY, &home) != B_OK
+					|| get_ref_for_path(home.Path(), &item.ref) != B_OK)
+					continue;
+			} else if (!find_program(a.program, item.ref))
+				continue;
+			item.icon = icon_for(item.ref, kIconSize);
+			apps.items.push_back(item);
+		}
+		ShelfGroup utils = { "Utilities", false, false, {}, BRect() };
+		for (auto& a : utilities) {
+			ShelfItem item = { a.label, entry_ref(), NULL, BRect() };
+			if (!find_program(a.program, item.ref))
+				continue;
+			item.icon = icon_for(item.ref, kIconSize);
+			utils.items.push_back(item);
+		}
+		ShelfGroup configure = { "Configure", true, false, {}, BRect() };
+		for (auto& a : preferences) {
+			ShelfItem item = { a.label, entry_ref(), NULL, BRect() };
+			if (!find_program(a.program, item.ref)) {
+				// Power Theme is in the user's or the system's apps
+				BPath path;
+				if (strcmp(a.program, "PowerTheme") != 0
+					|| find_directory(B_SYSTEM_APPS_DIRECTORY, &path) != B_OK)
+					continue;
+				path.Append(a.program);
+				if (get_ref_for_path(path.Path(), &item.ref) != B_OK
+					|| !BEntry(&item.ref).Exists())
+					continue;
+			}
+			item.icon = icon_for(item.ref, kIconSize);
+			configure.items.push_back(item);
+		}
+		ShelfGroup monitor = { "System Monitor", true, true, {}, BRect() };
+		fGroups.push_back(apps);
+		fGroups.push_back(utils);
+		fGroups.push_back(configure);
+		fGroups.push_back(monitor);
+		_LoadSettings();
+	}
+
+	~ShelfView()
+	{
+		for (ShelfGroup& group : fGroups) {
+			for (ShelfItem& item : group.items)
+				delete item.icon;
+		}
+	}
+
+	virtual void FrameResized(float, float)
+	{
+		Invalidate();
+	}
+
+	virtual void Draw(BRect update)
+	{
+		_Layout();
+		const BRect b = Bounds();
+		draw_band(this, BRect(b.left, b.top, b.left + kBand - 1, b.bottom),
+			false);
+		draw_trough(this, BRect(b.left + kBand, b.top, b.right, b.bottom));
+
+		for (size_t g = 0; g < fGroups.size(); g++) {
+			const ShelfGroup& group = fGroups[g];
+			// a dark line over the lower shelf, and under the upper
+			if (group.monitor) {
+				fill(this, group.header.left, group.header.top - 1, b.right,
+					group.header.top - 1, kOutline);
+			}
+			_DrawHeader(group, (int32)g == fPressedGroup && fPressedItem < 0);
+			if (!group.open)
+				continue;
+			if (group.monitor) {
+				_DrawMonitor(group);
+				continue;
+			}
+			for (size_t i = 0; i < group.items.size(); i++) {
+				_DrawItem(group.items[i], (int32)g == fPressedGroup
+					&& (int32)i == fPressedItem);
+			}
+		}
+		if (fUpperBottom >= 0) {
+			fill(this, b.left + kBand, fUpperBottom + 1, b.right,
+				fUpperBottom + 1, kOutline);
+		}
+	}
+
+	virtual void MouseDown(BPoint where)
+	{
+		_Layout();
+		for (size_t g = 0; g < fGroups.size(); g++) {
+			ShelfGroup& group = fGroups[g];
+			if (group.header.Contains(where)) {
+				fPressedGroup = (int32)g;
+				fPressedItem = -1;
+				break;
+			}
+			if (!group.open || group.monitor)
+				continue;
+			for (size_t i = 0; i < group.items.size(); i++) {
+				if (group.items[i].frame.Contains(where)) {
+					fPressedGroup = (int32)g;
+					fPressedItem = (int32)i;
+					break;
+				}
+			}
+		}
+		if (fPressedGroup >= 0) {
+			SetMouseEventMask(B_POINTER_EVENTS, B_LOCK_WINDOW_FOCUS);
+			Invalidate();
+		}
+	}
+
+	virtual void MouseUp(BPoint where)
+	{
+		if (fPressedGroup < 0)
+			return;
+		ShelfGroup& group = fGroups[fPressedGroup];
+		if (fPressedItem < 0) {
+			if (group.header.Contains(where)) {
+				group.open = !group.open;
+				_SaveSettings();
+			}
+		} else if (fPressedItem < (int32)group.items.size()
+			&& group.items[fPressedItem].frame.Contains(where))
+			launch(group.items[fPressedItem].ref);
+		fPressedGroup = -1;
+		fPressedItem = -1;
+		Invalidate();
+	}
+
+	//!	Reads the processors', memory's and disk's use, and redraws the gauges.
+	void Update()
+	{
+		system_info info;
+		if (get_system_info(&info) == B_OK) {
+			const uint32 count = info.cpu_count;
+			cpu_info* cpus = new cpu_info[count];
+			if (get_cpu_info(0, count, cpus) == B_OK) {
+				bigtime_t active = 0;
+				for (uint32 i = 0; i < count; i++)
+					active += cpus[i].active_time;
+				const bigtime_t now = system_time();
+				if (fLastTime > 0 && now > fLastTime) {
+					fCPU = std::min(1.0f, std::max(0.0f,
+						(float)(active - fLastActive)
+							/ ((now - fLastTime) * (float)count)));
+				}
+				fLastActive = active;
+				fLastTime = now;
+			}
+			delete[] cpus;
+			fMemory = info.max_pages > 0
+				? (float)info.used_pages / info.max_pages : 0;
+			fSwap = info.max_swap_pages > 0 ? 1.0f
+				- (float)info.free_swap_pages / info.max_swap_pages : 0;
+		}
+		fs_info fs;
+		BPath boot;
+		if (find_directory(B_SYSTEM_DIRECTORY, &boot) == B_OK
+			&& fs_stat_dev(dev_for_path(boot.Path()), &fs) == 0
+			&& fs.total_blocks > 0)
+			fDisk = 1.0f - (float)fs.free_blocks / fs.total_blocks;
+
+		for (const ShelfGroup& group : fGroups) {
+			if (group.monitor && group.open)
+				Invalidate(BRect(group.header.left, group.header.bottom + 1,
+					group.header.right, Bounds().bottom));
+		}
+	}
+
+private:
+	//!	The upper groups from the top, the monitor from the bottom.
+	void _Layout()
+	{
+		const BRect b = Bounds();
+		const float left = b.left + kBand;
+		float y = b.top;
+		fUpperBottom = -1;
+		for (ShelfGroup& group : fGroups) {
+			if (group.monitor)
+				continue;
+			group.header.Set(left, y, b.right, y + kHeaderHeight - 1);
+			y += kHeaderHeight;
+			for (ShelfItem& item : group.items) {
+				if (group.open) {
+					item.frame.Set(left, y, b.right, y + kItemHeight - 1);
+					y += kItemHeight;
+				} else
+					item.frame.Set(0, 0, -1, -1);
+			}
+			fUpperBottom = y - 1;
+		}
+		for (ShelfGroup& group : fGroups) {
+			if (!group.monitor)
+				continue;
+			const float height = kHeaderHeight + (group.open ? 66 : 0);
+			const float top = std::max(y + 2, b.bottom - height + 1);
+			group.header.Set(left, top, b.right, top + kHeaderHeight - 1);
+		}
+	}
+
+	void _DrawHeader(const ShelfGroup& group, bool pressed)
+	{
+		const BRect& h = group.header;
+		const BRect toggle(h.left, h.top, h.left + kToggleWidth - 1,
+			h.bottom);
+		const BRect label(toggle.right + 1, h.top, h.right, h.bottom);
+		draw_raised(this, toggle, kToggleFace, pressed);
+		draw_raised(this, label, kHeaderFace, pressed);
+		// the toggle's minus, with the plus's upright when it's closed
+		const float cx = floorf((toggle.left + toggle.right) / 2);
+		const float cy = floorf((toggle.top + toggle.bottom) / 2);
+		fill(this, cx - 3, cy, cx + 2, cy + 1, kToggleMark);
+		if (!group.open)
+			fill(this, cx - 1, cy - 2, cx, cy + 3, kToggleMark);
+		draw_text(this, group.title.String(), *be_bold_font, label,
+			label.left + 5, kBlack);
+	}
+
+	void _DrawItem(const ShelfItem& item, bool pressed)
+	{
+		const BRect& r = item.frame;
+		const BRect cell(r.left, r.top, r.left + kIconCellWidth - 1, r.bottom);
+		const BRect label(cell.right + 1, r.top, r.right, r.bottom);
+		draw_raised(this, cell, kIconCell, pressed);
+		draw_raised(this, label, kFace, pressed);
+		const float shift = pressed ? 1 : 0;
+		draw_icon(this, item.icon, BPoint(floorf((cell.left + cell.right + 1
+			- kIconSize) / 2) + shift, floorf((cell.top + cell.bottom + 1
+			- kIconSize) / 2) + shift));
+		draw_text(this, item.label.String(), *be_plain_font,
+			label.OffsetByCopy(0, shift), label.left + 4 + shift, kBlack);
+	}
+
+	//!	A gauge: a dark edge round a grey track, the level green-grey.
+	void _DrawGauge(BRect r, float level)
+	{
+		SetHighColor(kOutline);
+		StrokeRect(r);
+		const BRect in(r.InsetByCopy(1, 1));
+		fill(this, in.left, in.top, in.right, in.bottom, kGauge);
+		fill(this, in.left, in.top, in.left, in.bottom, kGaugeShade);
+		const float right = in.left + roundf((in.Width()) * level);
+		if (right > in.left) {
+			fill(this, in.left, in.top, right, in.bottom, kLevel);
+			fill(this, in.left, in.top, right, in.top, kLevelLight);
+			fill(this, in.left, in.top, in.left, in.bottom, kLevelLight);
+			fill(this, right, in.top, right, in.bottom, kLevelShade);
+			if (right + 1 <= in.right)
+				fill(this, right + 1, in.top, right + 1, in.bottom, kGaugeEdge);
+		}
+	}
+
+	void _DrawMonitor(const ShelfGroup& group)
+	{
+		const BRect area(group.header.left, group.header.bottom + 1,
+			group.header.right, Bounds().bottom);
+		draw_raised(this, area, kFace);
+		const float gaugeLeft = area.left + 24;
+		const float gaugeRight = area.right - 4;
+		float y = area.top + 4;
+		// processors: a chip
+		_DrawChip(BPoint(area.left + 5, y + 1));
+		_DrawGauge(BRect(gaugeLeft, y, gaugeRight, y + 15), fCPU);
+		y += 20;
+		// memory: a module
+		_DrawModule(BPoint(area.left + 5, y + 4));
+		_DrawGauge(BRect(gaugeLeft, y, gaugeRight, y + 15), fMemory);
+		y += 20;
+		// the disk, and swap
+		_DrawDisk(BPoint(area.left + 5, y + 1));
+		_DrawGauge(BRect(gaugeLeft, y, gaugeRight, y + 6), fDisk);
+		_DrawGauge(BRect(gaugeLeft, y + 8, gaugeRight, y + 14), fSwap);
+	}
+
+	void _DrawChip(BPoint p)
+	{
+		const rgb_color gold = { 0xff, 0xcd, 0x48, 255 };
+		for (int32 i = 0; i < 4; i++) {
+			fill(this, p.x + 3 + i * 3, p.y, p.x + 3 + i * 3, p.y + 1, gold);
+			fill(this, p.x + 3 + i * 3, p.y + 13, p.x + 3 + i * 3, p.y + 14,
+				gold);
+			fill(this, p.x, p.y + 3 + i * 3, p.x + 1, p.y + 3 + i * 3, gold);
+			fill(this, p.x + 13, p.y + 3 + i * 3, p.x + 14, p.y + 3 + i * 3,
+				gold);
+		}
+		fill(this, p.x + 2, p.y + 2, p.x + 12, p.y + 12, kBlack);
+		fill(this, p.x + 5, p.y + 5, p.x + 9, p.y + 9, kOutline);
+	}
+
+	void _DrawModule(BPoint p)
+	{
+		const rgb_color board = { 0x5a, 0x8a, 0x50, 255 };
+		fill(this, p.x, p.y, p.x + 14, p.y + 6, board);
+		for (int32 i = 0; i < 3; i++)
+			fill(this, p.x + 1 + i * 5, p.y + 1, p.x + 3 + i * 5, p.y + 4,
+				kBlack);
+		for (int32 x = 1; x < 14; x += 2)
+			fill(this, p.x + x, p.y + 6, p.x + x, p.y + 6, kLevelLight);
+	}
+
+	void _DrawDisk(BPoint p)
+	{
+		draw_raised(this, BRect(p.x, p.y, p.x + 12, p.y + 14), kIconCell);
+		fill(this, p.x + 3, p.y + 3, p.x + 9, p.y + 4, kOutline);
+		const rgb_color amber = { 0xff, 0xb0, 0x20, 255 };
+		fill(this, p.x + 6, p.y + 8, p.x + 12, p.y + 8, amber);
+		fill(this, p.x + 12, p.y + 8, p.x + 12, p.y + 14, amber);
+	}
+
+	void _LoadSettings()
+	{
+		BPath path;
+		if (find_directory(B_USER_SETTINGS_DIRECTORY, &path) != B_OK
+			|| path.Append(kSettingsName) != B_OK)
+			return;
+		BFile file(path.Path(), B_READ_ONLY);
+		BMessage settings;
+		if (file.InitCheck() != B_OK || settings.Unflatten(&file) != B_OK)
+			return;
+		for (ShelfGroup& group : fGroups) {
+			bool open;
+			if (settings.FindBool(group.title.String(), &open) == B_OK)
+				group.open = open;
+		}
+	}
+
+	void _SaveSettings()
+	{
+		BPath path;
+		if (find_directory(B_USER_SETTINGS_DIRECTORY, &path) != B_OK
+			|| path.Append(kSettingsName) != B_OK)
+			return;
+		BMessage settings;
+		for (const ShelfGroup& group : fGroups)
+			settings.AddBool(group.title.String(), group.open);
+		BFile file(path.Path(), B_WRITE_ONLY | B_CREATE_FILE | B_ERASE_FILE);
+		if (file.InitCheck() == B_OK)
+			settings.Flatten(&file);
+	}
+
+	std::vector<ShelfGroup> fGroups;
+	int32				fPressedGroup;
+	int32				fPressedItem;
+	float				fUpperBottom;
+	float				fCPU;
+	float				fMemory;
+	float				fDisk;
+	float				fSwap;
+	bigtime_t			fLastActive;
+	bigtime_t			fLastTime;
+};
+
+
+//	#pragma mark - windows
+
+
+static const uint32 kWindowFlags = B_NOT_MOVABLE | B_NOT_RESIZABLE
+	| B_NOT_CLOSABLE | B_NOT_ZOOMABLE | B_NOT_MINIMIZABLE | B_AVOID_FOCUS
+	| B_WILL_ACCEPT_FIRST_CLICK | B_ASYNCHRONOUS_CONTROLS;
+
+
+class TaskbarWindow : public BWindow {
+public:
+	TaskbarWindow()
+		:
+		BWindow(BRect(0, 0, 100, 30), "Taskbar", B_NO_BORDER_WINDOW_LOOK,
+			B_FLOATING_ALL_WINDOW_FEEL, kWindowFlags, B_ALL_WORKSPACES),
+		fTicks(0)
+	{
+		fView = new TaskbarView(Bounds());
+		AddChild(fView);
+		_Place();
+		BMessage tick(kTick);
+		fRunner = new BMessageRunner(BMessenger(this), &tick, 500000);
+		fView->Update(true);
+	}
+
+	~TaskbarWindow()
+	{
+		delete fRunner;
+	}
+
+	virtual void MessageReceived(BMessage* message)
+	{
+		switch (message->what) {
+			case kTick:
+				fView->Update(++fTicks % 2 == 0);
+				break;
+			case B_SCREEN_CHANGED:
+				_Place();
+				break;
+			default:
+				BWindow::MessageReceived(message);
+		}
+	}
+
+private:
+	void _Place()
+	{
+		const BRect screen = BScreen(this).Frame();
+		const float height = kBand + kTaskbarHeight;
+		MoveTo(screen.left, screen.bottom - height + 1);
+		ResizeTo(screen.Width(), height - 1);
+	}
+
+	TaskbarView*		fView;
+	BMessageRunner*		fRunner;
+	int32				fTicks;
+};
+
+
+class ShelfWindow : public BWindow {
+public:
+	ShelfWindow()
+		:
+		BWindow(BRect(0, 0, 100, 100), "Shelf", B_NO_BORDER_WINDOW_LOOK,
+			B_FLOATING_ALL_WINDOW_FEEL, kWindowFlags, B_ALL_WORKSPACES)
+	{
+		fView = new ShelfView(Bounds());
+		AddChild(fView);
+		_Place();
+		BMessage tick(kTick);
+		fRunner = new BMessageRunner(BMessenger(this), &tick, 1000000);
+		fView->Update();
+	}
+
+	~ShelfWindow()
+	{
+		delete fRunner;
+	}
+
+	virtual void MessageReceived(BMessage* message)
+	{
+		switch (message->what) {
+			case kTick:
+				fView->Update();
+				break;
+			case B_SCREEN_CHANGED:
+				_Place();
+				break;
+			default:
+				BWindow::MessageReceived(message);
+		}
+	}
+
+private:
+	void _Place()
+	{
+		const BRect screen = BScreen(this).Frame();
+		// down to the taskbar's trough, over the end of its band
+		MoveTo(screen.right - kShelfWidth + 1, screen.top);
+		ResizeTo(kShelfWidth - 1, screen.Height() - kTaskbarHeight);
+	}
+
+	ShelfView*			fView;
+	BMessageRunner*		fRunner;
+};
+
+
+//	#pragma mark - the application
+
+
+/*!	Stops the Deskbar, and keeps launch_daemon from starting it again, while
+	this runs; puts it back as this quits.
+*/
+static void
+set_deskbar_running(bool run)
+{
+	if (run) {
+		system("launch_roster start x-vnd.Be-TSKB >/dev/null 2>&1");
+		if (!be_roster->IsRunning(kDeskbarSignature))
+			be_roster->Launch(kDeskbarSignature);
+		return;
+	}
+	system("launch_roster stop x-vnd.Be-TSKB >/dev/null 2>&1");
+	BMessenger(kDeskbarSignature).SendMessage(B_QUIT_REQUESTED);
+}
+
+
+class PowerShelf : public BApplication {
+public:
+	PowerShelf()
+		:
+		BApplication(kSignature)
+	{
+	}
+
+	virtual void ReadyToRun()
+	{
+		set_deskbar_running(false);
+		(new TaskbarWindow())->Show();
+		(new ShelfWindow())->Show();
+	}
+
+	virtual bool QuitRequested()
+	{
+		set_deskbar_running(true);
+		return true;
+	}
+};
+
+
+int
+main()
+{
+	// it outlasts the Terminal or program that started it
+	const int null = open("/dev/null", O_RDWR);
+	if (null >= 0) {
+		dup2(null, STDIN_FILENO);
+		dup2(null, STDOUT_FILENO);
+		dup2(null, STDERR_FILENO);
+		if (null > STDERR_FILENO)
+			close(null);
+	}
+
+	PowerShelf app;
+	app.Run();
+	return 0;
+}

@@ -121,6 +121,8 @@ usage(FILE* out)
 		"                        Platinum's, Leopard's, Gershwix's, NeXT's,\n"
 		"                        System 7's, Amiga's, AmigaOS 3's and QNX's),\n"
 		"                        or a title bar\n"
+		"      --shell=photon|deskbar  a taskbar and shelf in the style of QNX's\n"
+		"                        Photon in the Deskbar's place, or the Deskbar\n"
 		"  -i, --icons=ID        use only the icon theme in folder ID;\n"
 		"                        \"haiku\" puts Haiku's own icons back, and\n"
 		"                        \"haiku-dark\" uses dark versions of them\n"
@@ -369,6 +371,7 @@ command_line(int argc, char** argv)
 		{ "mode", required_argument, NULL, 'm' },
 		{ "schedule", required_argument, NULL, 'S' },
 		{ "beos-tabs", required_argument, NULL, 'B' },
+		{ "shell", required_argument, NULL, 'H' },
 		{ "light-icons", required_argument, NULL, 'L' },
 		{ "dark-icons", required_argument, NULL, 'D' },
 		{ "restart-tracker", no_argument, NULL, 't' },
@@ -387,6 +390,7 @@ command_line(int argc, char** argv)
 	const char* mode = NULL;
 	const char* scheduleTimes = NULL;
 	const char* beosTabs = NULL;
+	const char* shell = NULL;
 	const char* lightIcons = NULL;
 	const char* darkIcons = NULL;
 
@@ -404,6 +408,7 @@ command_line(int argc, char** argv)
 			case 'm': mode = optarg; break;
 			case 'S': scheduleTimes = optarg; break;
 			case 'B': beosTabs = optarg; break;
+			case 'H': shell = optarg; break;
 			case 'L': lightIcons = optarg; break;
 			case 'D': darkIcons = optarg; break;
 			case 'i': icons = optarg; break;
@@ -420,7 +425,7 @@ command_line(int argc, char** argv)
 	if (optind < argc
 		|| (!list && !apply && !icons && !revert && !status && !restart
 			&& !show && !build && !mode && !scheduleTimes && !lightIcons
-			&& !darkIcons && !beosTabs)) {
+			&& !darkIcons && !beosTabs && !shell)) {
 		usage(stderr);
 		return 2;
 	}
@@ -552,6 +557,7 @@ command_line(int argc, char** argv)
 			}
 		}
 		printf("BeOS-style tabs: %s\n", beos_tabs() ? "on" : "off");
+		printf("shell: %s\n", photon_shell() ? "photon" : "deskbar");
 		printf("previous look saved: %s\n",
 			has_saved_appearance() ? "yes" : "no");
 		printf("previous icons saved: %s\n",
@@ -570,6 +576,18 @@ command_line(int argc, char** argv)
 		}
 		BString log;
 		status_t result = set_beos_tabs(on, log);
+		print_log(log);
+		return result == B_OK ? 0 : 1;
+	}
+
+	if (shell != NULL) {
+		const bool on = strcasecmp(shell, "photon") == 0;
+		if (!on && strcasecmp(shell, "deskbar") != 0) {
+			fprintf(stderr, "powertheme: --shell is photon or deskbar\n");
+			return 2;
+		}
+		BString log;
+		status_t result = set_photon_shell(on, log);
 		print_log(log);
 		return result == B_OK ? 0 : 1;
 	}

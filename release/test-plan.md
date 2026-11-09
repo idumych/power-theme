@@ -211,6 +211,16 @@ close boxes on a grey panel at its right, an inactive window's bar pale greyish
 blue, a grey ridged frame; shaded grey buttons, check boxes with a cross, slanted
 tabs, a menu with a single black line round it, and the lavender silk desktop.
 
+### photon-shell
+Steps: `powertheme --apply=QNX`, `--status`, `roster`; open StyledEdit and a
+Tracker window, open **Launch** and its Applications menu, start Terminal from the
+shelf, click Terminal's task button, then `powertheme --apply=Haiku` and `roster`.
+PASS when: with QNX, `--status` says "shell: photon", PowerShelf runs and the
+Deskbar doesn't; each window has a task button, the one in front cream; Launch
+lists the Deskbar's menu with icons; the shelf starts Terminal; a click on the
+front window's button minimizes it ("[...]"). After Haiku, `--status` says
+"shell: deskbar", the Deskbar runs and PowerShelf doesn't.
+
 ### flat-tab
 Steps: build `tools/left-tab-test.cpp`, `powertheme --apply=DarkFlat`, start it,
 take a screenshot and run `tools/left-tab-check.py` on it.

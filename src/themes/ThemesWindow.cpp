@@ -50,6 +50,7 @@ enum {
 	kMsgModeChosen		= 'mdch',
 	kMsgScheduleChanged	= 'schd',
 	kMsgBeOSTabs		= 'btab',
+	kMsgPhotonShell		= 'shel',
 	kMsgIconsChosen		= 'icch',
 	kMsgApply			= 'aply',
 	kMsgRevert			= 'rvrt',
@@ -550,6 +551,11 @@ ThemesWindow::ThemesWindow(BRect frame, const char* selected)
 	fBeOSTabs->SetToolTip("Gives these window borders a tab as wide as the title "
 		"on top of the frame, instead of a title bar across the window. "
 		"Shift-drag a tab to slide it. This takes effect at once.");
+	fPhotonShell = new BCheckBox("photon shell", "Photon shell",
+		new BMessage(kMsgPhotonShell));
+	fPhotonShell->SetToolTip("Puts a taskbar and a shelf of launchers in the "
+		"style of QNX's Photon in the Deskbar's place. The QNX theme turns it "
+		"on with the Deskbar position. This takes effect at once.");
 	fControls = new BCheckBox("controls", "Controls",
 		new BMessage(kMsgPartChanged));
 	fColors = new BCheckBox("colors", "Colors", new BMessage(kMsgPartChanged));
@@ -604,6 +610,7 @@ ThemesWindow::ThemesWindow(BRect frame, const char* selected)
 					.Add(fFonts, 1, 1)
 					.Add(fWallpaper, 0, 2)
 					.Add(fDeskbar, 1, 2)
+					.Add(fPhotonShell, 2, 2)
 				.End()
 				.Add(new BSeparatorView(B_HORIZONTAL))
 				.AddGroup(B_HORIZONTAL)
@@ -718,6 +725,18 @@ ThemesWindow::MessageReceived(BMessage* message)
 			log.Trim();
 			fStatus->SetText(log);
 			fStatus->SetToolTip(log);
+			break;
+		}
+
+		case kMsgPhotonShell:
+		{
+			BString log;
+			set_photon_shell(fPhotonShell->Value() == B_CONTROL_ON, log);
+			log.Trim();
+			fStatus->SetText(log);
+			fStatus->SetToolTip(log);
+			fPhotonShell->SetValue(photon_shell() ? B_CONTROL_ON
+				: B_CONTROL_OFF);
 			break;
 		}
 
@@ -1138,6 +1157,7 @@ ThemesWindow::_ShowTheme(const Theme* theme)
 
 	fBeOSTabs->SetEnabled(!fBusy && has_beos_tabs(*theme));
 	fBeOSTabs->SetValue(beos_tabs() ? B_CONTROL_ON : B_CONTROL_OFF);
+	fPhotonShell->SetValue(photon_shell() ? B_CONTROL_ON : B_CONTROL_OFF);
 
 	// parts whose add-ons or files aren't installed can't be applied
 	// (a version of a pair with icons chosen for it doesn't need its own)
@@ -1293,6 +1313,8 @@ ThemesWindow::_SetBusy(bool busy)
 	fSchedule->SetEnabled(!busy);
 	const Theme* theme = _SelectedTheme();
 	fBeOSTabs->SetEnabled(!busy && theme != NULL && has_beos_tabs(*theme));
+	fPhotonShell->SetEnabled(!busy);
+	fPhotonShell->SetValue(photon_shell() ? B_CONTROL_ON : B_CONTROL_OFF);
 	fLightAt->SetEnabled(!busy);
 	fDarkAt->SetEnabled(!busy);
 	fIconsField->SetEnabled(!busy);

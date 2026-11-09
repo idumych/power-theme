@@ -454,8 +454,25 @@ Rebuild the package when Hokku's decorator classes change; until then,
   line round them and a pale blue selection; scroll bars with a grey track, a
   light thumb and arrowheads on stems; and tabs with a slanted edge. The desktop
   is a lavender silk with a fine diagonal grain after Photon's, drawn by
-  `tools/make-qnx-wallpaper.py` (without its logos), and the Deskbar runs along
-  the bottom like Photon's taskbar.
+  `tools/make-qnx-wallpaper.py` (without its logos). In place of the Deskbar it
+  starts the Photon shell (below).
+- **The Photon shell** (`apps/PowerShelf`): a desktop shell in the style of
+  Photon's, in place of the Deskbar, which the QNX theme turns on
+  (`shell = photon`) and any other theme or **Revert** turns off; turn it on or off
+  yourself with **Photon shell** in the window or `powertheme --shell=photon` or
+  `--shell=deskbar`. Along the bottom is a taskbar: **Launch**, with a sun, opens
+  the Deskbar's menu of applications, demos, desktop applets and preferences,
+  each with its icon, and **Shutdown…**; then a button for each window, the
+  window in front sunk and cream, a minimized one in brackets (a click brings a
+  window forward, or minimizes the one in front); and a clock. Down the right is
+  the shelf: groups of launchers that open and close with their **−** and **+**
+  (applications, utilities and preferences), and a system monitor of the
+  processors, memory, disk and swap. While it runs, launch_daemon is kept from
+  starting the Deskbar, which comes back as it quits; it starts at login while
+  it's on. Replicants in the Deskbar's tray don't show, and windows can go under
+  the shelf, as Haiku has no way to keep them clear of it.
+
+  ![The Photon shell](docs/screenshots/photon-shell.png)
 - **The Gonx theme** (`data/themes/Gonx`): the look of
   [Gonx](https://github.com/idumych/gonx), with its colours, desktop colour
   and fonts over Haiku's defaults, and Haiku's icons. Power Theme builds

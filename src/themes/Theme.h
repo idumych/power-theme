@@ -18,6 +18,7 @@
  *   deskbar = right top, expanded
  *   scroll bar arrows = double
  *   font smoothing = grey
+ *   shell = photon
  *   font plain = Noto Sans, Regular, 10
  *   font bold = Noto Sans Display | Noto Sans, Medium | Bold, 12
  *   color B_PANEL_BACKGROUND_COLOR = #D4D0C8
@@ -35,7 +36,10 @@
  * optionally followed by ", expanded" or ", collapsed". "font smoothing =
  * grey" turns off subpixel font smoothing while the theme is in use, for a
  * pixel font whose squares must stay sharp; a theme without it brings back the
- * setting from before any theme.
+ * setting from before any theme. "shell = photon" puts PowerShelf, a taskbar
+ * and shelf in the style of QNX's Photon, in the Deskbar's place (see
+ * photon_shell()); it goes with the Deskbar's place, and a theme without it
+ * brings the Deskbar back.
  *
  * A theme can be one version of another: "variant of = Flat" and "mode =
  * dark". Two themes that say they are the same theme's light and dark versions
@@ -143,6 +147,9 @@ public:
 			// the coloured edges of subpixel smoothing: for pixel fonts
 			bool				GreyFontSmoothing() const
 									{ return fGreyFontSmoothing; }
+			// PowerShelf in the Deskbar's place
+			bool				PhotonShell() const
+									{ return fPhotonShell; }
 			const BString&		Wallpaper() const { return fWallpaper; }
 				// "none", "default", or the image's full path
 			int32				WallpaperMode() const
@@ -185,6 +192,7 @@ private:
 			bool				fDeskbarExpanded;
 			int32				fScrollBarArrows;
 			bool				fGreyFontSmoothing;
+			bool				fPhotonShell;
 			bool				fUITheme;
 			bool				fHasDesktopColor;
 			rgb_color			fDesktopColor;
@@ -287,6 +295,13 @@ bool		beos_tabs();
 status_t	set_beos_tabs(bool on, BString& log);
 // whether the window borders \a theme uses can draw one
 bool		has_beos_tabs(const Theme& theme);
+
+// Whether PowerShelf, beside this program, is in the Deskbar's place: a
+// taskbar and a shelf of launchers in the style of QNX's Photon.
+bool		photon_shell();
+// Puts it there, from the next login too, or brings the Deskbar back. Not on
+// Hokku.
+status_t	set_photon_shell(bool on, BString& log);
 
 // What applying \a theme would do on this system, line by line: the
 // decorator and control look found, fonts, colours and wallpapers.

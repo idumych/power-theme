@@ -140,6 +140,7 @@ if [ ! -e "$addons/control_look/Gonx" ] \
 	place "$files/control_look/Gonx" "$addons/control_look/Gonx"
 fi
 place "$files/PowerTheme" "$apps/PowerTheme"
+place "$files/PowerShelf" "$apps/PowerShelf"
 # its type, signature and icon, from its resources
 mimeset -f "$apps/PowerTheme" 2>/dev/null || true
 ln -sf "$apps/PowerTheme" "$bin/powertheme"

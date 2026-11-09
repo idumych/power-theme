@@ -38,7 +38,8 @@ rm -f "$addons/decorators/Reactionary" "$addons/control_look/Reactionary" \
 	"$addons/decorators/Amiga" "$addons/control_look/Amiga" \
 	"$addons/decorators/AmigaOS3" "$addons/control_look/AmigaOS3" \
 	"$data/fonts/ttfonts/HOTDOGTopaz.ttf" "$data/fonts/ttfonts/HOTDOGTopaz-Bold.ttf" \
-	"$apps/PowerTheme" "$bin/powertheme" \
+	"$apps/PowerTheme" "$apps/PowerShelf" "$bin/powertheme" \
+	"$settings/launch/powertheme-shelf" \
 	"$settings/deskbar/menu/Applications/Power Theme" \
 	"$apps/Themes" "$bin/Themes" "$bin/reactionary-theme" \
 	"$settings/deskbar/menu/Applications/Themes"

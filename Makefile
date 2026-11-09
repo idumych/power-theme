@@ -63,6 +63,7 @@ override CXXFLAGS += -O2 -Wall -Wno-multichar -fPIC $(SYSROOT_FLAGS)
 BUILD := build
 DECOR := $(BUILD)/Reactionary
 THEMES := $(BUILD)/PowerTheme
+SHELF := $(BUILD)/PowerShelf
 LOOK := $(BUILD)/control_look/Reactionary
 
 FLAT_DECOR := $(BUILD)/FlatDecorator
@@ -105,7 +106,7 @@ AMIGAOS3 := src/third_party/amigaos3
 # out as build-decorators.sh expects it in a data folder's "PowerTheme".
 DECOR_SOURCE := $(BUILD)/data/PowerTheme
 
-all: $(DECOR) $(LOOK) $(THEMES) $(FLAT_DECOR) $(FLAT_LOOK) $(SMOKE_DECOR) \
+all: $(DECOR) $(LOOK) $(THEMES) $(SHELF) $(FLAT_DECOR) $(FLAT_LOOK) $(SMOKE_DECOR) \
 	$(SMOKE_LOOK) $(DANO_LOOK) $(TIDY_DECOR) $(TIDY_SQUARE_DECOR) $(TIDY_LOOK) \
 	$(GONX_LOOK) \
 	$(EXPOSE_DECOR) $(EXPOSE_LOOK) $(PLATINUM_DECOR) $(PLATINUM_LOOK) \
@@ -547,6 +548,19 @@ $(THEMES): $(THEMES_OBJECTS) $(BUILD)/Themes.rsrc
 	$(CXX) $(SYSROOT_FLAGS) -s -o $@ $(THEMES_OBJECTS) -lbe -ltranslation \
 		-lstdc++
 	$(XRES) -o $@ $(BUILD)/Themes.rsrc
+	mimeset -f $@ 2>/dev/null || true
+
+# the Photon shell: a taskbar and shelf in the Deskbar's place
+$(BUILD)/PowerShelf.o: src/shelf/PowerShelf.cpp
+	@mkdir -p $(BUILD)
+	$(CXX) $(CXXFLAGS) -std=gnu++17 -c $< -o $@
+
+$(BUILD)/PowerShelf.rsrc: src/shelf/PowerShelf.rdef
+
+$(SHELF): $(BUILD)/PowerShelf.o $(BUILD)/PowerShelf.rsrc
+	$(CXX) $(SYSROOT_FLAGS) -s -o $@ $(BUILD)/PowerShelf.o -lbe -ltracker \
+		-lstdc++
+	$(XRES) -o $@ $(BUILD)/PowerShelf.rsrc
 	mimeset -f $@ 2>/dev/null || true
 
 $(BUILD)/ReactionaryDecorator.o: src/decorator/ReactionaryDecorator.cpp src/decorator/ReactionaryDecorator.h

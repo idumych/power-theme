@@ -467,6 +467,7 @@ Theme::Theme()
 	fDeskbarExpanded(true),
 	fScrollBarArrows(0),
 	fGreyFontSmoothing(false),
+	fPhotonShell(false),
 	fUITheme(false),
 	fHasDesktopColor(false)
 {
@@ -575,6 +576,9 @@ Theme::Load(const char* folder)
 			value.ToLower();
 			fGreyFontSmoothing = value == "grey" || value == "gray"
 				|| value == "greyscale" || value == "grayscale";
+		} else if (key == "shell") {
+			value.ToLower();
+			fPhotonShell = value == "photon";
 		} else if (key == "wallpaper mode") {
 			value.ToLower();
 			if (value == "centered" || value == "centred")
@@ -1760,6 +1764,118 @@ has_beos_tabs(const Theme& theme)
 }
 
 
+static const char* kShellName = "photon shell";
+static const char* kShellJob = "powertheme-shelf";
+static const char* kShellSignature
+	= "application/x-vnd.idumych-PowerTheme-shelf";
+
+
+bool
+photon_shell()
+{
+	BPath path;
+	return themes_settings_path(path, kShellName) == B_OK
+		&& BEntry(path.Path()).Exists();
+}
+
+
+#ifndef APP_COSMOE
+
+//! PowerShelf, in the folder this program is in (past a link to it).
+static status_t
+shell_program(BPath& path)
+{
+	image_info image;
+	int32 cookie = 0;
+	while (get_next_image_info(B_CURRENT_TEAM, &cookie, &image) == B_OK) {
+		if (image.type != B_APP_IMAGE)
+			continue;
+		BEntry entry(image.name, true);
+		status_t status = entry.GetPath(&path);
+		if (status == B_OK)
+			status = path.GetParent(&path);
+		if (status == B_OK)
+			status = path.Append("PowerShelf");
+		return status;
+	}
+	return B_ENTRY_NOT_FOUND;
+}
+
+#endif
+
+
+status_t
+set_photon_shell(bool on, BString& log)
+{
+#ifdef APP_COSMOE
+	if (on)
+		log << "The Photon shell isn't available on Linux.\n";
+	return on ? B_NOT_SUPPORTED : B_OK;
+#else
+	BPath program;
+	status_t status = shell_program(program);
+	if (on && (status != B_OK || !BEntry(program.Path()).Exists())) {
+		log << "Can't find PowerShelf, the Photon shell.\n";
+		return B_ENTRY_NOT_FOUND;
+	}
+
+	BPath setting;
+	status = themes_settings_path(setting, kShellName);
+	BPath job;
+	if (status == B_OK)
+		status = find_directory(B_USER_SETTINGS_DIRECTORY, &job, true);
+	if (status == B_OK)
+		status = job.Append("launch");
+	if (status == B_OK) {
+		create_directory(job.Path(), 0755);
+		status = job.Append(kShellJob);
+	}
+	if (status != B_OK) {
+		log << "Can't change the shell: " << strerror(status) << ".\n";
+		return status;
+	}
+
+	if (!on) {
+		BEntry(setting.Path()).Remove();
+		BEntry(job.Path()).Remove();
+		// it brings the Deskbar back as it quits
+		BMessenger(kShellSignature).SendMessage(B_QUIT_REQUESTED);
+		for (int32 i = 0; i < 40 && be_roster->IsRunning(kShellSignature);
+				i++)
+			snooze(50000);
+		for (int32 i = 0; i < 40
+				&& !be_roster->IsRunning("application/x-vnd.Be-TSKB"); i++)
+			snooze(50000);
+		return B_OK;
+	}
+
+	BFile(setting.Path(), B_WRITE_ONLY | B_CREATE_FILE);
+	// launch_daemon starts it at login, and it stops the Deskbar
+	BFile file(job.Path(), B_WRITE_ONLY | B_CREATE_FILE | B_ERASE_FILE);
+	BString text;
+	text << "# Written by Power Theme; powertheme --shell=deskbar removes it.\n"
+		"target desktop {\n"
+		"\tjob x-vnd.idumych-PowerTheme-shelf {\n"
+		"\t\tlaunch \"" << program.Path() << "\"\n"
+		"\t\ton initial_volumes_mounted\n"
+		"\t}\n"
+		"}\n";
+	if (file.Write(text.String(), text.Length()) != text.Length())
+		log << "Can't save the shell for the next login.\n";
+
+	if (be_roster->IsRunning(kShellSignature))
+		return B_OK;
+	entry_ref ref;
+	status = get_ref_for_path(program.Path(), &ref);
+	if (status == B_OK)
+		status = be_roster->Launch(&ref);
+	if (status != B_OK && status != B_ALREADY_RUNNING)
+		log << "Can't start the Photon shell: " << strerror(status) << ".\n";
+	return B_OK;
+#endif
+}
+
+
 theme_mode
 current_mode()
 {
@@ -1922,8 +2038,15 @@ apply_appearance(const Theme& theme, uint32 parts, BString& log)
 			save_message(kPreviousName, previous);
 	}
 
-	if ((parts & THEME_DESKBAR) != 0)
+	if ((parts & THEME_DESKBAR) != 0) {
+		// the Deskbar comes back before it's placed; the shelf goes in its
+		// place after
+		if (!theme.PhotonShell() && photon_shell())
+			set_photon_shell(false, log);
 		set_deskbar(theme.DeskbarLocation(), theme.DeskbarExpanded(), log);
+		if (theme.PhotonShell() && !photon_shell())
+			set_photon_shell(true, log);
+	}
 
 	// They go with the controls. A theme that says nothing brings back the
 	// setting from before any theme, so that one that does doesn't linger.
@@ -2201,6 +2324,12 @@ revert_appearance(BString& log)
 	bool subpixel;
 	if (previous.FindBool("subpixel smoothing", &subpixel) == B_OK)
 		set_font_smoothing(subpixel);
+
+	// there was none before any theme
+	if (photon_shell()) {
+		BString ignored;
+		set_photon_shell(false, ignored);
+	}
 
 	if (fontResized)
 		restart_deskbar();
