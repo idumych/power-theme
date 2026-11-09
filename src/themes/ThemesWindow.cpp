@@ -554,8 +554,9 @@ ThemesWindow::ThemesWindow(BRect frame, const char* selected)
 	fPhotonShell = new BCheckBox("photon shell", "Photon shell",
 		new BMessage(kMsgPhotonShell));
 	fPhotonShell->SetToolTip("Puts a taskbar and a shelf of launchers in the "
-		"style of QNX's Photon in the Deskbar's place. The QNX theme turns it "
-		"on with the Deskbar position. This takes effect at once.");
+		"style of QNX's Photon in the Deskbar's place, drawn in the theme's "
+		"look. The QNX theme turns it on, and it stays with other themes "
+		"until you turn it off. This takes effect at once.");
 	fControls = new BCheckBox("controls", "Controls",
 		new BMessage(kMsgPartChanged));
 	fColors = new BCheckBox("colors", "Colors", new BMessage(kMsgPartChanged));

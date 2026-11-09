@@ -467,7 +467,7 @@ Theme::Theme()
 	fDeskbarExpanded(true),
 	fScrollBarArrows(0),
 	fGreyFontSmoothing(false),
-	fPhotonShell(false),
+	fShell(-1),
 	fUITheme(false),
 	fHasDesktopColor(false)
 {
@@ -578,7 +578,10 @@ Theme::Load(const char* folder)
 				|| value == "greyscale" || value == "grayscale";
 		} else if (key == "shell") {
 			value.ToLower();
-			fPhotonShell = value == "photon";
+			if (value == "photon")
+				fShell = 1;
+			else if (value == "deskbar")
+				fShell = 0;
 		} else if (key == "wallpaper mode") {
 			value.ToLower();
 			if (value == "centered" || value == "centred")
@@ -2041,10 +2044,10 @@ apply_appearance(const Theme& theme, uint32 parts, BString& log)
 	if ((parts & THEME_DESKBAR) != 0) {
 		// the Deskbar comes back before it's placed; the shelf goes in its
 		// place after
-		if (!theme.PhotonShell() && photon_shell())
+		if (theme.Shell() == 0 && photon_shell())
 			set_photon_shell(false, log);
 		set_deskbar(theme.DeskbarLocation(), theme.DeskbarExpanded(), log);
-		if (theme.PhotonShell() && !photon_shell())
+		if (theme.Shell() == 1 && !photon_shell())
 			set_photon_shell(true, log);
 	}
 
@@ -2325,11 +2328,7 @@ revert_appearance(BString& log)
 	if (previous.FindBool("subpixel smoothing", &subpixel) == B_OK)
 		set_font_smoothing(subpixel);
 
-	// there was none before any theme
-	if (photon_shell()) {
-		BString ignored;
-		set_photon_shell(false, ignored);
-	}
+	// the shell is a choice of its own, kept through themes and a revert
 
 	if (fontResized)
 		restart_deskbar();

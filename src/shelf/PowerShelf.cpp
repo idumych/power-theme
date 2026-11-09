@@ -22,6 +22,8 @@
 #include <Alert.h>
 #include <Application.h>
 #include <Bitmap.h>
+#include <ControlLook.h>
+#include <InterfaceDefs.h>
 #include <Directory.h>
 #include <Entry.h>
 #include <File.h>
@@ -56,6 +58,7 @@
 #include <string.h>
 #include <strings.h>
 #include <time.h>
+#include <typeinfo>
 #include <vector>
 
 
@@ -149,6 +152,65 @@ static const float kIconCellWidth = 29;
 static const float kIconSize = 16;
 
 
+static float
+font_lines(const BFont& font)
+{
+	font_height height;
+	font.GetHeight(&height);
+	return ceilf(height.ascent + height.descent + height.leading);
+}
+
+
+// Photon's sizes, made bigger where a theme's fonts need more room
+static float
+item_height()
+{
+	return std::max(kItemHeight, font_lines(*be_plain_font) + 8);
+}
+
+
+static float
+header_height()
+{
+	return std::max(kHeaderHeight, font_lines(*be_bold_font) + 2);
+}
+
+
+static float
+taskbar_height()
+{
+	return std::max(kTaskbarHeight, font_lines(*be_plain_font) + 8);
+}
+
+
+static float
+launch_width()
+{
+	return std::max(kLaunchWidth,
+		ceilf(be_plain_font->StringWidth("Launch")) + 36);
+}
+
+
+static float
+shelf_width()
+{
+	// its longest titles and labels, in the theme's fonts
+	const float title = ceilf(be_bold_font->StringWidth("System Monitor"))
+		+ kBand + kToggleWidth + 14;
+	const float label = ceilf(be_plain_font->StringWidth("Activity Monitor"))
+		+ kBand + kIconCellWidth + 12;
+	return std::max(kShelfWidth, std::max(title, label));
+}
+
+
+static float
+clock_width()
+{
+	return std::max(kClockWidth,
+		ceilf(be_plain_font->StringWidth("Wed-28 12:00PM")) + 8);
+}
+
+
 static void
 fill(BView* view, float l, float t, float r, float b, rgb_color color)
 {
@@ -159,10 +221,52 @@ fill(BView* view, float l, float t, float r, float b, rgb_color color)
 }
 
 
+// Whether the QNX theme's controls are in use: then the shell is drawn as
+// Photon's, colour for colour; with any other, in that theme's own controls
+// and colours.
+static bool sPhoton = true;
+
+
+static bool
+photon_look()
+{
+	if (be_control_look == NULL)
+		return false;
+	return strstr(typeid(*be_control_look).name(), "QNXControlLook") != NULL;
+}
+
+
+static rgb_color
+panel()
+{
+	return ui_color(B_PANEL_BACKGROUND_COLOR);
+}
+
+
+//!	A button in the theme's own look, \a pressed or not.
+static void
+themed_button(BView* view, BRect r, bool pressed)
+{
+	const rgb_color base = panel();
+	const uint32 flags = pressed ? BControlLook::B_ACTIVATED : 0;
+	view->PushState();
+	view->SetHighColor(base);
+	view->FillRect(r);
+	BRect rect(r);
+	be_control_look->DrawButtonFrame(view, rect, r, base, base, flags);
+	be_control_look->DrawButtonBackground(view, rect, r, base, flags);
+	view->PopState();
+}
+
+
 //!	A raised button: lit along its top and left, shaded along its bottom and right.
 static void
 draw_raised(BView* view, BRect r, rgb_color face, bool pressed = false)
 {
+	if (!sPhoton) {
+		themed_button(view, r, pressed);
+		return;
+	}
 	fill(view, r.left, r.top, r.right, r.bottom, face);
 	fill(view, r.left, r.top, r.right, r.top, pressed ? kFaceShade : kWhite);
 	fill(view, r.left, r.top, r.left, r.bottom, pressed ? kFaceShade : kWhite);
@@ -173,22 +277,84 @@ draw_raised(BView* view, BRect r, rgb_color face, bool pressed = false)
 }
 
 
+//!	A group's title bar: Photon's raised grey, or the theme's menu bar.
+static void
+draw_header(BView* view, BRect r, rgb_color face, bool pressed)
+{
+	if (sPhoton) {
+		draw_raised(view, r, face, pressed);
+		return;
+	}
+	view->PushState();
+	BRect rect(r);
+	be_control_look->DrawMenuBarBackground(view, rect, r,
+		ui_color(B_MENU_BACKGROUND_COLOR),
+		pressed ? BControlLook::B_ACTIVATED : 0);
+	view->PopState();
+}
+
+
+//!	Plain panel, raised a little in Photon's look.
+static void
+draw_plain(BView* view, BRect r)
+{
+	if (sPhoton) {
+		draw_raised(view, r, kFace);
+		return;
+	}
+	fill(view, r.left, r.top, r.right, r.bottom, panel());
+}
+
+
+//!	The colour of a button's text, and a title bar's.
+static rgb_color
+button_text()
+{
+	return sPhoton ? kBlack : ui_color(B_CONTROL_TEXT_COLOR);
+}
+
+
+static rgb_color
+header_text()
+{
+	return sPhoton ? kBlack : ui_color(B_MENU_ITEM_TEXT_COLOR);
+}
+
+
 //!	The trough: grey, shaded a pixel along its top and left.
 static void
 draw_trough(BView* view, BRect r)
 {
+	if (!sPhoton) {
+		fill(view, r.left, r.top, r.right, r.bottom,
+			tint_color(panel(), B_DARKEN_1_TINT));
+		fill(view, r.left, r.top, r.right, r.top,
+			tint_color(panel(), B_DARKEN_2_TINT));
+		fill(view, r.left, r.top, r.left, r.bottom,
+			tint_color(panel(), B_DARKEN_2_TINT));
+		return;
+	}
 	fill(view, r.left, r.top, r.right, r.bottom, kTrough);
 	fill(view, r.left, r.top, r.right, r.top, kTroughShade);
 	fill(view, r.left, r.top, r.left, r.bottom, kTroughShade);
 }
 
 
-//!	A line of the band, along \a horizontal or down, \a at its \a index.
+//!	The band round each part, along \a horizontal or down.
 static void
 draw_band(BView* view, BRect r, bool horizontal)
 {
-	const rgb_color lines[6] = { kOutline, kWhite, kRidge, kRidge, kRidgeShade,
+	rgb_color lines[6] = { kOutline, kWhite, kRidge, kRidge, kRidgeShade,
 		kOutline };
+	if (!sPhoton) {
+		const rgb_color base = panel();
+		const rgb_color dark = tint_color(base, B_DARKEN_3_TINT);
+		const rgb_color light = tint_color(base, B_LIGHTEN_2_TINT);
+		const rgb_color shade = tint_color(base, B_DARKEN_1_TINT);
+		const rgb_color themed[6] = { dark, light, base, base, shade, dark };
+		for (int32 i = 0; i < 6; i++)
+			lines[i] = themed[i];
+	}
 	for (int32 i = 0; i < 6; i++) {
 		if (horizontal)
 			fill(view, r.left, r.top + i, r.right, r.top + i, lines[i]);
@@ -409,13 +575,14 @@ public:
 
 	virtual void Draw(BRect update)
 	{
+		sPhoton = photon_look();
 		const BRect b = Bounds();
 		// the band stops where the shelf comes down to the trough
-		const float shelfLeft = b.right - kShelfWidth + 1;
+		const float shelfLeft = b.right - shelf_width() + 1;
 		draw_band(this, BRect(b.left, b.top, shelfLeft + kBand - 1,
 			b.top + kBand - 1), true);
 		fill(this, shelfLeft + kBand, b.top, b.right, b.top + kBand - 1,
-			kFace);
+			sPhoton ? kFace : panel());
 		const BRect trough(b.left, b.top + kBand, b.right, b.bottom);
 		draw_trough(this, trough);
 
@@ -425,7 +592,7 @@ public:
 		_DrawSun(BPoint(launchButton.left + 13, (launchButton.top
 			+ launchButton.bottom) / 2 + (fLaunchPressed ? 1 : 0)));
 		draw_text(this, "Launch", *be_plain_font, launchButton,
-			launchButton.left + 24 + (fLaunchPressed ? 1 : 0), kBlack);
+			launchButton.left + 24 + (fLaunchPressed ? 1 : 0), button_text());
 
 		for (size_t i = 0; i < fButtons.size(); i++)
 			_DrawButton(fButtons[i], (int32)i == fPressed);
@@ -438,7 +605,7 @@ public:
 		strftime(text, sizeof(text), "%a-%d %I:%M%p", localtime(&now));
 		const float width = be_plain_font->StringWidth(text);
 		draw_text(this, text, *be_plain_font, clock,
-			floorf((clock.left + clock.right - width) / 2), kBlack);
+			floorf((clock.left + clock.right - width) / 2), button_text());
 	}
 
 	virtual void MouseDown(BPoint where)
@@ -613,7 +780,7 @@ private:
 		const BRect screen = BScreen(Window()).Frame();
 		// what's left of the screen, and the window with its border and tab
 		const BRect free(screen.left, screen.top,
-			screen.right - kShelfWidth, screen.bottom - kBand - kTaskbarHeight);
+			screen.right - shelf_width(), screen.bottom - kBand - taskbar_height());
 		const float border = info->border_size;
 		const float tab = info->tab_height;
 		const BRect outer(frame.left - border, frame.top - tab - border,
@@ -661,14 +828,14 @@ private:
 	BRect _LaunchFrame() const
 	{
 		const BRect b = Bounds();
-		return BRect(b.left, b.top + kBand, b.left + kLaunchWidth - 1,
+		return BRect(b.left, b.top + kBand, b.left + launch_width() - 1,
 			b.bottom);
 	}
 
 	BRect _ClockFrame() const
 	{
 		const BRect b = Bounds();
-		return BRect(b.right - kClockWidth + 1, b.top + kBand, b.right,
+		return BRect(b.right - clock_width() + 1, b.top + kBand, b.right,
 			b.bottom);
 	}
 
@@ -676,8 +843,8 @@ private:
 	void _Layout(std::vector<TaskButton>& buttons)
 	{
 		const BRect b = Bounds();
-		const float left = b.left + kLaunchWidth + 2;
-		const float right = b.right - kClockWidth - 2;
+		const float left = b.left + launch_width() + 2;
+		const float right = b.right - clock_width() - 2;
 		const float room = right - left + 1;
 		float width = kTaskWidth;
 		if (!buttons.empty())
@@ -694,7 +861,9 @@ private:
 	{
 		BRect r = button.frame;
 		const bool active = button.token == fActive || pressed;
-		if (active) {
+		if (active && !sPhoton)
+			themed_button(this, r, true);
+		else if (active) {
 			// the ridge round it, then a black edge round a cream face
 			fill(this, r.left, r.top, r.right, r.top, kWhite);
 			fill(this, r.left, r.top, r.left, r.bottom, kWhite);
@@ -724,7 +893,7 @@ private:
 		BString title(button.title);
 		if (button.minimized)
 			title.Prepend("[").Append("]");
-		draw_text(this, title.String(), *be_plain_font, r, x, kBlack);
+		draw_text(this, title.String(), *be_plain_font, r, x, button_text());
 	}
 
 	BBitmap* _IconFor(team_id team)
@@ -950,6 +1119,7 @@ public:
 
 	virtual void Draw(BRect update)
 	{
+		sPhoton = photon_look();
 		_Layout();
 		const BRect b = Bounds();
 		draw_band(this, BRect(b.left, b.top, b.left + kBand - 1, b.bottom),
@@ -961,7 +1131,8 @@ public:
 			// a dark line over the lower shelf, and under the upper
 			if (group.monitor) {
 				fill(this, group.header.left, group.header.top - 1, b.right,
-					group.header.top - 1, kOutline);
+					group.header.top - 1, sPhoton ? kOutline
+						: tint_color(panel(), B_DARKEN_3_TINT));
 			}
 			_DrawHeader(group, (int32)g == fPressedGroup && fPressedItem < 0);
 			if (!group.open)
@@ -977,7 +1148,8 @@ public:
 		}
 		if (fUpperBottom >= 0) {
 			fill(this, b.left + kBand, fUpperBottom + 1, b.right,
-				fUpperBottom + 1, kOutline);
+				fUpperBottom + 1, sPhoton ? kOutline
+					: tint_color(panel(), B_DARKEN_3_TINT));
 		}
 	}
 
@@ -1076,12 +1248,12 @@ private:
 		for (ShelfGroup& group : fGroups) {
 			if (group.monitor)
 				continue;
-			group.header.Set(left, y, b.right, y + kHeaderHeight - 1);
-			y += kHeaderHeight;
+			group.header.Set(left, y, b.right, y + header_height() - 1);
+			y += header_height();
 			for (ShelfItem& item : group.items) {
 				if (group.open) {
-					item.frame.Set(left, y, b.right, y + kItemHeight - 1);
-					y += kItemHeight;
+					item.frame.Set(left, y, b.right, y + item_height() - 1);
+					y += item_height();
 				} else
 					item.frame.Set(0, 0, -1, -1);
 			}
@@ -1090,9 +1262,9 @@ private:
 		for (ShelfGroup& group : fGroups) {
 			if (!group.monitor)
 				continue;
-			const float height = kHeaderHeight + (group.open ? 66 : 0);
+			const float height = header_height() + (group.open ? 66 : 0);
 			const float top = std::max(y + 2, b.bottom - height + 1);
-			group.header.Set(left, top, b.right, top + kHeaderHeight - 1);
+			group.header.Set(left, top, b.right, top + header_height() - 1);
 		}
 	}
 
@@ -1102,16 +1274,22 @@ private:
 		const BRect toggle(h.left, h.top, h.left + kToggleWidth - 1,
 			h.bottom);
 		const BRect label(toggle.right + 1, h.top, h.right, h.bottom);
-		draw_raised(this, toggle, kToggleFace, pressed);
-		draw_raised(this, label, kHeaderFace, pressed);
+		draw_header(this, toggle, kToggleFace, pressed);
+		draw_header(this, label, kHeaderFace, pressed);
+		if (!sPhoton) {
+			fill(this, toggle.right, toggle.top + 3, toggle.right,
+				toggle.bottom - 3, tint_color(ui_color(B_MENU_BACKGROUND_COLOR),
+					B_DARKEN_2_TINT));
+		}
 		// the toggle's minus, with the plus's upright when it's closed
 		const float cx = floorf((toggle.left + toggle.right) / 2);
 		const float cy = floorf((toggle.top + toggle.bottom) / 2);
-		fill(this, cx - 3, cy, cx + 2, cy + 1, kToggleMark);
+		const rgb_color mark = sPhoton ? kToggleMark : header_text();
+		fill(this, cx - 3, cy, cx + 2, cy + 1, mark);
 		if (!group.open)
-			fill(this, cx - 1, cy - 2, cx, cy + 3, kToggleMark);
+			fill(this, cx - 1, cy - 2, cx, cy + 3, mark);
 		draw_text(this, group.title.String(), *be_bold_font, label,
-			label.left + 5, kBlack);
+			label.left + 5, header_text());
 	}
 
 	void _DrawItem(const ShelfItem& item, bool pressed)
@@ -1126,12 +1304,19 @@ private:
 			- kIconSize) / 2) + shift, floorf((cell.top + cell.bottom + 1
 			- kIconSize) / 2) + shift));
 		draw_text(this, item.label.String(), *be_plain_font,
-			label.OffsetByCopy(0, shift), label.left + 4 + shift, kBlack);
+			label.OffsetByCopy(0, shift), label.left + 4 + shift, button_text());
 	}
 
 	//!	A gauge: a dark edge round a grey track, the level green-grey.
 	void _DrawGauge(BRect r, float level)
 	{
+		if (!sPhoton) {
+			BRect rect(r);
+			be_control_look->DrawStatusBar(this, rect, r, panel(),
+				ui_color(B_STATUS_BAR_COLOR),
+				r.left + roundf(r.Width() * level));
+			return;
+		}
 		SetHighColor(kOutline);
 		StrokeRect(r);
 		const BRect in(r.InsetByCopy(1, 1));
@@ -1152,7 +1337,7 @@ private:
 	{
 		const BRect area(group.header.left, group.header.bottom + 1,
 			group.header.right, Bounds().bottom);
-		draw_raised(this, area, kFace);
+		draw_plain(this, area);
 		const float gaugeLeft = area.left + 24;
 		const float gaugeRight = area.right - 4;
 		float y = area.top + 4;
@@ -1252,6 +1437,40 @@ private:
 //	#pragma mark - windows
 
 
+/*!	What the shell's look follows: the control look, the panel and menu
+	colours and the plain font. A change of theme changes some of them.
+*/
+class LookWatch {
+public:
+	LookWatch()
+		:
+		fLook(NULL)
+	{
+		Changed();
+	}
+
+	bool Changed()
+	{
+		const rgb_color panelColor = ui_color(B_PANEL_BACKGROUND_COLOR);
+		const rgb_color menuColor = ui_color(B_MENU_BACKGROUND_COLOR);
+		const float size = be_plain_font->Size();
+		const bool changed = be_control_look != fLook
+			|| panelColor != fPanel || menuColor != fMenu || size != fSize;
+		fLook = be_control_look;
+		fPanel = panelColor;
+		fMenu = menuColor;
+		fSize = size;
+		return changed;
+	}
+
+private:
+	const BControlLook*	fLook;
+	rgb_color			fPanel;
+	rgb_color			fMenu;
+	float				fSize;
+};
+
+
 static const uint32 kWindowFlags = B_NOT_MOVABLE | B_NOT_RESIZABLE
 	| B_NOT_CLOSABLE | B_NOT_ZOOMABLE | B_NOT_MINIMIZABLE | B_AVOID_FOCUS
 	| B_WILL_ACCEPT_FIRST_CLICK | B_ASYNCHRONOUS_CONTROLS;
@@ -1282,7 +1501,15 @@ public:
 	{
 		switch (message->what) {
 			case kTick:
+				if (fWatch.Changed()) {
+					_Place();
+					fView->Invalidate();
+				}
 				fView->Update(++fTicks % 2 == 0);
+				break;
+			case B_COLORS_UPDATED:
+			case B_FONTS_UPDATED:
+				fView->Invalidate();
 				break;
 			case B_SCREEN_CHANGED:
 				_Place();
@@ -1296,7 +1523,7 @@ private:
 	void _Place()
 	{
 		const BRect screen = BScreen(this).Frame();
-		const float height = kBand + kTaskbarHeight;
+		const float height = kBand + taskbar_height();
 		MoveTo(screen.left, screen.bottom - height + 1);
 		ResizeTo(screen.Width(), height - 1);
 	}
@@ -1304,6 +1531,7 @@ private:
 	TaskbarView*		fView;
 	BMessageRunner*		fRunner;
 	int32				fTicks;
+	LookWatch			fWatch;
 };
 
 
@@ -1318,7 +1546,7 @@ public:
 		AddChild(fView);
 		_Place();
 		BMessage tick(kTick);
-		fRunner = new BMessageRunner(BMessenger(this), &tick, 1000000);
+		fRunner = new BMessageRunner(BMessenger(this), &tick, 500000);
 		fView->Update();
 	}
 
@@ -1331,7 +1559,15 @@ public:
 	{
 		switch (message->what) {
 			case kTick:
+				if (fWatch.Changed()) {
+					_Place();
+					fView->Invalidate();
+				}
 				fView->Update();
+				break;
+			case B_COLORS_UPDATED:
+			case B_FONTS_UPDATED:
+				fView->Invalidate();
 				break;
 			case B_SCREEN_CHANGED:
 				_Place();
@@ -1346,12 +1582,13 @@ private:
 	{
 		const BRect screen = BScreen(this).Frame();
 		// down to the taskbar's trough, over the end of its band
-		MoveTo(screen.right - kShelfWidth + 1, screen.top);
-		ResizeTo(kShelfWidth - 1, screen.Height() - kTaskbarHeight);
+		MoveTo(screen.right - shelf_width() + 1, screen.top);
+		ResizeTo(shelf_width() - 1, screen.Height() - taskbar_height());
 	}
 
 	ShelfView*			fView;
 	BMessageRunner*		fRunner;
+	LookWatch			fWatch;
 };
 
 

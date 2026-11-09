@@ -456,11 +456,14 @@ Rebuild the package when Hokku's decorator classes change; until then,
   is a lavender silk with a fine diagonal grain after Photon's, drawn by
   `tools/make-qnx-wallpaper.py` (without its logos). In place of the Deskbar it
   starts the Photon shell (below).
-- **The Photon shell** (`apps/PowerShelf`): a desktop shell in the style of
-  Photon's, in place of the Deskbar, which the QNX theme turns on
-  (`shell = photon`) and any other theme or **Revert** turns off; turn it on or off
-  yourself with **Photon shell** in the window or `powertheme --shell=photon` or
-  `--shell=deskbar`. Along the bottom is a taskbar: **Launch**, with a sun, opens
+- **The Photon shell** (`apps/PowerShelf`): a desktop shell laid out as
+  Photon's, in place of the Deskbar. The QNX theme turns it on
+  (`shell = photon`); it then stays through other themes and **Revert** until a
+  theme with `shell = deskbar` or you turn it off, with **Photon shell** in the
+  window or `powertheme --shell=photon` or `--shell=deskbar`. With QNX's controls
+  it is drawn as Photon's, pixel for pixel; with any other theme, in that
+  theme's buttons, menu bars, progress bars and colours, and bigger where the
+  theme's fonts need room, changing along with the theme. Along the bottom is a taskbar: **Launch**, with a sun, opens
   the Deskbar's menu of applications, demos, desktop applets and preferences,
   each with its icon, and **Shutdown…**; then a button for each window, the
   window in front sunk and cream, a minimized one in brackets (a click brings a

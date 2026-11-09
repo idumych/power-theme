@@ -38,8 +38,9 @@
  * pixel font whose squares must stay sharp; a theme without it brings back the
  * setting from before any theme. "shell = photon" puts PowerShelf, a taskbar
  * and shelf in the style of QNX's Photon, in the Deskbar's place (see
- * photon_shell()); it goes with the Deskbar's place, and a theme without it
- * brings the Deskbar back.
+ * photon_shell()), and "shell = deskbar" brings the Deskbar back; it goes with
+ * the Deskbar's place, and a theme without it leaves the shell as it is, so
+ * that it can be kept with any theme, drawn in that theme's look.
  *
  * A theme can be one version of another: "variant of = Flat" and "mode =
  * dark". Two themes that say they are the same theme's light and dark versions
@@ -147,9 +148,10 @@ public:
 			// the coloured edges of subpixel smoothing: for pixel fonts
 			bool				GreyFontSmoothing() const
 									{ return fGreyFontSmoothing; }
-			// PowerShelf in the Deskbar's place
-			bool				PhotonShell() const
-									{ return fPhotonShell; }
+			// PowerShelf in the Deskbar's place (1), the Deskbar (0), or
+			// whichever is in use (-1)
+			int32				Shell() const
+									{ return fShell; }
 			const BString&		Wallpaper() const { return fWallpaper; }
 				// "none", "default", or the image's full path
 			int32				WallpaperMode() const
@@ -192,7 +194,7 @@ private:
 			bool				fDeskbarExpanded;
 			int32				fScrollBarArrows;
 			bool				fGreyFontSmoothing;
-			bool				fPhotonShell;
+			int32				fShell;
 			bool				fUITheme;
 			bool				fHasDesktopColor;
 			rgb_color			fDesktopColor;
