@@ -1841,7 +1841,10 @@ set_photon_shell(bool on, BString& log)
 	if (!on) {
 		BEntry(setting.Path()).Remove();
 		BEntry(job.Path()).Remove();
-		// it brings the Deskbar back as it quits
+		// launch_daemon restarts the service if it ends, unless it's stopped
+		// first; it brings the Deskbar back as it quits
+		system("launch_roster stop x-vnd.idumych-PowerTheme-shelf "
+			">/dev/null 2>&1");
 		BMessenger(kShellSignature).SendMessage(B_QUIT_REQUESTED);
 		for (int32 i = 0; i < 40 && be_roster->IsRunning(kShellSignature);
 				i++)
@@ -1853,12 +1856,13 @@ set_photon_shell(bool on, BString& log)
 	}
 
 	BFile(setting.Path(), B_WRITE_ONLY | B_CREATE_FILE);
-	// launch_daemon starts it at login, and it stops the Deskbar
+	// launch_daemon starts it at login, as a service that it starts again if
+	// it ends, as it does the Deskbar; it stops the Deskbar
 	BFile file(job.Path(), B_WRITE_ONLY | B_CREATE_FILE | B_ERASE_FILE);
 	BString text;
 	text << "# Written by Power Theme; powertheme --shell=deskbar removes it.\n"
 		"target desktop {\n"
-		"\tjob x-vnd.idumych-PowerTheme-shelf {\n"
+		"\tservice x-vnd.idumych-PowerTheme-shelf {\n"
 		"\t\tlaunch \"" << program.Path() << "\"\n"
 		"\t\ton initial_volumes_mounted\n"
 		"\t}\n"
@@ -1868,6 +1872,20 @@ set_photon_shell(bool on, BString& log)
 
 	if (be_roster->IsRunning(kShellSignature))
 		return B_OK;
+	// as the service, if launch_daemon knows it from this login; otherwise
+	// on its own until the next
+	// it may have been disabled, by being turned off or giving up after
+	// crashing again and again
+	system("launch_roster enable x-vnd.idumych-PowerTheme-shelf "
+		">/dev/null 2>&1");
+	if (system("launch_roster start x-vnd.idumych-PowerTheme-shelf "
+			">/dev/null 2>&1") == 0) {
+		for (int32 i = 0; i < 40 && !be_roster->IsRunning(kShellSignature);
+				i++)
+			snooze(50000);
+		if (be_roster->IsRunning(kShellSignature))
+			return B_OK;
+	}
 	entry_ref ref;
 	status = get_ref_for_path(program.Path(), &ref);
 	if (status == B_OK)

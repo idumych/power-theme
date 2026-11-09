@@ -473,8 +473,14 @@ Rebuild the package when Hokku's decorator classes change; until then,
   memory, disk and swap, and **Replicants**: the Deskbar's tray items (the
   volume, network and power status, the process monitor and any others listed
   in the Deskbar's settings), loaded as the Deskbar loads them. While it runs, launch_daemon is kept from
-  starting the Deskbar, which comes back as it quits; it starts at login while
-  it's on. Haiku has no way to set part of the screen aside, so it keeps windows
+  starting the Deskbar, which comes back as it quits. While it's on,
+  launch_daemon starts it at login as a service, as it does the Deskbar, and
+  starts it again if it ends. So that a replicant that crashes it can't do so
+  over and over, one that crashed it while being loaded is left out from then
+  on, and after four starts in two minutes it starts with no replicants; after
+  six it gives up and brings the Deskbar back (delete
+  `~/config/settings/PowerTheme/shelf-guard` to give left-out replicants another
+  try). Haiku has no way to set part of the screen aside, so it keeps windows
   clear itself: one that opens under the taskbar or the shelf is moved out (and
   shrunk if it doesn't fit), and one that is zoomed or resized by its
   application is fitted to the rest of the screen, a moment after; one you drag

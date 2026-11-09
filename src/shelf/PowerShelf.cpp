@@ -108,6 +108,10 @@ status_t get_window_order(int32 workspace, int32** _tokens, int32* _count);
 static const char* kSignature = "application/x-vnd.idumych-PowerTheme-shelf";
 static const char* kDeskbarSignature = "application/x-vnd.Be-TSKB";
 static const char* kSettingsName = "PowerTheme/shelf";
+// what keeps a crashing replicant from bringing the shell down for good: the
+// one being loaded, the ones that crashed while loading, and recent starts
+static const char* kLoadingName = "PowerTheme/shelf-loading";
+static const char* kGuardName = "PowerTheme/shelf-guard";
 
 static const uint32 kTick = 'tick';
 static const uint32 kLaunch = 'lnch';
@@ -988,6 +992,122 @@ private:
 };
 
 
+//	#pragma mark - the crash guard
+
+
+/*!	launch_daemon starts the shell again whenever it ends, as it does the
+	Deskbar, but with no limit; this keeps a replicant that crashes it from
+	doing so over and over. A replicant that crashed the shell while it was
+	being loaded is left out from then on. After four starts in two minutes
+	without a clean quit, the shell starts with no replicants; after six, it
+	gives up and brings the Deskbar back.
+*/
+class CrashGuard {
+public:
+	enum mode { NORMAL, NO_REPLICANTS, GIVE_UP };
+
+	CrashGuard()
+	{
+		_Path(fGuard, kGuardName);
+		_Path(fLoading, kLoadingName);
+		BFile file(fGuard.Path(), B_READ_ONLY);
+		if (file.InitCheck() == B_OK)
+			fSettings.Unflatten(&file);
+
+		// a replicant was being loaded when the last one ended
+		BFile loading(fLoading.Path(), B_READ_ONLY);
+		BMessage crashed;
+		if (loading.InitCheck() == B_OK && crashed.Unflatten(&loading) == B_OK) {
+			const char* path;
+			if (crashed.FindString("path", &path) == B_OK)
+				fSettings.AddString("skip", path);
+		}
+		BEntry(fLoading.Path()).Remove();
+
+		// the recent starts, this one included
+		const bigtime_t now = real_time_clock_usecs();
+		BMessage starts;
+		int64 when;
+		int32 recent = 0;
+		for (int32 i = 0; fSettings.FindInt64("start", i, &when) == B_OK; i++) {
+			if (now - when < 120000000) {
+				starts.AddInt64("start", when);
+				recent++;
+			}
+		}
+		fSettings.RemoveName("start");
+		for (int32 i = 0; starts.FindInt64("start", i, &when) == B_OK; i++)
+			fSettings.AddInt64("start", when);
+		fSettings.AddInt64("start", now);
+		recent++;
+		_Save();
+
+		fMode = recent >= 6 ? GIVE_UP : recent >= 4 ? NO_REPLICANTS : NORMAL;
+	}
+
+	mode Mode() const
+	{
+		return fMode;
+	}
+
+	bool Skipped(const char* path) const
+	{
+		const char* skip;
+		for (int32 i = 0; fSettings.FindString("skip", i, &skip) == B_OK; i++) {
+			if (strcmp(skip, path) == 0)
+				return true;
+		}
+		return false;
+	}
+
+	//!	Marks \a path as being loaded, or none if NULL.
+	void Loading(const char* path)
+	{
+		if (path == NULL) {
+			BEntry(fLoading.Path()).Remove();
+			return;
+		}
+		BMessage message;
+		message.AddString("path", path);
+		BFile file(fLoading.Path(), B_WRITE_ONLY | B_CREATE_FILE
+			| B_ERASE_FILE);
+		if (file.InitCheck() == B_OK) {
+			message.Flatten(&file);
+			file.Sync();
+		}
+	}
+
+	//!	A clean quit: the starts so far don't count against the next.
+	void Quit()
+	{
+		fSettings.RemoveName("start");
+		_Save();
+	}
+
+private:
+	static void _Path(BPath& path, const char* name)
+	{
+		if (find_directory(B_USER_SETTINGS_DIRECTORY, &path) == B_OK)
+			path.Append(name);
+	}
+
+	void _Save()
+	{
+		BFile file(fGuard.Path(), B_WRITE_ONLY | B_CREATE_FILE | B_ERASE_FILE);
+		if (file.InitCheck() == B_OK)
+			fSettings.Flatten(&file);
+	}
+
+	BPath				fGuard;
+	BPath				fLoading;
+	BMessage			fSettings;
+	mode				fMode;
+};
+
+
+static CrashGuard* sGuard = NULL;
+
+
 //	#pragma mark - the shelf
 
 
@@ -1398,10 +1518,16 @@ private:
 		if (file.InitCheck() != B_OK || settings.Unflatten(&file) != B_OK)
 			return;
 
+		if (sGuard != NULL && sGuard->Mode() != CrashGuard::NORMAL)
+			return;
 		const float maxWidth = Bounds().Width() - kBand - 8;
 		const char* entry;
 		for (int32 i = 0; settings.FindString("replicant_path", i, &entry)
 				== B_OK; i++) {
+			if (sGuard != NULL && sGuard->Skipped(entry))
+				continue;
+			if (sGuard != NULL)
+				sGuard->Loading(entry);
 			BEntry addOn(entry, true);
 			entry_ref ref;
 			if (!addOn.Exists() || addOn.GetRef(&ref) != B_OK)
@@ -1440,6 +1566,8 @@ private:
 			fTray->AddChild(made);
 			made->ResizeTo(frame.Width(), frame.Height());
 		}
+		if (sGuard != NULL)
+			sGuard->Loading(NULL);
 	}
 
 	void _DrawHeader(const ShelfGroup& group, bool pressed)
@@ -1799,6 +1927,16 @@ public:
 
 	virtual void ReadyToRun()
 	{
+		sGuard = new CrashGuard();
+		if (sGuard->Mode() == CrashGuard::GIVE_UP) {
+			// crashing over and over: the Deskbar back, and no more restarts
+			sGuard->Quit();
+			set_deskbar_running(true);
+			system("launch_roster stop x-vnd.idumych-PowerTheme-shelf "
+				">/dev/null 2>&1");
+			Quit();
+			return;
+		}
 		set_deskbar_running(false);
 		(new TaskbarWindow())->Show();
 		(new ShelfWindow())->Show();
@@ -1806,6 +1944,8 @@ public:
 
 	virtual bool QuitRequested()
 	{
+		if (sGuard != NULL)
+			sGuard->Quit();
 		set_deskbar_running(true);
 		return true;
 	}
