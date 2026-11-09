@@ -1782,6 +1782,79 @@ photon_shell()
 }
 
 
+bool
+photon_shell_running()
+{
+	return be_roster->IsRunning(kShellSignature);
+}
+
+
+shell_entry
+photon_shell_entry()
+{
+	std::vector<BPath> folders;
+	BPath path;
+	if (find_directory(B_USER_SETTINGS_DIRECTORY, &path) == B_OK
+		&& path.Append("launch") == B_OK)
+		folders.push_back(path);
+	const directory_which places[] = { B_SYSTEM_DATA_DIRECTORY,
+		B_SYSTEM_NONPACKAGED_DATA_DIRECTORY, B_USER_DATA_DIRECTORY,
+		B_USER_NONPACKAGED_DATA_DIRECTORY };
+	for (size_t i = 0; i < sizeof(places) / sizeof(places[0]); i++) {
+		if (find_directory(places[i], &path) == B_OK
+			&& path.Append("user_launch") == B_OK)
+			folders.push_back(path);
+	}
+
+	bool job = false;
+	for (const BPath& folder : folders) {
+		BDirectory directory(folder.Path());
+		BEntry entry;
+		while (directory.GetNextEntry(&entry, true) == B_OK) {
+			BFile file(&entry, B_READ_ONLY);
+			off_t size = 0;
+			if (file.InitCheck() != B_OK || file.GetSize(&size) != B_OK
+				|| size <= 0 || size > 256 * 1024)
+				continue;
+			BString text;
+			char* buffer = text.LockBuffer(size);
+			const ssize_t bytes = file.Read(buffer, size);
+			text.UnlockBuffer(bytes > 0 ? bytes : 0);
+			if (text.IFindFirst("service x-vnd.idumych-PowerTheme-shelf") >= 0)
+				return SHELL_ENTRY_SERVICE;
+			if (text.IFindFirst("job x-vnd.idumych-PowerTheme-shelf") >= 0)
+				job = true;
+		}
+	}
+	return job ? SHELL_ENTRY_JOB : SHELL_ENTRY_NONE;
+}
+
+
+static const char* kNoShellEntryQuestion = "don't offer shell entry";
+
+
+bool
+ask_for_shell_entry()
+{
+	BPath path;
+	return themes_settings_path(path, kNoShellEntryQuestion) != B_OK
+		|| !BEntry(path.Path()).Exists();
+}
+
+
+void
+set_ask_for_shell_entry(bool ask)
+{
+	BPath path;
+	if (themes_settings_path(path, kNoShellEntryQuestion) != B_OK)
+		return;
+	if (ask)
+		BEntry(path.Path()).Remove();
+	else
+		BFile(path.Path(), B_WRITE_ONLY | B_CREATE_FILE);
+}
+
+
 #ifndef APP_COSMOE
 
 //! PowerShelf, in the folder this program is in (past a link to it).

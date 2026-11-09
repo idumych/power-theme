@@ -480,7 +480,9 @@ Rebuild the package when Hokku's decorator classes change; until then,
   on, and after four starts in two minutes it starts with no replicants; after
   six it gives up and brings the Deskbar back (delete
   `~/config/settings/PowerTheme/shelf-guard` to give left-out replicants another
-  try). Haiku has no way to set part of the screen aside, so it keeps windows
+  try). When the shell runs with nothing to start it at login, or with an older
+  Power Theme's entry that doesn't start it again, Power Theme's window offers to
+  add or update it; `powertheme --status` says which it has ("shell at login"). Haiku has no way to set part of the screen aside, so it keeps windows
   clear itself: one that opens under the taskbar or the shelf is moved out (and
   shrunk if it doesn't fit), and one that is zoomed or resized by its
   application is fitted to the rest of the screen, a moment after; one you drag

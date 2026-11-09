@@ -558,6 +558,11 @@ command_line(int argc, char** argv)
 		}
 		printf("BeOS-style tabs: %s\n", beos_tabs() ? "on" : "off");
 		printf("shell: %s\n", photon_shell() ? "photon" : "deskbar");
+		const shell_entry entry = photon_shell_entry();
+		printf("shell at login: %s\n", entry == SHELL_ENTRY_SERVICE
+			? "service (started again if it ends)"
+			: entry == SHELL_ENTRY_JOB ? "job (not started again if it ends)"
+			: "none");
 		printf("previous look saved: %s\n",
 			has_saved_appearance() ? "yes" : "no");
 		printf("previous icons saved: %s\n",

@@ -60,6 +60,8 @@ private:
 			BString				_ChosenIcons() const;
 			void				_SetBusy(bool busy);
 			void				_UpdateButtons();
+			void				_CheckShellEntry();
+			void				_ShellEntryAnswered(int32 which);
 			void				_UpdateSchedule();
 			void				_ScheduleChanged();
 

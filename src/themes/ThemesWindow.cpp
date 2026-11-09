@@ -13,6 +13,7 @@
 #include <algorithm>
 #include <vector>
 
+#include <Alert.h>
 #include <Application.h>
 #include <Bitmap.h>
 #include <Box.h>
@@ -51,6 +52,8 @@ enum {
 	kMsgScheduleChanged	= 'schd',
 	kMsgBeOSTabs		= 'btab',
 	kMsgPhotonShell		= 'shel',
+	kMsgCheckShellEntry	= 'chse',
+	kMsgShellEntryAnswer	= 'shea',
 	kMsgIconsChosen		= 'icch',
 	kMsgApply			= 'aply',
 	kMsgRevert			= 'rvrt',
@@ -666,6 +669,60 @@ ThemesWindow::Show()
 		MoveOnScreen(B_MOVE_IF_PARTIALLY_OFFSCREEN);
 		UnlockLooper();
 	}
+
+	// once it's on screen, so that a question about the shell sits over it
+	PostMessage(kMsgCheckShellEntry);
+}
+
+
+/*!	Offers to add launch_daemon's entry for the Photon shell when it runs
+	without one, started some other way, or with an older Power Theme's,
+	which doesn't start it again if it ends.
+*/
+void
+ThemesWindow::_CheckShellEntry()
+{
+	if (!photon_shell_running() || !ask_for_shell_entry())
+		return;
+	const shell_entry entry = photon_shell_entry();
+	if (entry == SHELL_ENTRY_SERVICE)
+		return;
+
+	const char* text = entry == SHELL_ENTRY_JOB
+		? "The Photon shell starts at login, but not again if it crashes: what "
+			"starts it is from an older Power Theme.\n\nUpdate it, so that "
+			"launch_daemon starts the shell again if it ends?"
+		: "The Photon shell is running, but nothing starts it at login, or "
+			"again if it crashes.\n\nAdd it to what launch_daemon starts, as "
+			"it does the Deskbar?";
+	BAlert* alert = new BAlert("Photon shell", text, "Don't ask again",
+		"Not now", entry == SHELL_ENTRY_JOB ? "Update" : "Add",
+		B_WIDTH_AS_USUAL, B_OFFSET_SPACING, B_INFO_ALERT);
+	alert->SetShortcut(1, B_ESCAPE);
+	alert->Go(new BInvoker(new BMessage(kMsgShellEntryAnswer), this));
+}
+
+
+void
+ThemesWindow::_ShellEntryAnswered(int32 which)
+{
+	if (which == 0) {
+		set_ask_for_shell_entry(false);
+		return;
+	}
+	if (which != 2)
+		return;
+
+	// the shell is running, so this only writes its entry and setting
+	BString log;
+	set_photon_shell(true, log);
+	log.Trim();
+	if (log.IsEmpty() && photon_shell_entry() == SHELL_ENTRY_SERVICE) {
+		log = "The Photon shell starts at login now, and again if it ends.";
+	}
+	fStatus->SetText(log);
+	fStatus->SetToolTip(log);
+	fPhotonShell->SetValue(photon_shell() ? B_CONTROL_ON : B_CONTROL_OFF);
 }
 
 
@@ -728,6 +785,14 @@ ThemesWindow::MessageReceived(BMessage* message)
 			fStatus->SetToolTip(log);
 			break;
 		}
+
+		case kMsgCheckShellEntry:
+			_CheckShellEntry();
+			break;
+
+		case kMsgShellEntryAnswer:
+			_ShellEntryAnswered(message->GetInt32("which", 1));
+			break;
 
 		case kMsgPhotonShell:
 		{

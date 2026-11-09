@@ -304,6 +304,22 @@ bool		photon_shell();
 // Puts it there, from the next login too, or brings the Deskbar back. Not on
 // Hokku.
 status_t	set_photon_shell(bool on, BString& log);
+// Whether PowerShelf is running now, however it was started.
+bool		photon_shell_running();
+
+// What starts PowerShelf at login: launch_daemon's service, which starts it
+// again if it ends; an older Power Theme's job, which doesn't; or nothing.
+// The user's launch folder is looked in, and the folders a system build can
+// ship one in.
+enum shell_entry {
+	SHELL_ENTRY_SERVICE,
+	SHELL_ENTRY_JOB,
+	SHELL_ENTRY_NONE
+};
+shell_entry	photon_shell_entry();
+// Whether to offer to add that entry when the shell runs without it.
+bool		ask_for_shell_entry();
+void		set_ask_for_shell_entry(bool ask);
 
 // What applying \a theme would do on this system, line by line: the
 // decorator and control look found, fonts, colours and wallpapers.
