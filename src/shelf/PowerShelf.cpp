@@ -346,21 +346,27 @@ draw_trough(BView* view, BRect r)
 }
 
 
+//!	The band's six lines, from its outer edge in.
+static void
+band_lines(rgb_color lines[6])
+{
+	const rgb_color photon[6] = { kOutline, kWhite, kRidge, kRidge,
+		kRidgeShade, kOutline };
+	const rgb_color base = panel();
+	const rgb_color themed[6] = { tint_color(base, B_DARKEN_3_TINT),
+		tint_color(base, B_LIGHTEN_2_TINT), base, base,
+		tint_color(base, B_DARKEN_1_TINT), tint_color(base, B_DARKEN_3_TINT) };
+	for (int32 i = 0; i < 6; i++)
+		lines[i] = sPhoton ? photon[i] : themed[i];
+}
+
+
 //!	The band round each part, along \a horizontal or down.
 static void
 draw_band(BView* view, BRect r, bool horizontal)
 {
-	rgb_color lines[6] = { kOutline, kWhite, kRidge, kRidge, kRidgeShade,
-		kOutline };
-	if (!sPhoton) {
-		const rgb_color base = panel();
-		const rgb_color dark = tint_color(base, B_DARKEN_3_TINT);
-		const rgb_color light = tint_color(base, B_LIGHTEN_2_TINT);
-		const rgb_color shade = tint_color(base, B_DARKEN_1_TINT);
-		const rgb_color themed[6] = { dark, light, base, base, shade, dark };
-		for (int32 i = 0; i < 6; i++)
-			lines[i] = themed[i];
-	}
+	rgb_color lines[6];
+	band_lines(lines);
 	for (int32 i = 0; i < 6; i++) {
 		if (horizontal)
 			fill(view, r.left, r.top + i, r.right, r.top + i, lines[i]);
@@ -1287,6 +1293,7 @@ public:
 		const BRect b = Bounds();
 		draw_band(this, BRect(b.left, b.top, b.left + kBand - 1, b.bottom),
 			false);
+		_DrawCorner();
 		draw_trough(this, BRect(b.left + kBand, b.top, b.right, b.bottom));
 
 		for (size_t g = 0; g < fGroups.size(); g++) {
@@ -1568,6 +1575,30 @@ private:
 		}
 		if (sGuard != NULL)
 			sGuard->Loading(NULL);
+	}
+
+	/*!	Where the shelf's band meets the taskbar's, in the shelf's last rows,
+		over the taskbar's band: the outer line turns along the taskbar's top,
+		the light lines stop short, and the shaded and inner dark lines meet,
+		as a frame's corner does.
+	*/
+	void _DrawCorner()
+	{
+		rgb_color lines[6];
+		band_lines(lines);
+		const BRect b = Bounds();
+		const float top = b.bottom - kBand + 1;
+		for (int32 i = 1; i < 6; i++) {
+			const float y = top + i;
+			for (int32 column = 0; column < 6; column++) {
+				rgb_color color = lines[2];
+				if (i == 5 || column == 5)
+					color = lines[5];
+				else if (i == 4 || column == 4)
+					color = lines[4];
+				fill(this, b.left + column, y, b.left + column, y, color);
+			}
+		}
 	}
 
 	void _DrawHeader(const ShelfGroup& group, bool pressed)
