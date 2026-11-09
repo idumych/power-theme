@@ -6,7 +6,8 @@
 and Haiku. It switches the whole look of the desktop between themes, and
 back: window borders, controls, colours, fonts, wallpaper, the Deskbar's
 place and freedesktop icon themes. It reads the themes made for Theme
-Manager (and BeOS and ZETA before it) too.
+Manager (and BeOS and ZETA before it) too. And it has a desktop shell of its
+own to use in place of the Deskbar: [the Photon shell](#the-photon-shell).
 
 It comes with its own looks:
 
@@ -46,6 +47,30 @@ Reactionary, Reactionary Plus or the themes they build on, or the
 ClassicOS project. It is a new implementation drawn to match the KDE
 theme. Colours and the title bar button glyphs come from the theme's
 files; the code shares nothing with them.
+
+## The Photon shell
+
+![The Photon shell under the QNX theme](docs/screenshots/photon-shell.png)
+
+A desktop shell laid out as QNX 6's Photon, in place of the Deskbar. Along the
+bottom is a taskbar:
+
+- **Launch**, which opens the Deskbar's menu of applications, with icons;
+- a button for each window;
+- a clock.
+
+Down the right is a shelf:
+
+- groups of launchers that open and close;
+- a system monitor;
+- **Replicants**, the Deskbar's tray items: volume, network, power and the rest.
+
+With the QNX theme it looks just like Photon. With any other theme it's drawn in
+that theme's own buttons and colours. The QNX theme turns it on. To keep it as
+your desktop shell, check **Photon shell** and **With every theme** in Power
+Theme's window, or run `powertheme --shell=photon --shell-every-theme=on`.
+launch_daemon starts it at login and again if it ends. It keeps windows clear of
+the taskbar and shelf. [More below](#whats-here).
 
 ## Haiku Dark
 
@@ -491,8 +516,6 @@ Rebuild the package when Hokku's decorator classes change; until then,
   under them stays where you put it. A replicant an application adds while the
   shell runs doesn't appear until the Deskbar has kept it, as applications add
   them by asking the Deskbar itself.
-
-  ![The Photon shell](docs/screenshots/photon-shell.png)
 - **The Gonx theme** (`data/themes/Gonx`): the look of
   [Gonx](https://github.com/idumych/gonx), with its colours, desktop colour
   and fonts over Haiku's defaults, and Haiku's icons. Power Theme builds
