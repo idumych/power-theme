@@ -20,6 +20,7 @@
 #include <Menu.h>
 #include <MenuBar.h>
 #include <Rect.h>
+#include <AffineTransform.h>
 #include <TabView.h>
 #include <View.h>
 
@@ -79,6 +80,7 @@ static const rgb_color kSliderBottom = GREY(0xc4);
 static const rgb_color kTabLight = GREY(0xec);
 static const rgb_color kTabBack = GREY(0xc7);
 static const rgb_color kTabBackLight = GREY(0xdb);
+static const rgb_color kTabBackText = GREY(0x63);
 
 // the groove before a pop-up's arrow, a check box's light edge and its
 // inside held down, and a radio button's edge
@@ -384,12 +386,29 @@ QNXControlLook::DrawButtonWithPopUpBackground(BView* view, BRect& rect,
 }
 
 
+//!	A tab behind the chosen one has a grey label.
 void
 QNXControlLook::DrawLabel(BView* view, const char* label,
 	const BBitmap* icon, BRect rect, const BRect& updateRect,
 	const rgb_color& base, uint32 flags, const BAlignment& alignment,
 	const rgb_color* textColor)
 {
+	BTabView* tabView = dynamic_cast<BTabView*>(view);
+	if (tabView != NULL && (flags & B_DISABLED) == 0) {
+		// BTab draws its label in the tab view, turned for tabs on the left
+		// or right, so its middle is the place to look
+		const BPoint middle((rect.left + rect.right) / 2,
+			(rect.top + rect.bottom) / 2);
+		const BPoint where = view->Transform().Apply(middle);
+		for (int32 i = 0; i < tabView->CountTabs(); i++) {
+			if (i != tabView->Selection()
+				&& tabView->TabFrame(i).Contains(where)) {
+				HaikuControlLook::DrawLabel(view, label, icon, rect,
+					updateRect, base, flags, alignment, &kTabBackText);
+				return;
+			}
+		}
+	}
 	HaikuControlLook::DrawLabel(view, label, icon, rect, updateRect, base,
 		flags, alignment, textColor);
 }
@@ -1010,10 +1029,12 @@ tab_point(const BRect& rect, uint32 side, float along, float across)
 }
 
 
-/*!	A tab as Photon drew it: a dark outline, straight up at its start, along
-	its far edge, and slanting back down to the page at its end, lit inside
-	along its far edge. One behind the chosen tab is darker, pushed two pixels
-	back from the page, and sits on its line.
+/*!	A tab as Photon drew it: a dark outline, straight up at its start with the
+	corner there cut by a pixel, along its far edge, and slanting back down to
+	the page at its end, a pixel for each row, so the slant is as wide as the
+	tab is deep; a light line inside along its start, its far edge and its
+	slant. Behind the chosen tab, a tab is as deep but darker, and sits on the
+	page's line.
 */
 static void
 draw_tab(BView* view, const BRect& rect, uint32 side, bool open)
@@ -1021,35 +1042,47 @@ draw_tab(BView* view, const BRect& rect, uint32 side, bool open)
 	const bool across = side == BTabView::kLeftSide
 		|| side == BTabView::kRightSide;
 	const float length = across ? rect.Height() + 1 : rect.Width() + 1;
-	const float depth = (across ? rect.Width() : rect.Height())
-		- (open ? 0 : 2);
-	const float slant = std::min(depth - 2, floorf(length / 3));
+	// from the page's line to the far edge
+	const float top = across ? rect.Width() : rect.Height();
+	const float slant = std::max(0.0f, std::min(top, length - 4));
+	const float end = length - 1 - slant;
 	const rgb_color face = open ? ui_color(B_PANEL_BACKGROUND_COLOR)
 		: kTabBack;
 	const rgb_color light = open ? kTabLight : kTabBackLight;
+	auto at = [&](float along, float out) {
+		return tab_point(rect, side, along, out);
+	};
 
-	BPoint shape[4] = {
-		tab_point(rect, side, 0, -1),
-		tab_point(rect, side, 0, depth),
-		tab_point(rect, side, length - 1 - slant, depth),
-		tab_point(rect, side, length - 1, open ? -1 : 0)
+	// pixel by pixel, so that the slant stays as crisp as Photon's: a run
+	// along the tab, \a out from the page, from \a from to \a to
+	auto run = [&](float out, float from, float to, rgb_color color) {
+		if (from > to)
+			return;
+		const BPoint a = at(from, out), b = at(to, out);
+		fill_line(view, std::min(a.x, b.x), std::min(a.y, b.y),
+			std::max(a.x, b.x), std::max(a.y, b.y), color);
 	};
 
 	view->PushState();
 	view->ClipToRect(rect);
-	view->SetDrawingMode(B_OP_ALPHA);
-	view->SetBlendingMode(B_PIXEL_ALPHA, B_ALPHA_OVERLAY);
-	view->SetHighColor(face);
-	view->FillPolygon(shape, 4);
-	view->SetHighColor(light);
-	view->StrokeLine(tab_point(rect, side, 1, depth - 1),
-		tab_point(rect, side, length - 2 - slant, depth - 1));
-	view->StrokeLine(tab_point(rect, side, 1, 0),
-		tab_point(rect, side, 1, depth - 1));
-	view->SetHighColor(kOutline);
-	view->StrokeLine(shape[0], shape[1]);
-	view->StrokeLine(shape[1], shape[2]);
-	view->StrokeLine(shape[2], shape[3]);
+	for (float out = 0; out <= top; out++) {
+		// how far along the slant is at this row
+		const float reach = end + (top - out);
+		if (out == top) {
+			run(out, 1, end, kOutline);
+			continue;
+		}
+		run(out, 0, 0, kOutline);
+		if (out == top - 1) {
+			run(out, 1, 1, kOutline);
+			run(out, 2, reach - 1, light);
+		} else {
+			run(out, 1, 1, light);
+			run(out, 2, reach - 2, face);
+			run(out, reach - 1, reach - 1, light);
+		}
+		run(out, reach, reach, kOutline);
+	}
 	view->PopState();
 
 	if (!open) {
@@ -1063,30 +1096,33 @@ draw_tab(BView* view, const BRect& rect, uint32 side, bool open)
 static void
 inset_tab(BRect& rect, uint32 side)
 {
+	// the label may run under the slant's upper half, as Photon's did
+	const float slant = floorf(((side == BTabView::kLeftSide
+		|| side == BTabView::kRightSide) ? rect.Width() : rect.Height()) / 2);
 	switch (side) {
 		case BTabView::kBottomSide:
 			rect.top += 1;
-			rect.bottom -= 3;
-			rect.left += 4;
-			rect.right -= 8;
+			rect.bottom -= 2;
+			rect.left += 3;
+			rect.right -= slant - 2;
 			break;
 		case BTabView::kLeftSide:
-			rect.left += 3;
+			rect.left += 2;
 			rect.right -= 1;
-			rect.top += 4;
-			rect.bottom -= 8;
+			rect.top += 3;
+			rect.bottom -= slant - 2;
 			break;
 		case BTabView::kRightSide:
 			rect.left += 1;
-			rect.right -= 3;
-			rect.top += 4;
-			rect.bottom -= 8;
+			rect.right -= 2;
+			rect.top += 3;
+			rect.bottom -= slant - 2;
 			break;
 		default:
-			rect.top += 3;
+			rect.top += 2;
 			rect.bottom -= 1;
-			rect.left += 4;
-			rect.right -= 8;
+			rect.left += 3;
+			rect.right -= slant - 2;
 			break;
 	}
 }
