@@ -37,6 +37,7 @@ It comes with its own looks:
   its Topaz font and Workbench icons;
 - **AmigaOS 3**, the Amiga's Workbench 3.x, from public domain xfwm4 and GTK
   themes;
+- **QNX**, QNX 6's Photon microGUI;
 - and the Haiku, Gonx and four Flat themes.
 
 The Reactionary ME look is an independent, unofficial port. It is not
@@ -89,7 +90,7 @@ scratch after screenshots of Leopard; nothing of Apple's is included.
 Window borders that can draw one can have a BeOS-style tab instead of a title bar
 across the window, whatever the theme. It's as wide as the title, with close on the
 left and zoom on the right, and shift-dragging it slides it along the window. That's
-Reactionary's, Expose's, Platinum's, Leopard's, Gershwix's, NeXT's, System 7's, Amiga's and AmigaOS 3's borders; turn it on with **BeOS-style tabs** in the window, or
+Reactionary's, Expose's, Platinum's, Leopard's, Gershwix's, NeXT's, System 7's, Amiga's, AmigaOS 3's and QNX's borders; turn it on with **BeOS-style tabs** in the window, or
 `powertheme --beos-tabs=on`. Run **Build add-ons…** after updating to get it.
 
 ## What needs Renku OS changes
@@ -141,8 +142,8 @@ theme.
 | ![Gershwix French Blue](docs/screenshots/gershwix.png) | ![NeXT](docs/screenshots/next.png) |
 | **Gershwix French Blue**: a striped grey title bar with square boxes, light bevelled buttons, a ridged scroll thumb and slider knob and a tube-shaded progress bar in French blue, and NineIcons Redux; six other colours share the rest | **NeXT**: NeXTSTEP's black title bar with bevelled grey boxes, square grey buttons, stippled scroll bars with dimpled thumbs, a black progress bar and a slate desktop, with its leather folders |
 | ![System 7](docs/screenshots/system7.png) | ![Amiga](docs/screenshots/amiga.png) |
-| ![AmigaOS 3](docs/screenshots/amigaos3.png) | |
-| **AmigaOS 3**: Workbench 3.x: blue title bars with the close, zoom and depth gadgets, bevelled grey buttons and fields, a dotted scroll bar track, Topaz and Workbench's drawers | |
+| ![AmigaOS 3](docs/screenshots/amigaos3.png) | ![QNX](docs/screenshots/qnx.png) |
+| **AmigaOS 3**: Workbench 3.x: blue title bars with the close, zoom and depth gadgets, bevelled grey buttons and fields, a dotted scroll bar track, Topaz and Workbench's drawers | **QNX**: QNX 6's Photon: shaded blue title bars with a window menu box and minimize, maximize and close boxes on a grey panel, grey ridged frames, shaded grey buttons, slanted tabs and a lavender silk desktop |
 | **System 7**: Mac OS 7.5's striped title bar with a close box and a zoom box, black frames with a drop shadow, white rounded buttons, a lavender scroll thumb and the dotted grey desktop | **Amiga**: Workbench 1.3 after HOTDOG: white title bars with blue stripes and gadgets, blue windows, orange and blue buttons, the Topaz pixel font and Workbench's drawers |
 | ![The Power Theme window](docs/screenshots/themes-window.png) | |
 | **Power Theme** under Renku: the theme list with a preview, the icon theme, and the parts to apply | |
@@ -435,6 +436,26 @@ Rebuild the package when Hokku's decorator classes change; until then,
   its sliders, blue progress bars and tabs. `tools/make-amigaos3-art.py` turns the
   pictures into the add-ons' headers. It shares the Amiga theme's Topaz font
   (with grey smoothing) and Workbench icons, on Workbench's blue desktop.
+- **QNX** (`add-ons/decorators/QNX`, `add-ons/control_look/QNX` and
+  `data/themes/QNX`): QNX 6's Photon microGUI, drawn from scratch after Nathan
+  Lineback's [screenshots of QNX 6.2.1](http://toastytech.com/guis/qnx621.html)
+  and measured against QNX 6.2.1 itself running in a virtual machine; nothing of
+  QNX's is included. Windows have a blue title bar shaded from top to bottom with
+  a light line along its top and left, a window menu box sunk into its left end,
+  the title in the middle in dark blue, and at its right end a grey panel with
+  minimize, maximize and close boxes, each a small grey picture of a window; a
+  grey frame six pixels wide with a raised ridge between black and dark grey
+  lines, and a blue square in the bottom right corner of a resizable window. An
+  inactive bar is pale greyish blue. The bar's shades are worked out from the
+  window tab colour, as Photon's colour schemes changed them. The controls:
+  light grey buttons shaded from top to bottom with a dark grey outline, sunk a
+  little into the panel; pop-up menus with an arrow over a bar; white check boxes
+  with a cross and shaded radio buttons; sunk fields; grey menus with a black
+  line round them and a pale blue selection; scroll bars with a grey track, a
+  light thumb and arrowheads on stems; and tabs with a slanted edge. The desktop
+  is a lavender silk with a fine diagonal grain after Photon's, drawn by
+  `tools/make-qnx-wallpaper.py` (without its logos), and the Deskbar runs along
+  the bottom like Photon's taskbar.
 - **The Gonx theme** (`data/themes/Gonx`): the look of
   [Gonx](https://github.com/idumych/gonx), with its colours, desktop colour
   and fonts over Haiku's defaults, and Haiku's icons. Power Theme builds
@@ -487,7 +508,7 @@ Rebuild the package when Hokku's decorator classes change; until then,
   - Saves your look and icons the first time, so **Revert** always gets
     back to them, whatever was applied in between.
   - **Build add-ons…** compiles the window decorators and control looks
-    (Reactionary, Smoke, Dano, Tidy, Expose, Platinum, Leopard, Gershwix, NeXT, System 7, Amiga, AmigaOS 3, Gonx, and
+    (Reactionary, Smoke, Dano, Tidy, Expose, Platinum, Leopard, Gershwix, NeXT, System 7, Amiga, AmigaOS 3, QNX, Gonx, and
     Haiku's Flat ones if the system lacks them) on the system they will run on, with a progress bar and a log.
     Decorators run inside app_server and use its private classes, and
     control looks subclass Haiku's private HaikuControlLook, so ones built
@@ -537,7 +558,7 @@ Rebuild the package when Hokku's decorator classes change; until then,
   --beos-tabs=on`, gives window borders that can draw one a tab as wide as the
   title on top of the frame, with close on the left and zoom on the right, instead
   of a title bar across the window, and shift-dragging a tab slides it. It's for any theme using those borders, and so
-  far that's Reactionary's, Expose's, Platinum's, Leopard's, Gershwix's, NeXT's, System 7's, Amiga's and AmigaOS 3's. It stays on through a change of mode.
+  far that's Reactionary's, Expose's, Platinum's, Leopard's, Gershwix's, NeXT's, System 7's, Amiga's, AmigaOS 3's and QNX's. It stays on through a change of mode.
 - **Theme Manager themes**: themes made for
   [Theme Manager](https://github.com/HaikuArchives/HaikuThemeManager)
   (and BeOS and ZETA before it), such as the
@@ -617,6 +638,9 @@ Rebuild the package when Hokku's decorator classes change; until then,
 - AmigaOS 3's depth gadget minimizes, as Amiga's does. Haiku sizes slider knobs
   itself, smaller than the GTK theme's pictures, and Topaz fills nearly all of
   the bar's sixteen rows.
+- QNX's window menu box is only drawn: Haiku has no window menu for it to open.
+  Photon drew every menu item as a darker band, but Haiku lets a control look
+  paint only the chosen one, so the others sit on the menu's plain grey.
 
 ## Building
 
@@ -713,6 +737,11 @@ should run on (Haiku R1/beta6), against that system's own headers.
 - AmigaOS 3's window borders are lordwolfchild's Amiga3.x theme for xfwm4 and its
   controls untouchable89's Amiga3.x GTK 2 theme, both in the public domain (in
   `src/third_party/amigaos3/art`, with the Unlicense text as `LICENSE`).
+- QNX's window borders, controls and wallpaper are drawn from scratch after
+  screenshots of QNX 6.2.1 from Nathan Lineback's
+  [toastytech.com](http://toastytech.com/guis/qnx621.html) and QNX 6.2.1 itself;
+  nothing of QNX's is included. QNX Software Systems (now BlackBerry) isn't
+  affiliated with this project.
 - [nanosvg](https://github.com/memononen/nanosvg) by Mikko Mononen (zlib
   licence), in `src/themes/third_party`.
 - Gonx's window decorator and control look (`src/third_party/gonx`), MIT

@@ -1,0 +1,10 @@
+resource("be:decor:info") message('deco') {
+	"name"				= "QNX",
+	"authors"			= "idumych",
+	"short_descr"		= "In the style of QNX 6's Photon microGUI",
+	"long_descr"		= "A shaded blue title bar with a window menu box, the title in the middle and minimize, maximize and close boxes on a grey panel; a grey ridged frame",
+	"lic_url"			= "",
+	"lic_name"			= "MIT",
+	"support_url"		= "https://github.com/idumych/power-theme",
+	float "version"		= 0.1
+};

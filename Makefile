@@ -91,6 +91,8 @@ NEXT_DECOR := $(BUILD)/NeXT
 NEXT_LOOK := $(BUILD)/control_look/NeXT
 SYSTEM7_DECOR := $(BUILD)/System7
 SYSTEM7_LOOK := $(BUILD)/control_look/System7
+QNX_DECOR := $(BUILD)/QNX
+QNX_LOOK := $(BUILD)/control_look/QNX
 AMIGA_DECOR := $(BUILD)/Amiga
 AMIGA_LOOK := $(BUILD)/control_look/Amiga
 AMIGA := src/third_party/amiga
@@ -108,7 +110,7 @@ all: $(DECOR) $(LOOK) $(THEMES) $(FLAT_DECOR) $(FLAT_LOOK) $(SMOKE_DECOR) \
 	$(GONX_LOOK) \
 	$(EXPOSE_DECOR) $(EXPOSE_LOOK) $(PLATINUM_DECOR) $(PLATINUM_LOOK) \
 	$(LEOPARD_DECOR) $(LEOPARD_LOOK) $(GERSHWIX_DECOR) $(GERSHWIX_LOOK) \
-	$(NEXT_DECOR) $(NEXT_LOOK) $(SYSTEM7_DECOR) $(SYSTEM7_LOOK) \
+	$(NEXT_DECOR) $(NEXT_LOOK) $(SYSTEM7_DECOR) $(SYSTEM7_LOOK) $(QNX_DECOR) $(QNX_LOOK) \
 	$(AMIGA_DECOR) $(AMIGA_LOOK) $(AMIGAOS3_DECOR) $(AMIGAOS3_LOOK) \
 	decorator-source
 
@@ -124,6 +126,7 @@ decorator-source:
 		$(DECOR_SOURCE)/source/decorators/Gershwix \
 		$(DECOR_SOURCE)/source/decorators/NeXT \
 		$(DECOR_SOURCE)/source/decorators/System7 \
+		$(DECOR_SOURCE)/source/decorators/QNX \
 		$(DECOR_SOURCE)/source/decorators/Amiga \
 		$(DECOR_SOURCE)/source/decorators/AmigaOS3 \
 		$(DECOR_SOURCE)/source/decorators/Gonx \
@@ -138,6 +141,7 @@ decorator-source:
 		$(DECOR_SOURCE)/source/control_looks/Gershwix \
 		$(DECOR_SOURCE)/source/control_looks/NeXT \
 		$(DECOR_SOURCE)/source/control_looks/System7 \
+		$(DECOR_SOURCE)/source/control_looks/QNX \
 		$(DECOR_SOURCE)/source/control_looks/Amiga \
 		$(DECOR_SOURCE)/source/control_looks/AmigaOS3 \
 		$(DECOR_SOURCE)/source/control_looks/Gonx \
@@ -183,6 +187,10 @@ decorator-source:
 		$(DECOR_SOURCE)/source/decorators/System7/
 	cp src/system7/System7ControlLook.* \
 		$(DECOR_SOURCE)/source/control_looks/System7/
+	cp src/qnx/QNXDecorator.* src/qnx/resources.rdef \
+		$(DECOR_SOURCE)/source/decorators/QNX/
+	cp src/qnx/QNXControlLook.* \
+		$(DECOR_SOURCE)/source/control_looks/QNX/
 	cp $(AMIGA)/decorator/* $(AMIGA)/LICENSE \
 		$(DECOR_SOURCE)/source/decorators/Amiga/
 	cp $(AMIGA)/controllook/* $(AMIGA)/LICENSE \
@@ -425,6 +433,30 @@ $(SYSTEM7_LOOK): $(BUILD)/System7ControlLook.o $(BUILD)/System7ControlLook.rsrc
 	$(CXX) $(SYSROOT_FLAGS) -shared -s -o $@ $(BUILD)/System7ControlLook.o \
 		-lbe -lstdc++
 	$(XRES) -o $@ $(BUILD)/System7ControlLook.rsrc
+
+# QNX, after QNX 6's Photon microGUI.
+$(BUILD)/QNXDecorator.o: src/qnx/QNXDecorator.cpp src/qnx/QNXDecorator.h
+	@mkdir -p $(BUILD)
+	$(CXX) $(CXXFLAGS) $(DECOR_INCLUDES) -c $< -o $@
+
+$(BUILD)/QNXDecorator.rsrc: src/qnx/resources.rdef
+
+$(QNX_DECOR): $(BUILD)/QNXDecorator.o $(BUILD)/QNXDecorator.rsrc
+	$(CXX) $(SYSROOT_FLAGS) -shared -s -o $@ $(BUILD)/QNXDecorator.o \
+		-lbe $(APP_SERVER) -lstdc++
+	$(XRES) -o $@ $(BUILD)/QNXDecorator.rsrc
+
+$(BUILD)/QNXControlLook.o: src/qnx/QNXControlLook.cpp src/qnx/QNXControlLook.h
+	@mkdir -p $(BUILD)
+	$(CXX) $(CXXFLAGS) -std=gnu++17 -I$(PRIVATE)/interface -c $< -o $@
+
+$(BUILD)/QNXControlLook.rsrc: src/qnx/QNXControlLook.rdef
+
+$(QNX_LOOK): $(BUILD)/QNXControlLook.o $(BUILD)/QNXControlLook.rsrc
+	@mkdir -p $(dir $@)
+	$(CXX) $(SYSROOT_FLAGS) -shared -s -o $@ $(BUILD)/QNXControlLook.o \
+		-lbe -lstdc++
+	$(XRES) -o $@ $(BUILD)/QNXControlLook.rsrc
 
 # Amiga, Workbench 1.3 after Arthur Choung's HOTDOG (GPL 3 or later).
 $(BUILD)/AmigaDecorator.o: $(AMIGA)/decorator/AmigaDecorator.cpp $(AMIGA)/decorator/AmigaDecorator.h

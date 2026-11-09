@@ -68,8 +68,8 @@ Gonx, Haiku, Dano, Tidy, Expose, Platinum (in the style of Mac OS 9), Leopard \
 (in the style of Mac OS X 10.5), Gershwix (after Mintar's Platinum theme for \
 Mac OS X, in seven colours), NeXT (after Swizcore Studio's NeXTSTEP theme \
 for Mac OS X), System 7 (in the style of Mac OS 7.5), Amiga (Workbench 1.3, after \
-HOTDOG, with its Topaz font and icons), AmigaOS 3 (Workbench 3.x) and four \
-Flat themes, and the ClassicOS 2000, \
+HOTDOG, with its Topaz font and icons), AmigaOS 3 (Workbench 3.x), QNX (Photon) \
+and four Flat themes, and the ClassicOS 2000, \
 NineIcons Redux, elementary, NeXT and Workbench icons. The window \
 borders and controls are built on your own system by Power Theme's \
 'Build add-ons...' (they use private parts of app_server and libbe, so they \

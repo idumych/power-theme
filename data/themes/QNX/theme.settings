@@ -1,0 +1,52 @@
+# "QNX", after QNX 6's Photon microGUI with its standard colours. Colours and
+# sizes measured from screenshots of QNX 6.2.1 (toastytech.com/guis/qnx621.html)
+# and from QNX 6.2.1 running in a virtual machine; the window borders, controls
+# and the silk wallpaper are drawn from scratch and nothing of QNX's is used.
+
+name = QNX
+description = QNX 6's Photon: shaded blue title bars with a window menu box and minimize, maximize and close boxes, grey ridged frames, shaded grey buttons, slanted tabs, and a lavender silk desktop.
+decorator = QNX
+control look = QNX
+wallpaper = wallpaper.png
+wallpaper mode = manual
+desktop color = #7979A7
+deskbar = bottom, expanded
+font plain = Noto Sans, Regular, 12
+font bold = Noto Sans, Bold, 12
+font fixed = Noto Sans Mono, Regular, 12
+font menu = Noto Sans, Regular, 12
+icons = NineIconsRedux
+
+color B_DESKTOP_COLOR = #7979A7
+color B_PANEL_BACKGROUND_COLOR = #D8D8D8
+color B_PANEL_TEXT_COLOR = #000000
+color B_DOCUMENT_BACKGROUND_COLOR = #FFFFFF
+color B_DOCUMENT_TEXT_COLOR = #000000
+color B_CONTROL_BACKGROUND_COLOR = #FFFFFF
+color B_CONTROL_TEXT_COLOR = #000000
+color B_CONTROL_BORDER_COLOR = #4B4B4B
+color B_CONTROL_HIGHLIGHT_COLOR = #9BA9C9
+color B_CONTROL_MARK_COLOR = #181818
+color B_KEYBOARD_NAVIGATION_COLOR = #5C8BDF
+color B_NAVIGATION_PULSE_COLOR = #8EBDFF
+color B_SHINE_COLOR = #FFFFFF
+color B_SHADOW_COLOR = #4B4B4B
+color B_MENU_BACKGROUND_COLOR = #D8D8D8
+color B_MENU_SELECTED_BACKGROUND_COLOR = #9BA9C9
+color B_MENU_ITEM_TEXT_COLOR = #000000
+color B_MENU_SELECTED_ITEM_TEXT_COLOR = #000000
+color B_MENU_SELECTED_BORDER_COLOR = #4B4B4B
+color B_LIST_BACKGROUND_COLOR = #FFFFFF
+color B_LIST_ITEM_TEXT_COLOR = #000000
+color B_LIST_SELECTED_BACKGROUND_COLOR = #8EA29B
+color B_LIST_SELECTED_ITEM_TEXT_COLOR = #FFFFFF
+color B_SCROLL_BAR_THUMB_COLOR = #D5D5D5
+color B_STATUS_BAR_COLOR = #5C8BDF
+color B_TOOLTIP_BACKGROUND_COLOR = #FFFFE1
+color B_TOOLTIP_TEXT_COLOR = #000000
+color B_WINDOW_TAB_COLOR = #5C8BDF
+color B_WINDOW_TEXT_COLOR = #000065
+color B_WINDOW_INACTIVE_TAB_COLOR = #B1C1D9
+color B_WINDOW_INACTIVE_TEXT_COLOR = #000065
+color B_WINDOW_BORDER_COLOR = #4B4B4B
+color B_WINDOW_INACTIVE_BORDER_COLOR = #4B4B4B

@@ -1,0 +1,9 @@
+resource app_version {
+	major = 0,
+	middle = 1,
+	minor = 0,
+	variety = B_APPV_ALPHA,
+	internal = 0,
+	short_info = "QNX Control Look",
+	long_info = "QNX 6 Photon's controls: shaded grey buttons, white boxes with a cross, grey scroll bars, slanted tabs"
+};

@@ -200,6 +200,17 @@ Topaz, an inactive window's bar grey; bevelled grey buttons, the GTK theme's che
 boxes and radio buttons, a dotted scroll bar track with a raised thumb, a blue
 progress bar and menu selection, and the resize grip where the scroll bars meet.
 
+### qnx
+Steps: `powertheme --apply=Haiku --parts=decorator,controls`, `--apply=QNX`, start
+StyledEdit, list its images and read `decorator_settings`; screenshot of the
+controls demo on both tabs with a menu open and a Tracker window behind it.
+PASS when: {p}-qnx.txt says "window borders: QNX" and "new application loads
+control look: QNX". The screenshots show a shaded blue title bar with the menu box
+at its left, the title in dark blue in the middle and the minimize, maximize and
+close boxes on a grey panel at its right, an inactive window's bar pale greyish
+blue, a grey ridged frame; shaded grey buttons, check boxes with a cross, slanted
+tabs, a menu with a single black line round it, and the lavender silk desktop.
+
 ### flat-tab
 Steps: build `tools/left-tab-test.cpp`, `powertheme --apply=DarkFlat`, start it,
 take a screenshot and run `tools/left-tab-check.py` on it.
