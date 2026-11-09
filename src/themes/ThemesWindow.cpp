@@ -52,6 +52,7 @@ enum {
 	kMsgScheduleChanged	= 'schd',
 	kMsgBeOSTabs		= 'btab',
 	kMsgPhotonShell		= 'shel',
+	kMsgShellEveryTheme	= 'shev',
 	kMsgCheckShellEntry	= 'chse',
 	kMsgShellEntryAnswer	= 'shea',
 	kMsgIconsChosen		= 'icch',
@@ -558,8 +559,13 @@ ThemesWindow::ThemesWindow(BRect frame, const char* selected)
 		new BMessage(kMsgPhotonShell));
 	fPhotonShell->SetToolTip("Puts a taskbar and a shelf of launchers in the "
 		"style of QNX's Photon in the Deskbar's place, drawn in the theme's "
-		"look. The QNX theme turns it on, and it stays with other themes "
-		"until you turn it off. This takes effect at once.");
+		"look. The QNX theme turns it on, and other themes bring the Deskbar "
+		"back unless it's kept with every theme. This takes effect at once.");
+	fShellEveryTheme = new BCheckBox("shell every theme", "With every theme",
+		new BMessage(kMsgShellEveryTheme));
+	fShellEveryTheme->SetToolTip("Keeps the Photon shell on, drawn in each "
+		"theme's look, whatever theme you apply and through Revert, instead "
+		"of letting each theme choose between it and the Deskbar.");
 	fControls = new BCheckBox("controls", "Controls",
 		new BMessage(kMsgPartChanged));
 	fColors = new BCheckBox("colors", "Colors", new BMessage(kMsgPartChanged));
@@ -615,6 +621,7 @@ ThemesWindow::ThemesWindow(BRect frame, const char* selected)
 					.Add(fWallpaper, 0, 2)
 					.Add(fDeskbar, 1, 2)
 					.Add(fPhotonShell, 2, 2)
+					.Add(fShellEveryTheme, 2, 3)
 				.End()
 				.Add(new BSeparatorView(B_HORIZONTAL))
 				.AddGroup(B_HORIZONTAL)
@@ -792,6 +799,11 @@ ThemesWindow::MessageReceived(BMessage* message)
 
 		case kMsgShellEntryAnswer:
 			_ShellEntryAnswered(message->GetInt32("which", 1));
+			break;
+
+		case kMsgShellEveryTheme:
+			set_shell_with_every_theme(
+				fShellEveryTheme->Value() == B_CONTROL_ON);
 			break;
 
 		case kMsgPhotonShell:
@@ -1224,6 +1236,8 @@ ThemesWindow::_ShowTheme(const Theme* theme)
 	fBeOSTabs->SetEnabled(!fBusy && has_beos_tabs(*theme));
 	fBeOSTabs->SetValue(beos_tabs() ? B_CONTROL_ON : B_CONTROL_OFF);
 	fPhotonShell->SetValue(photon_shell() ? B_CONTROL_ON : B_CONTROL_OFF);
+	fShellEveryTheme->SetValue(shell_with_every_theme() ? B_CONTROL_ON
+		: B_CONTROL_OFF);
 
 	// parts whose add-ons or files aren't installed can't be applied
 	// (a version of a pair with icons chosen for it doesn't need its own)
@@ -1381,6 +1395,9 @@ ThemesWindow::_SetBusy(bool busy)
 	fBeOSTabs->SetEnabled(!busy && theme != NULL && has_beos_tabs(*theme));
 	fPhotonShell->SetEnabled(!busy);
 	fPhotonShell->SetValue(photon_shell() ? B_CONTROL_ON : B_CONTROL_OFF);
+	fShellEveryTheme->SetEnabled(!busy);
+	fShellEveryTheme->SetValue(shell_with_every_theme() ? B_CONTROL_ON
+		: B_CONTROL_OFF);
 	fLightAt->SetEnabled(!busy);
 	fDarkAt->SetEnabled(!busy);
 	fIconsField->SetEnabled(!busy);

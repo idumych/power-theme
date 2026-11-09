@@ -1830,6 +1830,31 @@ photon_shell_entry()
 }
 
 
+static const char* kShellEveryTheme = "photon shell with every theme";
+
+
+bool
+shell_with_every_theme()
+{
+	BPath path;
+	return themes_settings_path(path, kShellEveryTheme) == B_OK
+		&& BEntry(path.Path()).Exists();
+}
+
+
+void
+set_shell_with_every_theme(bool every)
+{
+	BPath path;
+	if (themes_settings_path(path, kShellEveryTheme) != B_OK)
+		return;
+	if (every)
+		BFile(path.Path(), B_WRITE_ONLY | B_CREATE_FILE);
+	else
+		BEntry(path.Path()).Remove();
+}
+
+
 static const char* kNoShellEntryQuestion = "don't offer shell entry";
 
 
@@ -2135,10 +2160,18 @@ apply_appearance(const Theme& theme, uint32 parts, BString& log)
 	if ((parts & THEME_DESKBAR) != 0) {
 		// the Deskbar comes back before it's placed; the shelf goes in its
 		// place after
-		if (theme.Shell() == 0 && photon_shell())
+		// a theme without the key has the Deskbar, unless the shell is kept
+		// with every theme, which leaves it on
+		int32 shell = theme.Shell();
+		if (shell_with_every_theme()) {
+			if (photon_shell())
+				shell = 1;
+		} else if (shell < 0)
+			shell = 0;
+		if (shell == 0 && photon_shell())
 			set_photon_shell(false, log);
 		set_deskbar(theme.DeskbarLocation(), theme.DeskbarExpanded(), log);
-		if (theme.Shell() == 1 && !photon_shell())
+		if (shell == 1 && !photon_shell())
 			set_photon_shell(true, log);
 	}
 
@@ -2419,7 +2452,11 @@ revert_appearance(BString& log)
 	if (previous.FindBool("subpixel smoothing", &subpixel) == B_OK)
 		set_font_smoothing(subpixel);
 
-	// the shell is a choice of its own, kept through themes and a revert
+	// there was none before any theme, unless it's kept with every theme
+	if (photon_shell() && !shell_with_every_theme()) {
+		BString ignored;
+		set_photon_shell(false, ignored);
+	}
 
 	if (fontResized)
 		restart_deskbar();

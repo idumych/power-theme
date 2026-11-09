@@ -219,8 +219,10 @@ PASS when: with QNX, `--status` says "shell: photon", PowerShelf runs and the
 Deskbar doesn't; each window has a task button, the one in front cream; Launch
 lists the Deskbar's menu with icons; the Replicants group shows the Deskbar's tray
 items, and the volume one opens its slider; the shelf starts Terminal; a click on the
-front window's button minimizes it ("[...]"). After Haiku, `--status` still says
-"shell: photon" and the shell is drawn in Haiku's buttons and colours; after
+front window's button minimizes it ("[...]"). With `--shell-every-theme=off`, after
+Haiku `--status` says "shell: deskbar" and the Deskbar runs; with
+`--shell-every-theme=on`, after Haiku and after `--revert` it still says "shell:
+photon" and the shell is drawn in Haiku's buttons and colours; after
 `--shell=deskbar`, the Deskbar runs and PowerShelf doesn't.
 
 ### flat-tab

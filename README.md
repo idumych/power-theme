@@ -458,9 +458,11 @@ Rebuild the package when Hokku's decorator classes change; until then,
   starts the Photon shell (below).
 - **The Photon shell** (`apps/PowerShelf`): a desktop shell laid out as
   Photon's, in place of the Deskbar. The QNX theme turns it on
-  (`shell = photon`); it then stays through other themes and **Revert** until a
-  theme with `shell = deskbar` or you turn it off, with **Photon shell** in the
-  window or `powertheme --shell=photon` or `--shell=deskbar`. With QNX's controls
+  (`shell = photon`), and other themes and **Revert** bring the Deskbar back;
+  turn it on or off yourself with **Photon shell** in the window or
+  `powertheme --shell=photon` or `--shell=deskbar`. Check **With every theme**
+  (or `powertheme --shell-every-theme=on`) to keep it with whatever theme you
+  apply, and through **Revert**, as your desktop shell. With QNX's controls
   it is drawn as Photon's, pixel for pixel; with any other theme, in that
   theme's buttons, menu bars, progress bars and colours, and bigger where the
   theme's fonts need room, changing along with the theme. Along the bottom is a taskbar: **Launch**, with a sun, opens
