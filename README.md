@@ -469,14 +469,18 @@ Rebuild the package when Hokku's decorator classes change; until then,
   window in front sunk and cream, a minimized one in brackets (a click brings a
   window forward, or minimizes the one in front); and a clock. Down the right is
   the shelf: groups of launchers that open and close with their **−** and **+**
-  (applications, utilities and preferences), and a system monitor of the
-  processors, memory, disk and swap. While it runs, launch_daemon is kept from
+  (applications, utilities and preferences), a system monitor of the processors,
+  memory, disk and swap, and **Replicants**: the Deskbar's tray items (the
+  volume, network and power status, the process monitor and any others listed
+  in the Deskbar's settings), loaded as the Deskbar loads them. While it runs, launch_daemon is kept from
   starting the Deskbar, which comes back as it quits; it starts at login while
   it's on. Haiku has no way to set part of the screen aside, so it keeps windows
   clear itself: one that opens under the taskbar or the shelf is moved out (and
   shrunk if it doesn't fit), and one that is zoomed or resized by its
   application is fitted to the rest of the screen, a moment after; one you drag
-  under them stays where you put it. Replicants in the Deskbar's tray don't show.
+  under them stays where you put it. A replicant an application adds while the
+  shell runs doesn't appear until the Deskbar has kept it, as applications add
+  them by asking the Deskbar itself.
 
   ![The Photon shell](docs/screenshots/photon-shell.png)
 - **The Gonx theme** (`data/themes/Gonx`): the look of

@@ -20,6 +20,7 @@
 
 
 #include <Alert.h>
+#include <Archivable.h>
 #include <Application.h>
 #include <Bitmap.h>
 #include <ControlLook.h>
@@ -37,6 +38,7 @@
 #include <Node.h>
 #include <NodeInfo.h>
 #include <OS.h>
+#include <image.h>
 #include <Path.h>
 #include <PopUpMenu.h>
 #include <Roster.h>
@@ -1002,7 +1004,14 @@ struct ShelfGroup {
 	bool		monitor;
 	std::vector<ShelfItem> items;
 	BRect		header;
+	// the Deskbar's replicants, in a view of their own
+	bool		tray;
 };
+
+// how big a replicant may be: as Deskbar's at its smallest
+static const float kReplicantHeight = 16;
+static const float kReplicantGap = 4;
+static const float kMonitorHeight = 66;
 
 
 //!	The first of \a names found in the system's apps, preferences or bin.
@@ -1096,12 +1105,19 @@ public:
 			item.icon = icon_for(item.ref, kIconSize);
 			configure.items.push_back(item);
 		}
-		ShelfGroup monitor = { "System Monitor", true, true, {}, BRect() };
+		ShelfGroup monitor = { "System Monitor", true, true, {}, BRect(),
+			false };
+		ShelfGroup replicants = { "Replicants", true, false, {}, BRect(),
+			true };
 		fGroups.push_back(apps);
 		fGroups.push_back(utils);
 		fGroups.push_back(configure);
 		fGroups.push_back(monitor);
+		fGroups.push_back(replicants);
 		_LoadSettings();
+
+		fTray = new BView(BRect(0, 0, 10, 10), "replicants", B_FOLLOW_NONE,
+			B_WILL_DRAW);
 	}
 
 	~ShelfView()
@@ -1112,9 +1128,36 @@ public:
 		}
 	}
 
+	virtual void AttachedToWindow()
+	{
+		sPhoton = photon_look();
+		fTray->SetViewColor(sPhoton ? kFace : panel());
+		fTray->SetLowColor(fTray->ViewColor());
+		AddChild(fTray);
+		_LoadReplicants();
+		Relayout();
+	}
+
 	virtual void FrameResized(float, float)
 	{
+		Relayout();
 		Invalidate();
+	}
+
+	//!	Lays the groups out again, and moves the replicants with them.
+	void Relayout()
+	{
+		sPhoton = photon_look();
+		const rgb_color color = sPhoton ? kFace : panel();
+		if (color != fTray->ViewColor()) {
+			fTray->SetViewColor(color);
+			fTray->SetLowColor(color);
+			fTray->Invalidate();
+			for (int32 i = 0; i < fTray->CountChildren(); i++)
+				fTray->ChildAt(i)->Invalidate();
+		}
+		_Layout();
+		_PlaceTray();
 	}
 
 	virtual void Draw(BRect update)
@@ -1129,7 +1172,7 @@ public:
 		for (size_t g = 0; g < fGroups.size(); g++) {
 			const ShelfGroup& group = fGroups[g];
 			// a dark line over the lower shelf, and under the upper
-			if (group.monitor) {
+			if (group.header.top == fLowerTop) {
 				fill(this, group.header.left, group.header.top - 1, b.right,
 					group.header.top - 1, sPhoton ? kOutline
 						: tint_color(panel(), B_DARKEN_3_TINT));
@@ -1139,6 +1182,10 @@ public:
 				continue;
 			if (group.monitor) {
 				_DrawMonitor(group);
+				continue;
+			}
+			if (group.tray) {
+				draw_plain(this, _TrayArea(group));
 				continue;
 			}
 			for (size_t i = 0; i < group.items.size(); i++) {
@@ -1188,6 +1235,7 @@ public:
 			if (group.header.Contains(where)) {
 				group.open = !group.open;
 				_SaveSettings();
+				Relayout();
 			}
 		} else if (fPressedItem < (int32)group.items.size()
 			&& group.items[fPressedItem].frame.Contains(where))
@@ -1233,7 +1281,7 @@ public:
 		for (const ShelfGroup& group : fGroups) {
 			if (group.monitor && group.open)
 				Invalidate(BRect(group.header.left, group.header.bottom + 1,
-					group.header.right, Bounds().bottom));
+					group.header.right, group.header.bottom + kMonitorHeight));
 		}
 	}
 
@@ -1259,12 +1307,138 @@ private:
 			}
 			fUpperBottom = y - 1;
 		}
-		for (ShelfGroup& group : fGroups) {
-			if (!group.monitor)
+		// the monitor and the replicants, stacked up from the bottom
+		float bottom = b.bottom;
+		fLowerTop = -1;
+		for (auto group = fGroups.rbegin(); group != fGroups.rend(); group++) {
+			if (!group->monitor && !group->tray)
 				continue;
-			const float height = header_height() + (group.open ? 66 : 0);
-			const float top = std::max(y + 2, b.bottom - height + 1);
-			group.header.Set(left, top, b.right, top + header_height() - 1);
+			float body = 0;
+			if (group->open)
+				body = group->monitor ? kMonitorHeight : _TrayHeight();
+			const float top = std::max(y + 2,
+				bottom - header_height() - body + 1);
+			group->header.Set(left, top, b.right, top + header_height() - 1);
+			bottom = top - 1;
+			fLowerTop = top;
+		}
+	}
+
+	//!	Below a replicants group's title, down to the next group or the end.
+	BRect _TrayArea(const ShelfGroup& group) const
+	{
+		float bottom = Bounds().bottom;
+		for (const ShelfGroup& other : fGroups) {
+			if (other.header.top > group.header.top)
+				bottom = std::min(bottom, other.header.top - 1);
+		}
+		return BRect(group.header.left, group.header.bottom + 1,
+			group.header.right, bottom);
+	}
+
+	//!	Where each replicant goes, in rows, and so how tall they all are.
+	float _ArrangeTray(bool move)
+	{
+		const float width = Bounds().Width() - kBand - 6;
+		float x = 0, y = 0, rowHeight = 0;
+		for (int32 i = 0; i < fTray->CountChildren(); i++) {
+			BView* child = fTray->ChildAt(i);
+			const float w = child->Bounds().Width() + 1;
+			const float h = child->Bounds().Height() + 1;
+			if (x > 0 && x + w > width) {
+				x = 0;
+				y += rowHeight + kReplicantGap;
+				rowHeight = 0;
+			}
+			if (move)
+				child->MoveTo(x, y);
+			x += w + kReplicantGap;
+			rowHeight = std::max(rowHeight, h);
+		}
+		return fTray->CountChildren() > 0 ? y + rowHeight : 0;
+	}
+
+	float _TrayHeight()
+	{
+		return _ArrangeTray(false) + 8;
+	}
+
+	void _PlaceTray()
+	{
+		for (const ShelfGroup& group : fGroups) {
+			if (!group.tray)
+				continue;
+			if (!group.open) {
+				if (!fTray->IsHidden())
+					fTray->Hide();
+				return;
+			}
+			const BRect area = _TrayArea(group).InsetByCopy(4, 4);
+			fTray->MoveTo(area.LeftTop());
+			fTray->ResizeTo(std::max(0.0f, area.Width()),
+				std::max(0.0f, area.Height()));
+			_ArrangeTray(true);
+			if (fTray->IsHidden())
+				fTray->Show();
+		}
+	}
+
+	/*!	The Deskbar's replicants, as it keeps them: add-ons and applications
+		listed in its settings, each asked for its view, which is archived and
+		made again from the archive, as the Deskbar's shelf does.
+	*/
+	void _LoadReplicants()
+	{
+		BPath path;
+		if (find_directory(B_USER_SETTINGS_DIRECTORY, &path) != B_OK
+			|| path.Append("deskbar/replicants") != B_OK)
+			return;
+		BFile file(path.Path(), B_READ_ONLY);
+		BMessage settings;
+		if (file.InitCheck() != B_OK || settings.Unflatten(&file) != B_OK)
+			return;
+
+		const float maxWidth = Bounds().Width() - kBand - 8;
+		const char* entry;
+		for (int32 i = 0; settings.FindString("replicant_path", i, &entry)
+				== B_OK; i++) {
+			BEntry addOn(entry, true);
+			entry_ref ref;
+			if (!addOn.Exists() || addOn.GetRef(&ref) != B_OK)
+				continue;
+			const image_id image = load_add_on(entry);
+			if (image < B_OK)
+				continue;
+			BView* (*entryFunction)(image_id, const entry_ref*, float, float);
+			BView* (*itemFunction)(float, float);
+			BView* view = NULL;
+			if (get_image_symbol(image, "instantiate_deskbar_entry",
+					B_SYMBOL_TYPE_TEXT, (void**)&entryFunction) == B_OK)
+				view = entryFunction(image, &ref, maxWidth, kReplicantHeight);
+			else if (get_image_symbol(image, "instantiate_deskbar_item",
+					B_SYMBOL_TYPE_TEXT, (void**)&itemFunction) == B_OK)
+				view = itemFunction(maxWidth, kReplicantHeight);
+			if (view == NULL) {
+				unload_add_on(image);
+				continue;
+			}
+
+			BMessage archive;
+			const bool archived = view->Archive(&archive) == B_OK;
+			BView* made = NULL;
+			if (archived) {
+				made = dynamic_cast<BView*>(instantiate_object(&archive));
+			}
+			if (made != NULL)
+				delete view;
+			else
+				made = view;
+			// some follow their parent's edges, as the Deskbar's tray never
+			// changes size; here they keep their own
+			const BRect frame = made->Frame();
+			made->SetResizingMode(B_FOLLOW_NONE);
+			fTray->AddChild(made);
+			made->ResizeTo(frame.Width(), frame.Height());
 		}
 	}
 
@@ -1336,7 +1510,7 @@ private:
 	void _DrawMonitor(const ShelfGroup& group)
 	{
 		const BRect area(group.header.left, group.header.bottom + 1,
-			group.header.right, Bounds().bottom);
+			group.header.right, group.header.bottom + kMonitorHeight);
 		draw_plain(this, area);
 		const float gaugeLeft = area.left + 24;
 		const float gaugeRight = area.right - 4;
@@ -1422,6 +1596,8 @@ private:
 	}
 
 	std::vector<ShelfGroup> fGroups;
+	BView*				fTray;
+	float				fLowerTop;
 	int32				fPressedGroup;
 	int32				fPressedItem;
 	float				fUpperBottom;
@@ -1561,6 +1737,7 @@ public:
 			case kTick:
 				if (fWatch.Changed()) {
 					_Place();
+					fView->Relayout();
 					fView->Invalidate();
 				}
 				fView->Update();
