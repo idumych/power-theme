@@ -31,7 +31,7 @@ class PreviewView;
 class ThemesWindow : public BWindow {
 public:
 								ThemesWindow(BRect frame,
-									const char* selected);
+									const char* selected, bool wallpaper);
 	virtual						~ThemesWindow();
 
 	virtual	void				DispatchMessage(BMessage* message,
@@ -60,6 +60,7 @@ private:
 			BString				_ChosenIcons() const;
 			void				_SetBusy(bool busy);
 			void				_UpdateButtons();
+			void				_CheckAddOns(bool offerBuild);
 			void				_CheckShellEntry();
 			void				_ShellEntryAnswered(int32 which);
 			void				_UpdateSchedule();
@@ -76,6 +77,10 @@ private:
 			IconThemeList		fIconThemes;
 			bool				fBusy;
 			float				fHeightWithoutProgress;
+			// whether themes change the wallpaper: only when asked to
+			bool				fWantWallpaper;
+			// why the add-ons must be built before a theme is applied, or ""
+			BString				fNeedsBuild;
 
 			BListView*			fThemeList;
 			PreviewView*		fPreview;

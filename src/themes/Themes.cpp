@@ -71,7 +71,8 @@ public:
 
 		BRect frame = settings.GetRect("frame", BRect());
 		const char* theme = settings.GetString("theme", NULL);
-		fWindow = new ThemesWindow(frame, theme);
+		fWindow = new ThemesWindow(frame, theme,
+			settings.GetBool("wallpaper", false));
 		fWindow->Show();
 	}
 
@@ -105,7 +106,8 @@ usage(FILE* out)
 		"  -a, --apply=NAME      apply the theme called NAME\n"
 		"  -p, --parts=LIST      with --apply, only these parts: decorator,\n"
 		"                        controls, colors, fonts, icons, wallpaper,\n"
-		"                        deskbar\n"
+		"                        deskbar (all but the wallpaper, unless it's\n"
+		"                        listed)\n"
 		"  -m, --mode=MODE       switch the theme in use to its light or dark\n"
 		"                        version, or toggle between them; with --apply,\n"
 		"                        apply that version (light or dark)\n"
@@ -386,7 +388,8 @@ command_line(int argc, char** argv)
 
 	const char* apply = NULL;
 	const char* icons = NULL;
-	uint32 parts = THEME_ALL;
+	// a theme leaves the wallpaper alone unless it's asked for
+	uint32 parts = THEME_ALL & ~THEME_WALLPAPER;
 	bool list = false, revert = false, status = false, restart = false;
 	bool build = false, installTools = false;
 	const char* show = NULL;
@@ -676,6 +679,13 @@ command_line(int argc, char** argv)
 				fprintf(stderr, "powertheme: no theme is called \"%s\" (see "
 					"--list)\n", apply);
 			}
+			return 1;
+		}
+
+		BString why;
+		if (addons_need_building(&why)) {
+			fprintf(stderr, "powertheme: %s Build them first: powertheme "
+				"--build-decorators\n", why.String());
 			return 1;
 		}
 

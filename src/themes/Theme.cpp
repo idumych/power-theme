@@ -281,7 +281,7 @@ get_current_parts()
 {
 	BMessage current;
 	load_message(kCurrentName, current);
-	return current.GetUInt32("parts", THEME_ALL);
+	return current.GetUInt32("parts", THEME_ALL & ~THEME_WALLPAPER);
 }
 
 
@@ -359,6 +359,169 @@ find_build_script(BString& path)
 		}
 	}
 	return B_ENTRY_NOT_FOUND;
+}
+
+
+// build-decorators.sh writes the system revision it built for here
+static const char* kAddOnsBuiltName = "addons built for";
+
+
+/*!	The running system's revision, as build-decorators.sh reads it from the
+	name of the haiku package (haiku-r1~beta6_hrev60072_640-1-x86_64.hpkg is
+	hrev60072+640), or "" if it can't be told.
+*/
+static BString
+system_revision()
+{
+	BString revision;
+#ifndef APP_COSMOE
+	BDirectory packages("/boot/system/packages");
+	BStringList names;
+	BEntry entry;
+	while (packages.GetNextEntry(&entry) == B_OK) {
+		char name[B_FILE_NAME_LENGTH];
+		if (entry.GetName(name) == B_OK && strncmp(name, "haiku-r", 7) == 0
+			&& BString(name).EndsWith(".hpkg"))
+			names.Add(name);
+	}
+	// the first, as the script takes it
+	names.Sort();
+	if (names.IsEmpty())
+		return revision;
+
+	const char* hrev = strstr(names.StringAt(0).String(), "_hrev");
+	if (hrev == NULL)
+		return revision;
+	char* end;
+	const unsigned long number = strtoul(hrev + 5, &end, 10);
+	if (end == hrev + 5)
+		return revision;
+	revision << "hrev" << (uint32)number;
+	if (*end == '_') {
+		char* aheadEnd;
+		const unsigned long ahead = strtoul(end + 1, &aheadEnd, 10);
+		if (aheadEnd != end + 1 && *aheadEnd == '-')
+			revision << "+" << (uint32)ahead;
+	}
+#endif
+	return revision;
+}
+
+
+/*!	Whether every window decorator and control look that Build add-ons makes
+	is installed. Others that themes name, such as Dano's BeDecorator, don't
+	count: building can't make them.
+*/
+static bool
+buildable_addons_installed()
+{
+#ifdef APP_COSMOE
+	// Hokku's add-ons have folders of their own: go by the themes
+	ThemeList themes;
+	find_themes(themes);
+	for (int32 i = 0; i < themes.CountItems(); i++) {
+		if (themes.ItemAt(i)->Missing(NULL, THEME_DECORATOR | THEME_CONTROLS)
+				!= 0)
+			return false;
+	}
+	return true;
+#else
+	// what can be built is what there is source for, next to the script
+	BString script;
+	BPath source;
+	if (find_build_script(script) != B_OK
+		|| BPath(script.String()).GetParent(&source) != B_OK
+		|| source.Append("source") != B_OK)
+		return true;
+
+	static const directory_which kAddOnDirectories[] = {
+		B_USER_NONPACKAGED_ADDONS_DIRECTORY,
+		B_USER_ADDONS_DIRECTORY,
+		B_SYSTEM_NONPACKAGED_ADDONS_DIRECTORY,
+		B_SYSTEM_ADDONS_DIRECTORY
+	};
+	// the source's folder and the add-ons' folder for each kind
+	static const char* kKinds[][2] = {
+		{ "decorators", "decorators" },
+		{ "control_looks", "control_look" }
+	};
+	for (size_t k = 0; k < sizeof(kKinds) / sizeof(kKinds[0]); k++) {
+		BDirectory folder(BPath(source.Path(), kKinds[k][0]).Path());
+		BEntry entry;
+		while (folder.GetNextEntry(&entry) == B_OK) {
+			char name[B_FILE_NAME_LENGTH];
+			if (!entry.IsDirectory() || entry.GetName(name) != B_OK)
+				continue;
+			bool installed = false;
+			for (size_t d = 0; d < sizeof(kAddOnDirectories)
+					/ sizeof(kAddOnDirectories[0]) && !installed; d++) {
+				BPath path;
+				if (find_directory(kAddOnDirectories[d], &path) == B_OK
+					&& path.Append(kKinds[k][1]) == B_OK
+					&& path.Append(name) == B_OK)
+					installed = BEntry(path.Path()).Exists();
+			}
+			if (!installed)
+				return false;
+		}
+	}
+	return true;
+#endif
+}
+
+
+bool
+addons_need_building(BString* why)
+{
+	BString built;
+	BPath path;
+	if (themes_settings_path(path, kAddOnsBuiltName) == B_OK) {
+		BFile file(path.Path(), B_READ_ONLY);
+		char buffer[64];
+		const ssize_t bytes = file.InitCheck() == B_OK
+			? file.Read(buffer, sizeof(buffer) - 1) : 0;
+		if (bytes > 0) {
+			buffer[bytes] = '\0';
+			built = trimmed(buffer);
+		}
+	}
+
+	if (!built.IsEmpty()) {
+		const BString running = system_revision();
+		if (running.IsEmpty() || running == built)
+			return false;
+		if (why != NULL) {
+			*why = BString("The window borders and controls were built for ")
+				<< built << ", and this system is " << running << ".";
+		}
+		return true;
+	}
+
+	// never built here: fine as long as every one Power Theme can build is
+	// installed, as when they come with the system
+	if (!buildable_addons_installed()) {
+		if (why != NULL) {
+			*why = "The window borders and controls haven't been built for "
+				"this system yet.";
+		}
+		return true;
+	}
+	return false;
+}
+
+
+/*!	Whether a theme can be applied: not before the window decorators and
+	control looks are built for this system, which \a log then says.
+*/
+static bool
+can_apply(BString& log)
+{
+	BString why;
+	if (!addons_need_building(&why))
+		return true;
+	log << why << " Build them first, with Build add-ons" B_UTF8_ELLIPSIS
+		" in Power Theme or powertheme --build-decorators.\n";
+	return false;
 }
 
 
@@ -2046,6 +2209,9 @@ apply_mode(theme_mode mode, BString& log, BString* applied, bool* iconsChanged)
 	if (iconsChanged != NULL)
 		*iconsChanged = false;
 
+	if (!can_apply(log))
+		return B_NOT_ALLOWED;
+
 	BString name, icons;
 	get_current(name, icons);
 	if (name.IsEmpty()) {
@@ -2117,6 +2283,9 @@ apply_mode(theme_mode mode, BString& log, BString* applied, bool* iconsChanged)
 status_t
 apply_appearance(const Theme& theme, uint32 parts, BString& log)
 {
+	if (!can_apply(log))
+		return B_NOT_ALLOWED;
+
 	const uint32 requested = parts;
 	parts &= theme.Parts();
 	const float tabHeight = window_tab_height();

@@ -53,6 +53,7 @@ enum {
 	kMsgBeOSTabs		= 'btab',
 	kMsgPhotonShell		= 'shel',
 	kMsgShellEveryTheme	= 'shev',
+	kMsgCheckAddOns		= 'chad',
 	kMsgCheckShellEntry	= 'chse',
 	kMsgShellEntryAnswer	= 'shea',
 	kMsgIconsChosen		= 'icch',
@@ -495,14 +496,15 @@ ThemesWindow::_RestartTrackerThread(void* data)
 //	#pragma mark - ThemesWindow
 
 
-ThemesWindow::ThemesWindow(BRect frame, const char* selected)
+ThemesWindow::ThemesWindow(BRect frame, const char* selected, bool wallpaper)
 	:
 	BWindow(frame, "Power Theme", B_TITLED_WINDOW,
 		B_AUTO_UPDATE_SIZE_LIMITS | B_QUIT_ON_WINDOW_CLOSE),
 	fMode(current_mode() == THEME_MODE_DARK
 		? THEME_MODE_DARK : THEME_MODE_LIGHT),
 	fBusy(false),
-	fHeightWithoutProgress(0)
+	fHeightWithoutProgress(0),
+	fWantWallpaper(wallpaper)
 {
 	fIconChoiceChanged[0] = fIconChoiceChanged[1] = false;
 
@@ -677,8 +679,28 @@ ThemesWindow::Show()
 		UnlockLooper();
 	}
 
-	// once it's on screen, so that a question about the shell sits over it
+	// once it's on screen, so that the build window and a question about the
+	// shell sit over it
+	BMessage check(kMsgCheckAddOns);
+	check.AddBool("offer build", true);
+	PostMessage(&check);
 	PostMessage(kMsgCheckShellEntry);
+}
+
+
+/*!	Themes can't be applied until the window decorators and control looks
+	are built for this system: says so, and with \a offerBuild opens the
+	build window.
+*/
+void
+ThemesWindow::_CheckAddOns(bool offerBuild)
+{
+	fNeedsBuild = "";
+	addons_need_building(&fNeedsBuild);
+	_ShowTheme(_SelectedTheme());
+	_UpdateButtons();
+	if (offerBuild && !fNeedsBuild.IsEmpty())
+		PostMessage(kMsgBuildDecorators);
 }
 
 
@@ -793,6 +815,10 @@ ThemesWindow::MessageReceived(BMessage* message)
 			break;
 		}
 
+		case kMsgCheckAddOns:
+			_CheckAddOns(message->GetBool("offer build", false));
+			break;
+
 		case kMsgCheckShellEntry:
 			_CheckShellEntry();
 			break;
@@ -837,6 +863,9 @@ ThemesWindow::MessageReceived(BMessage* message)
 		}
 
 		case kMsgPartChanged:
+			// the wallpaper stays as chosen from theme to theme
+			if (fWallpaper->IsEnabled())
+				fWantWallpaper = fWallpaper->Value() == B_CONTROL_ON;
 			_UpdateButtons();
 			break;
 
@@ -939,6 +968,7 @@ ThemesWindow::MessageReceived(BMessage* message)
 			fIconsField->Menu()->RemoveItems(0,
 				fIconsField->Menu()->CountItems(), true);
 			_LoadThemes(name.IsEmpty() ? NULL : name.String());
+			_CheckAddOns(false);
 			break;
 		}
 
@@ -1008,6 +1038,7 @@ ThemesWindow::QuitRequested()
 
 	BMessage settings;
 	settings.AddRect("frame", Frame());
+	settings.AddBool("wallpaper", fWantWallpaper);
 	const Theme* theme = _SelectedTheme();
 	if (theme != NULL)
 		settings.AddString("theme", theme->Name());
@@ -1253,10 +1284,17 @@ ThemesWindow::_ShowTheme(const Theme* theme)
 		THEME_FONTS, THEME_WALLPAPER, THEME_DESKBAR };
 	for (int32 i = 0; i < 6; i++) {
 		boxes[i]->SetEnabled((parts & flags[i]) != 0);
-		boxes[i]->SetValue((parts & flags[i]) != 0);
+		boxes[i]->SetValue((parts & flags[i]) != 0
+			&& (flags[i] != THEME_WALLPAPER || fWantWallpaper));
 	}
 	if (!fBusy) {
-		if (missingParts.IsEmpty()) {
+		if (!fNeedsBuild.IsEmpty()) {
+			BString text(fNeedsBuild);
+			text << " Build add-ons" B_UTF8_ELLIPSIS " before applying a "
+				"theme.";
+			fStatus->SetText(text);
+			fStatus->SetToolTip(text);
+		} else if (missingParts.IsEmpty()) {
 			fStatus->SetText("");
 			fStatus->SetToolTip((const char*)NULL);
 		} else {
@@ -1492,7 +1530,7 @@ ThemesWindow::_UpdateButtons()
 		|| (fWallpaper->IsEnabled() && fWallpaper->Value() == B_CONTROL_ON)
 		|| (fDeskbar->IsEnabled() && fDeskbar->Value() == B_CONTROL_ON)
 		|| _ChosenIcons() != kKeepIcons;
-	fApply->SetEnabled(!fBusy && anyPart);
+	fApply->SetEnabled(!fBusy && fNeedsBuild.IsEmpty() && anyPart);
 	fRevert->SetEnabled(!fBusy
 		&& (has_saved_appearance() || has_saved_icons()));
 }

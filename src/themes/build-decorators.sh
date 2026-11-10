@@ -588,5 +588,12 @@ for item in $built; do
 	fi
 done
 
+# Power Theme applies no theme until the user's add-ons are built for the
+# running system: note which one that is
+if $reload && ! $hokku && [ -z "$forced_revision" ]; then
+	{ mkdir -p "$cache" && echo "$revision" > "$cache/addons built for"; } \
+		|| fail "can't note the revision in $cache"
+fi
+
 say 100 "Built:$(echo $names | tr ' ' '\n' | sort -u | tr '\n' ' ')"
 exit 0

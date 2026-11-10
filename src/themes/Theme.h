@@ -358,6 +358,12 @@ status_t	restart_tracker();
 // (build-decorators.sh): in a data folder's "Themes", or next to Themes.
 status_t	find_build_script(BString& path);
 
+// Whether the window decorators and control looks have to be built before a
+// theme can be applied: when they never were and some are missing, or when
+// they were built for another system build (as after a system update). \a why
+// says which.
+bool		addons_need_building(BString* why = NULL);
+
 // whether a theme's "control look" or "icons" value means Haiku's own
 bool		is_haiku(const char* value);
 
