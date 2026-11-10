@@ -148,16 +148,19 @@ public:
 		}
 
 	void SetFont(int32 which, float size, uint32 flags)
-		{ fCanvas->set_font(fCanvas, which, size, flags); }
+		{
+			decor_font font = { which, size, flags };
+			fCanvas->set_font(fCanvas, &font);
+		}
 	float FontSize(int32 which) const
 		{ return fCanvas->font_size(fCanvas, which); }
 	void GetFontHeight(font_height& height) const
 		{
-			fCanvas->font_height(fCanvas, &height.ascent, &height.descent,
-				&height.leading);
+			fCanvas->font_height(fCanvas, NULL, &height.ascent,
+				&height.descent, &height.leading);
 		}
 	float StringWidth(const char* string, int32 length = -1) const
-		{ return fCanvas->string_width(fCanvas, string, length); }
+		{ return fCanvas->string_width(fCanvas, NULL, string, length); }
 	void DrawString(const char* string, int32 length, BPoint baseline,
 		rgb_color color)
 		{ fCanvas->draw_string(fCanvas, string, length, P(baseline), color); }

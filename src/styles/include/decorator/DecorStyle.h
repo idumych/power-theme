@@ -114,6 +114,16 @@ enum {
 	DECOR_FONT_FIXED
 };
 
+/*!	A font to measure text in: one of the system's, at \c size (or its own
+	size if 0), with B_FORCE_ANTIALIASING and the like in \c flags.
+*/
+typedef struct decor_font {
+	int32					which;
+		// DECOR_FONT_*
+	float					size;
+	uint32					flags;
+} decor_font;
+
 
 /*!	A window's tab: one per window in a stack. The engine fills in the
 	"in" fields; layout() fills in the rest.
@@ -271,18 +281,25 @@ struct decor_canvas {
 								int32 bytesPerRow, decor_rect source,
 								decor_rect destination);
 
-	// the title font: one of the system's, at \a size (or its own size
-	// if 0), with B_FORCE_ANTIALIASING and the like in \a flags
-	void					(*set_font)(decor_canvas* canvas, int32 which,
-								float size, uint32 flags);
+	// The title font, that draw_string() draws in: set it as a decor_font
+	// says. The measuring calls measure in \a font, or in the title font if
+	// it's NULL.
+	void					(*set_font)(decor_canvas* canvas,
+								const decor_font* font);
 	float					(*font_size)(decor_canvas* canvas, int32 which);
 		// the system font's own size
 	void					(*font_height)(decor_canvas* canvas,
-								float* ascent, float* descent, float* leading);
-		// of the title font
+								const decor_font* font, float* ascent,
+								float* descent, float* leading);
 	float					(*string_width)(decor_canvas* canvas,
-								const char* string, int32 length);
-		// in the title font
+								const decor_font* font, const char* string,
+								int32 length);
+	int32					(*truncate_string)(decor_canvas* canvas,
+								const decor_font* font, const char* string,
+								uint32 mode, float width, char* result,
+								int32 resultSize);
+		// shortens \a string to \a width as DECOR_TRUNCATE_* \a mode says,
+		// into \a result; returns the result's length in bytes
 	void					(*draw_string)(decor_canvas* canvas,
 								const char* string, int32 length,
 								decor_point baseline, rgb_color color);
@@ -361,6 +378,25 @@ typedef struct decor_style {
 	// title bar and the resize corner
 	void					(*footprint)(decor_window* window,
 								decor_region* region);
+
+	// draws the whole frame within \a invalid, instead of draw_frame()
+	// and draw_tab() for each tab
+	void					(*draw)(decor_window* window,
+								decor_canvas* canvas, decor_rect invalid);
+
+	// keeps the window's content within these sizes, as it may already
+	// have to be, in pixels
+	void					(*size_limits)(decor_window* window,
+								int32* minWidth, int32* minHeight,
+								int32* maxWidth, int32* maxHeight);
+
+	// the window moved by \a x and \a y; the engine has moved what it
+	// knows of, from window->frame and the layout
+	void					(*moved)(decor_window* window, float x, float y);
+
+	// the system colours changed; called before the frame is drawn again
+	void					(*update_colors)(decor_window* window,
+								decor_canvas* canvas);
 } decor_style;
 
 
