@@ -16,6 +16,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <strings.h>
+#include <sys/stat.h>
 #include <time.h>
 #include <unistd.h>
 #ifdef APP_COSMOE
@@ -362,8 +363,46 @@ find_build_script(BString& path)
 }
 
 
-// build-decorators.sh writes the system revision it built for here
+// build-decorators.sh writes the system revision it built for here, and the
+// size and modification time of the app_server and libbe it built against
+// in the other
 static const char* kAddOnsBuiltName = "addons built for";
+static const char* kAddOnsBuiltAgainstName = "addons built against";
+
+
+/*!	Whether the system's app_server and libbe are the ones the add-ons were
+	built against, as they check when they load (AddOnGuard.cpp); true if
+	that wasn't noted.
+*/
+static bool
+same_system_build()
+{
+#ifdef APP_COSMOE
+	return true;
+#else
+	BPath path;
+	if (themes_settings_path(path, kAddOnsBuiltAgainstName) != B_OK)
+		return true;
+	FILE* file = fopen(path.Path(), "r");
+	if (file == NULL)
+		return true;
+	static const char* kFiles[] = { "/boot/system/servers/app_server",
+		"/boot/system/lib/libbe.so" };
+	bool same = true;
+	for (size_t i = 0; i < sizeof(kFiles) / sizeof(kFiles[0]) && same; i++) {
+		char line[64];
+		struct stat st;
+		if (fgets(line, sizeof(line), file) == NULL
+			|| stat(kFiles[i], &st) != 0)
+			break;
+		BString running;
+		running << (int64)st.st_size << " " << (int64)st.st_mtime;
+		same = trimmed(line) == running;
+	}
+	fclose(file);
+	return same;
+#endif
+}
 
 
 /*!	The running system's revision, as build-decorators.sh reads it from the
@@ -488,8 +527,15 @@ addons_need_building(BString* why)
 
 	if (!built.IsEmpty()) {
 		const BString running = system_revision();
-		if (running.IsEmpty() || running == built)
+		if ((running.IsEmpty() || running == built) && same_system_build())
 			return false;
+		if (running.IsEmpty() || running == built) {
+			if (why != NULL) {
+				*why = "The window borders and controls were built for "
+					"another build of this system.";
+			}
+			return true;
+		}
 		if (why != NULL) {
 			*why = BString("The window borders and controls were built for ")
 				<< built << ", and this system is " << running << ".";
@@ -507,6 +553,15 @@ addons_need_building(BString* why)
 		return true;
 	}
 	return false;
+}
+
+
+bool
+addons_built_before()
+{
+	BPath path;
+	return themes_settings_path(path, kAddOnsBuiltName) == B_OK
+		&& BEntry(path.Path()).Exists();
 }
 
 
@@ -1512,6 +1567,84 @@ find_theme(const ThemeList& themes, const char* name, theme_mode mode)
 
 const char* const kThemeAppSignature = "application/x-vnd.idumych-PowerTheme";
 const char* const kThemeSchedulePort = "PowerTheme schedule";
+
+status_t
+reapply_addons(BString& log)
+{
+	BString name, icons;
+	get_current(name, icons);
+	if (name.IsEmpty())
+		return B_OK;
+	ThemeList themes;
+	find_themes(themes);
+	const Theme* theme = find_theme(themes, name);
+	if (theme == NULL) {
+		log << "The theme \"" << name << "\" isn't installed any more.\n";
+		return B_ENTRY_NOT_FOUND;
+	}
+	// applying a part notes it as the only one applied
+	const uint32 parts = get_current_parts();
+	const uint32 addons = parts & (THEME_DECORATOR | THEME_CONTROLS);
+	if (addons == 0)
+		return B_OK;
+	const status_t status = apply_appearance(*theme, addons, log);
+	set_current_parts(parts);
+	return status;
+}
+
+
+#ifndef APP_COSMOE
+
+static const char* kAfterUpdateJob = "powertheme-after-update";
+
+
+status_t
+set_after_update_job(const char* program)
+{
+	BPath job;
+	status_t status = find_directory(B_USER_SETTINGS_DIRECTORY, &job, true);
+	if (status == B_OK)
+		status = job.Append("launch");
+	if (status != B_OK)
+		return status;
+	create_directory(job.Path(), 0755);
+	status = job.Append(kAfterUpdateJob);
+	if (status != B_OK)
+		return status;
+
+	BString text;
+	text << "# Written by Power Theme: after a system update, builds its window\n"
+		"# decorators and control looks again for the new system.\n"
+		"target desktop {\n"
+		"\tjob x-vnd.idumych-PowerTheme-after-update {\n"
+		"\t\tlaunch \"" << program << "\" --after-update\n"
+		"\t\ton initial_volumes_mounted\n"
+		"\t}\n"
+		"}\n";
+
+	// only when it changed, as Power Theme writes it every time it starts
+	BFile file(job.Path(), B_READ_ONLY);
+	off_t size = 0;
+	if (file.InitCheck() == B_OK && file.GetSize(&size) == B_OK
+		&& size == text.Length()) {
+		BString saved;
+		char* buffer = saved.LockBuffer(size);
+		const ssize_t bytes = file.Read(buffer, size);
+		saved.UnlockBuffer(bytes > 0 ? bytes : 0);
+		if (saved == text)
+			return B_OK;
+	}
+
+	status = file.SetTo(job.Path(), B_WRITE_ONLY | B_CREATE_FILE | B_ERASE_FILE);
+	if (status != B_OK)
+		return status;
+	const ssize_t written = file.Write(text.String(), text.Length());
+	return written == text.Length() ? B_OK
+		: written < 0 ? (status_t)written : B_IO_ERROR;
+}
+
+#endif	// !APP_COSMOE
+
 
 static const char* kScheduleName = "schedule";
 static const char* kScheduleJob = "powertheme-schedule";

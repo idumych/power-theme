@@ -205,11 +205,19 @@ powertheme --revert           # your previous decorator, controls, colours, font
 pkgman uninstall powertheme   # then remove Power Theme
 ```
 
-The add-ons are built for the system they're built on. A system update can
-change app_server under them, and then the desktop can crash at startup
-(app_server stops in the Debugger, in one of the add-ons). Safe mode's
-**Disable user add-ons** doesn't help: app_server loads the decorator chosen
-in its settings regardless. To get back to the desktop:
+The add-ons are built for the system they're built on, and a system update
+can change app_server under them. Add-ons built by this version check that
+when they load: on another system build they don't load, so windows get
+Haiku's own borders and controls instead of crashing app_server. At the next
+login Power Theme builds them again for the new system, in the background,
+and puts the theme's back, with a notification when it starts and when it's
+done (it needs the compiler, which **Build add-ons…** installs).
+
+Add-ons built by Power Theme 1.0 or earlier have no such check. After a
+system update the desktop can crash at startup with them (app_server stops in
+the Debugger, in one of the add-ons), and safe mode's **Disable user
+add-ons** doesn't help: app_server loads the decorator chosen in its settings
+regardless. To get back to the desktop:
 
 - **After an update:** hold Space while booting, choose **Select system
   state** and boot the state from before the update. Run
@@ -219,8 +227,6 @@ in its settings regardless. To get back to the desktop:
   delete `home/config/settings/system/app_server/decorator_settings`, so that
   app_server starts with its own decorator. Back on your desktop, open Power
   Theme and click **Build add-ons…**.
-
-Build the add-ons again after every system update.
 
 ### On Linux, with Hokku
 

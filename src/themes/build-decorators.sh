@@ -127,6 +127,7 @@ hokku=false
 develFolder=""
 develFlags=""
 develLink=""
+guard=""
 build=""
 trap 'rm -rf "$develFolder" "$build"' EXIT
 if $hokku; then
@@ -486,6 +487,25 @@ decorLink="-lbe /boot/system/servers/app_server -lstdc++"
 lookLink="-lbe -lstdc++"
 systemAddons=/boot/system/add-ons
 
+# each add-on refuses to load on a system build other than this one (see
+# AddOnGuard.cpp), so that a system update can't take app_server down
+guard=""
+for file in "$source/AddOnGuard.cpp" "$source/src/themes/AddOnGuard.cpp" \
+		"$here/source/AddOnGuard.cpp"; do
+	[ -f "$file" ] && { guard=$file; break; }
+done
+fingerprint() { stat -L -c '%s %Y' "$1"; }
+if [ -n "$guard" ] && [ -z "$forced_revision" ]; then
+	builtAppServer=$(fingerprint /boot/system/servers/app_server) \
+		|| fail "can't read /boot/system/servers/app_server"
+	builtLibbe=$(fingerprint /boot/system/lib/libbe.so) \
+		|| fail "can't read /boot/system/lib/libbe.so"
+else
+	# for another system build there's nothing to compare with
+	guard=""
+	echo "Building the add-ons without the system build check"
+fi
+
 fi	# Haiku and Renku
 
 build=$(mktemp -d "${TMPDIR:-/tmp}/themes-build.XXXXXX") || fail "no temporary folder"
@@ -526,16 +546,34 @@ for item in $todo; do
 
 	percent=$((35 + index * 55 / count))
 	say $percent "Compiling $label"
+	guardFlags=""
+	if [ -n "$guard" ] && [ "$kind" = decorators ]; then
+		guardFlags="-Dinstantiate_decor_addon=pt_guarded_instantiate_decor_addon"
+		guardKind=PT_GUARD_DECORATOR
+	elif [ -n "$guard" ]; then
+		guardFlags="-Dinstantiate_control_look=pt_guarded_instantiate_control_look"
+		guardKind=PT_GUARD_CONTROL_LOOK
+	fi
 	objects=""
 	for file in "$folder"/$sources; do
 		[ -f "$file" ] || fail "$name: no $sources in $folder"
 		object=$build/$kind-$name-$(basename "$file" .cpp).o
 		echo "g++ -c $(basename "$file")"
 		# shellcheck disable=SC2086
-		g++ $kindflags $develFlags -c "$file" -o "$object" 2>&1 \
+		g++ $kindflags $develFlags $guardFlags -c "$file" -o "$object" 2>&1 \
 			|| fail "$label: doesn't compile"
 		objects="$objects $object"
 	done
+	if [ -n "$guard" ]; then
+		object=$build/$kind-$name-AddOnGuard.o
+		echo "g++ -c AddOnGuard.cpp"
+		g++ -O2 -Wall -fPIC $develFlags -D$guardKind \
+			-DPT_BUILT_APP_SERVER="\"$builtAppServer\"" \
+			-DPT_BUILT_LIBBE="\"$builtLibbe\"" \
+			-c "$guard" -o "$object" 2>&1 \
+			|| fail "$label: the system build check doesn't compile"
+		objects="$objects $object"
+	fi
 	output=$build/$kind/$name
 	mkdir -p "$build/$kind"
 	# shellcheck disable=SC2086
@@ -593,6 +631,12 @@ done
 if $reload && ! $hokku && [ -z "$forced_revision" ]; then
 	{ mkdir -p "$cache" && echo "$revision" > "$cache/addons built for"; } \
 		|| fail "can't note the revision in $cache"
+	# and the exact app_server and libbe, as the add-ons check them
+	if [ -n "$guard" ]; then
+		printf '%s\n%s\n' "$builtAppServer" "$builtLibbe" \
+			> "$cache/addons built against" \
+			|| fail "can't note the system build in $cache"
+	fi
 fi
 
 say 100 "Built:$(echo $names | tr ' ' '\n' | sort -u | tr '\n' ' ')"

@@ -363,6 +363,18 @@ status_t	find_build_script(BString& path);
 // they were built for another system build (as after a system update). \a why
 // says which.
 bool		addons_need_building(BString* why = NULL);
+// Whether build-decorators.sh has built the add-ons here before.
+bool		addons_built_before();
+
+// Applies the window decorator and control look of the theme in use again,
+// if it was applied with them, as after building them for a new system.
+status_t	reapply_addons(BString& log);
+
+#ifndef APP_COSMOE
+// Writes the launch_daemon job that runs "\a program --after-update" at every
+// login, which builds the add-ons again after a system update.
+status_t	set_after_update_job(const char* program);
+#endif
 
 // whether a theme's "control look" or "icons" value means Haiku's own
 bool		is_haiku(const char* value);

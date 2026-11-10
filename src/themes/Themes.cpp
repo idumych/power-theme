@@ -18,6 +18,7 @@
 #include <errno.h>
 #include <getopt.h>
 #include <fcntl.h>
+#include <sys/wait.h>
 #include <stdio.h>
 #include <string.h>
 #include <strings.h>
@@ -25,9 +26,11 @@
 
 #include <AboutWindow.h>
 #include <Application.h>
+#include <Entry.h>
 #include <File.h>
 #include <OS.h>
 #include <Messenger.h>
+#include <Notification.h>
 #include <Path.h>
 #include <Roster.h>
 #include <image.h>
@@ -278,6 +281,108 @@ run_schedule()
 	release_schedule_process();
 	return 0;
 }
+
+
+#ifndef APP_COSMOE
+
+static void
+notify_after_update(const char* text, notification_type type)
+{
+	BNotification notification(type);
+	notification.SetGroup("Power Theme");
+	notification.SetMessageID("powertheme-after-update");
+	notification.SetTitle("Window borders and controls");
+	notification.SetContent(text);
+	notification.Send(type == B_ERROR_NOTIFICATION ? -1 : 20 * 1000000LL);
+}
+
+
+/*!	Runs at every login, from the launch_daemon job set_after_update_job()
+	writes. After a system update the add-ons Power Theme built no longer
+	load (AddOnGuard.cpp), and windows have Haiku's own look: this builds
+	them for the new system and applies the theme's again. Without a system
+	update, or if they were never built here, it does nothing.
+*/
+static int
+after_update()
+{
+	BApplication app(kThemeAppSignature);
+	BString why;
+	if (!addons_built_before() || !addons_need_building(&why))
+		return 0;
+
+	BString script;
+	if (find_build_script(script) != B_OK)
+		return 1;
+
+	// the notification server starts with the desktop, and drops what comes
+	// before it is ready: wait for Tracker, and a little longer
+	for (int32 i = 0; i < 240 && (!be_roster->IsRunning(
+				"application/x-vnd.Haiku-notification_server")
+			|| !be_roster->IsRunning("application/x-vnd.Be-TRAK")); i++)
+		snooze(250000);
+	snooze(3000000);
+	notify_after_update("The system was updated: Power Theme is building its "
+		"window borders and controls for it. Until then windows have Haiku's "
+		"own look.", B_INFORMATION_NOTIFICATION);
+
+	// the script's output, for when it fails
+	BPath log;
+	themes_settings_path(log, "after update log");
+	const pid_t child = fork();
+	if (child == 0) {
+		const int out = open(log.Path(), O_WRONLY | O_CREAT | O_TRUNC, 0644);
+		if (out >= 0) {
+			dup2(out, STDOUT_FILENO);
+			dup2(out, STDERR_FILENO);
+		}
+		execl("/bin/sh", "sh", script.String(), (char*)NULL);
+		_exit(127);
+	}
+	int status = -1;
+	if (child < 0 || waitpid(child, &status, 0) != child)
+		status = -1;
+	const int exitCode = status >= 0 && WIFEXITED(status)
+		? WEXITSTATUS(status) : -1;
+
+	if (exitCode == 3) {
+		notify_after_update("Power Theme needs the compiler to build its "
+			"window borders and controls for the updated system. Open Power "
+			"Theme and click \"Build add-ons…\" to install it and build them.",
+			B_ERROR_NOTIFICATION);
+		return 1;
+	}
+	if (exitCode != 0) {
+		// the script's last ERROR line says what went wrong
+		BString error;
+		FILE* file = fopen(log.Path(), "r");
+		char line[512];
+		while (file != NULL && fgets(line, sizeof(line), file) != NULL) {
+			if (strncmp(line, "ERROR ", 6) == 0)
+				error = BString(line + 6).Trim();
+		}
+		if (file != NULL)
+			fclose(file);
+		BString text("Power Theme couldn't build its window borders and "
+			"controls for the updated system");
+		if (!error.IsEmpty())
+			text << ": " << error;
+		text << ". Open Power Theme and click \"Build add-ons…\" to try "
+			"again.";
+		notify_after_update(text.String(), B_ERROR_NOTIFICATION);
+		return 1;
+	}
+
+	BString applyLog;
+	reapply_addons(applyLog);
+	notify_after_update("Power Theme built its window borders and controls "
+		"for the updated system, and the theme's are back. Applications "
+		"started before now keep Haiku's controls until they restart.",
+		B_INFORMATION_NOTIFICATION);
+	return 0;
+}
+
+#endif	// !APP_COSMOE
 
 
 static int
@@ -738,6 +843,23 @@ main(int argc, char** argv)
 {
 	if (argc == 2 && strcmp(argv[1], "--run-schedule") == 0)
 		return run_schedule();
+#ifndef APP_COSMOE
+	if (argc == 2 && strcmp(argv[1], "--after-update") == 0)
+		return after_update();
+
+	// after a system update, launch_daemon runs this at login to build the
+	// add-ons again
+	image_info image;
+	int32 cookie = 0;
+	while (get_next_image_info(B_CURRENT_TEAM, &cookie, &image) == B_OK) {
+		if (image.type == B_APP_IMAGE) {
+			BPath program;
+			if (BEntry(image.name, true).GetPath(&program) == B_OK)
+				set_after_update_job(program.Path());
+			break;
+		}
+	}
+#endif
 
 	if (argc > 1)
 		return command_line(argc, argv);
