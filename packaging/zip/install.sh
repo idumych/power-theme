@@ -202,7 +202,11 @@ Terminal) switches between themes and icon themes, and back:
     powertheme --revert    go back to your previous look and icons
     sh uninstall.sh        remove Power Theme
 
-If the desktop ever fails to start after a system update: hold Space while
-booting, open "Select safe mode options" and choose "Disable user add-ons";
-then run sh uninstall.sh, or reinstall with sh install.sh --build.
+Reinstall with sh install.sh --build after every system update. If the
+desktop ever fails to start after one (safe mode's "Disable user add-ons"
+doesn't help): hold Space while booting, choose "Select system state" and
+boot the state from before the update, then run powertheme --revert. Or boot
+from a Haiku USB stick and delete
+home/config/settings/system/app_server/decorator_settings on the installed
+disk. Then reinstall with sh install.sh --build, or run sh uninstall.sh.
 EOF
