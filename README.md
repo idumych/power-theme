@@ -184,7 +184,7 @@ Power Theme comes as a package for Haiku R1/beta6 and later, and Renku OS
 (x86_64), on the [releases page](https://github.com/idumych/power-theme/releases):
 
 ```sh
-pkgman install ./powertheme-1.0-1-x86_64.hpkg
+pkgman install ./powertheme-1.0.1-1-x86_64.hpkg
 ```
 
 Then open **Power Theme** (Deskbar → Applications). It opens **Build
