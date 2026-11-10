@@ -59,6 +59,7 @@ ServerFont::ServerFont()
 	fFont.which = DECOR_FONT_PLAIN;
 	fFont.size = 0;
 	fFont.flags = 0;
+	fFont.rotation = 0;
 }
 
 
@@ -189,7 +190,13 @@ DesktopSettings::GetDefaultFixedFont(ServerFont& font) const
 void
 DesktopSettings::GetMenuInfo(menu_info& info) const
 {
-	get_menu_info(&info);
+	// app_server's own settings, which libbe can't ask for from inside it
+	memset(&info, 0, sizeof(info));
+	info.font_size = fCanvas->font_size(fCanvas, DECOR_FONT_MENU);
+	info.background_color = UIColor(B_MENU_BACKGROUND_COLOR);
+	info.separator = 0;
+	info.click_to_open = true;
+	info.triggers_always_shown = false;
 }
 
 
@@ -200,6 +207,7 @@ DesktopSettings::_Font(int32 which, ServerFont& font) const
 	font.fFont.which = which;
 	font.fFont.size = fCanvas->font_size(fCanvas, which);
 	font.fFont.flags = 0;
+	font.fFont.rotation = 0;
 }
 
 
@@ -209,9 +217,75 @@ DesktopSettings::_Font(int32 which, ServerFont& font) const
 DrawingEngine::DrawingEngine()
 	:
 	fCanvas(NULL),
-	fDrawingMode(B_OP_COPY)
+	fDrawingMode(B_OP_COPY),
+	fRecording(false),
+	fDrawings(NULL),
+	fCount(0),
+	fCapacity(0)
 {
 	fHighColor = make_color(0, 0, 0);
+}
+
+
+bool
+DrawingEngine::_Record(const ShimDrawing& drawing)
+{
+	if (!fRecording)
+		return false;
+
+	if (fCount == fCapacity) {
+		const int32 capacity = fCapacity > 0 ? fCapacity * 2 : 16;
+		ShimDrawing* drawings = new(std::nothrow) ShimDrawing[capacity];
+		if (drawings == NULL)
+			return true;
+		for (int32 i = 0; i < fCount; i++)
+			drawings[i] = fDrawings[i];
+		delete[] fDrawings;
+		fDrawings = drawings;
+		fCapacity = capacity;
+	}
+	fDrawings[fCount++] = drawing;
+	return true;
+}
+
+
+/*!	Draws again what was drawn into \a bitmap, moved to \a viewRect. Its
+	transparent background is left out, as B_OP_OVER would.
+*/
+void
+DrawingEngine::DrawBitmap(ServerBitmap* bitmap, const BRect& bitmapRect,
+	const BRect& viewRect, uint32 options)
+{
+	if (bitmap == NULL || fCanvas == NULL)
+		return;
+
+	const BPoint offset = viewRect.LeftTop() - bitmapRect.LeftTop();
+	for (int32 i = 0; i < bitmap->fCount; i++) {
+		ShimDrawing drawing = bitmap->fDrawings[i];
+		switch (drawing.what) {
+			case ShimDrawing::FILL_RECT:
+				if (drawing.color == B_TRANSPARENT_COLOR)
+					break;
+				FillRect(drawing.rect.OffsetByCopy(offset), drawing.color);
+				break;
+			case ShimDrawing::FILL_GRADIENT:
+				drawing.gradient.start.x += offset.x;
+				drawing.gradient.start.y += offset.y;
+				drawing.gradient.end.x += offset.x;
+				drawing.gradient.end.y += offset.y;
+				fCanvas->fill_rect_gradient(fCanvas,
+					to_decor_rect(drawing.rect.OffsetByCopy(offset)),
+					&drawing.gradient);
+				break;
+			case ShimDrawing::STROKE_RECT:
+				StrokeRect(drawing.rect.OffsetByCopy(offset), drawing.color);
+				break;
+			case ShimDrawing::STROKE_LINE:
+				StrokeLine(drawing.start + offset, drawing.end + offset,
+					drawing.color);
+				break;
+		}
+	}
 }
 
 
@@ -306,6 +380,13 @@ void
 DrawingEngine::StrokeLine(const BPoint& start, const BPoint& end,
 	const rgb_color& color)
 {
+	ShimDrawing drawing;
+	drawing.what = ShimDrawing::STROKE_LINE;
+	drawing.start = start;
+	drawing.end = end;
+	drawing.color = color;
+	if (_Record(drawing))
+		return;
 	fCanvas->stroke_line(fCanvas, to_decor_point(start), to_decor_point(end),
 		color);
 }
@@ -328,6 +409,12 @@ DrawingEngine::StrokePoint(const BPoint& point, const rgb_color& color)
 void
 DrawingEngine::StrokeRect(BRect rect, const rgb_color& color)
 {
+	ShimDrawing drawing;
+	drawing.what = ShimDrawing::STROKE_RECT;
+	drawing.rect = rect;
+	drawing.color = color;
+	if (_Record(drawing))
+		return;
 	fCanvas->stroke_rect(fCanvas, to_decor_rect(rect), color);
 }
 
@@ -342,6 +429,12 @@ DrawingEngine::StrokeRect(BRect rect)
 void
 DrawingEngine::FillRect(BRect rect, const rgb_color& color)
 {
+	ShimDrawing drawing;
+	drawing.what = ShimDrawing::FILL_RECT;
+	drawing.rect = rect;
+	drawing.color = color;
+	if (_Record(drawing))
+		return;
 	fCanvas->fill_rect(fCanvas, to_decor_rect(rect), color);
 }
 
@@ -371,6 +464,12 @@ DrawingEngine::FillRect(BRect rect, const BGradient& gradient)
 		styleGradient.colors[i] = stop->color;
 		styleGradient.offsets[i] = (uint8)stop->offset;
 	}
+	ShimDrawing drawing;
+	drawing.what = ShimDrawing::FILL_GRADIENT;
+	drawing.rect = rect;
+	drawing.gradient = styleGradient;
+	if (_Record(drawing))
+		return;
 	fCanvas->fill_rect_gradient(fCanvas, to_decor_rect(rect),
 		&styleGradient);
 }
@@ -410,6 +509,62 @@ DrawingEngine::StringWidth(const char* string, int32 length,
 }
 
 
+//	#pragma mark - bitmaps
+
+
+ServerBitmap::~ServerBitmap()
+{
+	delete[] fDrawings;
+}
+
+
+UtilityBitmap::UtilityBitmap(BRect bounds, color_space space, uint32 flags)
+{
+	fBounds = bounds;
+}
+
+
+BitmapDrawingEngine::BitmapDrawingEngine()
+{
+	fRecording = true;
+}
+
+
+BitmapDrawingEngine::~BitmapDrawingEngine()
+{
+	delete[] fDrawings;
+}
+
+
+status_t
+BitmapDrawingEngine::SetSize(int32 width, int32 height)
+{
+	fBounds.Set(0, 0, width - 1, height - 1);
+	fCount = 0;
+	return B_OK;
+}
+
+
+UtilityBitmap*
+BitmapDrawingEngine::ExportToBitmap(int32 width, int32 height,
+	color_space space)
+{
+	UtilityBitmap* bitmap = new(std::nothrow) UtilityBitmap(
+		BRect(0, 0, width - 1, height - 1), space, 0);
+	if (bitmap == NULL)
+		return NULL;
+	bitmap->fDrawings = new(std::nothrow) ShimDrawing[fCount > 0 ? fCount : 1];
+	if (bitmap->fDrawings == NULL) {
+		delete bitmap;
+		return NULL;
+	}
+	for (int32 i = 0; i < fCount; i++)
+		bitmap->fDrawings[i] = fDrawings[i];
+	bitmap->fCount = fCount;
+	return bitmap;
+}
+
+
 //	#pragma mark - Decorator
 
 
@@ -430,6 +585,9 @@ Decorator::Tab::Tab()
 	minTabSize(0.0f),
 	maxTabSize(0.0f)
 {
+	memset(closeBitmaps, 0, sizeof(closeBitmaps));
+	memset(minimizeBitmaps, 0, sizeof(minimizeBitmaps));
+	memset(zoomBitmaps, 0, sizeof(zoomBitmaps));
 }
 
 

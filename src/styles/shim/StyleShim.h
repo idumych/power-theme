@@ -32,6 +32,7 @@
 
 
 class Desktop;
+class ServerBitmap;
 class StyleShim;
 
 
@@ -47,6 +48,9 @@ public:
 			uint32				Flags() const { return fFont.flags; }
 			void				SetFlags(uint32 flags) { fFont.flags = flags; }
 			void				SetSpacing(uint8 spacing) {}
+			float				Rotation() const { return fFont.rotation; }
+			void				SetRotation(float rotation)
+									{ fFont.rotation = rotation; }
 
 			void				GetHeight(font_height& height) const;
 			float				StringWidth(const char* string,
@@ -102,6 +106,49 @@ private:
 //	#pragma mark - drawing
 
 
+/*!	A drawing call kept for later: what an off-screen bitmap holds here. */
+struct ShimDrawing {
+	enum {
+		FILL_RECT,
+		FILL_GRADIENT,
+		STROKE_RECT,
+		STROKE_LINE
+	}						what;
+	BRect					rect;
+	BPoint					start;
+	BPoint					end;
+	rgb_color				color;
+	decor_gradient			gradient;
+};
+
+
+/*!	app_server's bitmaps, as a decorator uses them: the off-screen drawing
+	of a BitmapDrawingEngine, kept as the calls that made it, and drawn
+	again where the bitmap is drawn.
+*/
+class ServerBitmap {
+public:
+	virtual						~ServerBitmap();
+
+			BRect				Bounds() const { return fBounds; }
+
+protected:
+	friend class DrawingEngine;
+	friend class BitmapDrawingEngine;
+
+			BRect				fBounds;
+			ShimDrawing*		fDrawings = NULL;
+			int32				fCount = 0;
+};
+
+
+class UtilityBitmap : public ServerBitmap {
+public:
+								UtilityBitmap(BRect bounds,
+									color_space space, uint32 flags);
+};
+
+
 class DrawingEngine {
 public:
 								DrawingEngine();
@@ -137,6 +184,11 @@ public:
 			void				FillRegion(BRegion& region,
 									const rgb_color& color);
 
+			void				DrawBitmap(ServerBitmap* bitmap,
+									const BRect& bitmapRect,
+									const BRect& viewRect,
+									uint32 options = 0);
+
 			BPoint				DrawString(const char* string, int32 length,
 									const BPoint& point,
 									escapement_delta* delta = NULL);
@@ -146,6 +198,9 @@ public:
 									const ServerFont& font,
 									escapement_delta* delta = NULL);
 
+protected:
+			bool				_Record(const ShimDrawing& drawing);
+
 private:
 	friend class Decorator;
 	friend class StyleShim;
@@ -153,6 +208,27 @@ private:
 			decor_canvas*		fCanvas;
 			rgb_color			fHighColor;
 			drawing_mode		fDrawingMode;
+
+protected:
+			// off screen: what is drawn is kept, instead
+			bool				fRecording;
+			ShimDrawing*		fDrawings;
+			int32				fCount;
+			int32				fCapacity;
+};
+
+
+class BitmapDrawingEngine : public DrawingEngine {
+public:
+								BitmapDrawingEngine();
+								~BitmapDrawingEngine();
+
+			status_t			SetSize(int32 width, int32 height);
+			UtilityBitmap*		ExportToBitmap(int32 width, int32 height,
+									color_space space);
+
+private:
+			BRect				fBounds;
 };
 
 
@@ -222,6 +298,10 @@ public:
 
 		float					minTabSize;
 		float					maxTabSize;
+
+		ServerBitmap*			closeBitmaps[4];
+		ServerBitmap*			minimizeBitmaps[4];
+		ServerBitmap*			zoomBitmaps[4];
 	};
 
 	enum Region {

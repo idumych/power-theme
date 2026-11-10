@@ -111,7 +111,9 @@ enum {
 enum {
 	DECOR_FONT_PLAIN = 0,
 	DECOR_FONT_BOLD,
-	DECOR_FONT_FIXED
+	DECOR_FONT_FIXED,
+	DECOR_FONT_MENU
+		// the menus' font, at their font size
 };
 
 /*!	A font to measure text in: one of the system's, at \c size (or its own
@@ -122,6 +124,9 @@ typedef struct decor_font {
 		// DECOR_FONT_*
 	float					size;
 	uint32					flags;
+	float					rotation;
+		// in degrees, counterclockwise: 90 for a title running up the
+		// side of a window
 } decor_font;
 
 

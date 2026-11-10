@@ -149,7 +149,7 @@ public:
 
 	void SetFont(int32 which, float size, uint32 flags)
 		{
-			decor_font font = { which, size, flags };
+			decor_font font = { which, size, flags, 0 };
 			fCanvas->set_font(fCanvas, &font);
 		}
 	float FontSize(int32 which) const
