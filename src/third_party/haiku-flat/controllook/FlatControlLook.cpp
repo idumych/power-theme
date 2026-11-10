@@ -23,7 +23,6 @@
 #include <Rect.h>
 #include <Region.h>
 #include <View.h>
-#include <WindowPrivate.h>
 
 
 namespace BPrivate {
@@ -37,7 +36,7 @@ static const float kButtonPopUpIndicatorWidth = 11;
 
 
 FlatControlLook::FlatControlLook()
-	: HaikuControlLook()
+	: ForwardingControlLook()
 {
 }
 

@@ -359,11 +359,11 @@ AmigaControlLook::DrawLabel(BView* view, const char* label,
 			&& textColor->green == standard.green
 			&& textColor->blue == standard.blue))
 		&& is_pressed(flags) && dynamic_cast<BButton*>(view) != NULL) {
-		HaikuControlLook::DrawLabel(view, label, icon, rect, updateRect, base,
+		ForwardingControlLook::DrawLabel(view, label, icon, rect, updateRect, base,
 			flags, alignment, &kOrange);
 		return;
 	}
-	HaikuControlLook::DrawLabel(view, label, icon, rect, updateRect, base,
+	ForwardingControlLook::DrawLabel(view, label, icon, rect, updateRect, base,
 		flags, alignment, textColor);
 }
 
@@ -852,7 +852,7 @@ AmigaControlLook::DrawGroupFrame(BView* view, BRect& rect,
 	const BRect& updateRect, const rgb_color& base, uint32 borders)
 {
 	if (borders != B_ALL_BORDERS) {
-		HaikuControlLook::DrawGroupFrame(view, rect, updateRect, base, borders);
+		ForwardingControlLook::DrawGroupFrame(view, rect, updateRect, base, borders);
 		return;
 	}
 

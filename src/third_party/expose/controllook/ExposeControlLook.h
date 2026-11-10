@@ -18,7 +18,7 @@
 #define EXPOSE_CONTROL_LOOK_H
 
 
-#include <HaikuControlLook.h>
+#include "ForwardingControlLook.h"
 
 
 class BBitmap;
@@ -27,12 +27,12 @@ class BBitmap;
 namespace BPrivate {
 
 
-class ExposeControlLook : public HaikuControlLook {
+class ExposeControlLook : public ForwardingControlLook {
 public:
 								ExposeControlLook();
 	virtual						~ExposeControlLook();
 
-	using HaikuControlLook::DrawButtonFrame;
+	using ForwardingControlLook::DrawButtonFrame;
 	virtual	void				DrawButtonFrame(BView* view, BRect& rect,
 									const BRect& updateRect,
 									const rgb_color& base,
@@ -40,7 +40,7 @@ public:
 									uint32 flags = 0,
 									uint32 borders = B_ALL_BORDERS);
 
-	using HaikuControlLook::DrawButtonBackground;
+	using ForwardingControlLook::DrawButtonBackground;
 	virtual	void				DrawButtonBackground(BView* view, BRect& rect,
 									const BRect& updateRect,
 									const rgb_color& base,
@@ -48,7 +48,7 @@ public:
 									uint32 borders = B_ALL_BORDERS,
 									orientation orientation = B_HORIZONTAL);
 
-	using HaikuControlLook::DrawButtonWithPopUpBackground;
+	using ForwardingControlLook::DrawButtonWithPopUpBackground;
 	virtual	void				DrawButtonWithPopUpBackground(BView* view,
 									BRect& rect, const BRect& updateRect,
 									const rgb_color& base,
@@ -61,7 +61,7 @@ public:
 									const rgb_color& base, uint32 flags = 0,
 									uint32 borders = B_ALL_BORDERS);
 
-	using HaikuControlLook::DrawMenuFieldFrame;
+	using ForwardingControlLook::DrawMenuFieldFrame;
 	virtual	void				DrawMenuFieldFrame(BView* view, BRect& rect,
 									const BRect& updateRect,
 									const rgb_color& base,
@@ -69,7 +69,7 @@ public:
 									uint32 flags = 0,
 									uint32 borders = B_ALL_BORDERS);
 
-	using HaikuControlLook::DrawMenuFieldBackground;
+	using ForwardingControlLook::DrawMenuFieldBackground;
 	virtual	void				DrawMenuFieldBackground(BView* view,
 									BRect& rect, const BRect& updateRect,
 									const rgb_color& base, bool popupIndicator,
@@ -128,7 +128,7 @@ public:
 									orientation orientation,
 									uint32 knobStyle = B_KNOB_NONE);
 
-	using HaikuControlLook::DrawSliderBar;
+	using ForwardingControlLook::DrawSliderBar;
 	virtual	void				DrawSliderBar(BView* view, BRect rect,
 									const BRect& updateRect,
 									const rgb_color& base, rgb_color fillColor,

@@ -24,7 +24,7 @@
 #include <MenuField.h>
 #include <MenuItem.h>
 
-#include <MenuPrivate.h>
+#include "MenuMargins.h"
 #include <Rect.h>
 #include <TabView.h>
 #include <View.h>
@@ -696,7 +696,7 @@ DanoControlLook::DrawMenuFieldBackground(BView* view, BRect& rect,
 	// unchanged.
 	BMenuBar* menuBar = dynamic_cast<BMenuBar*>(view);
 	if (menuBar != NULL && popupIndicator) {
-		BPrivate::MenuPrivate menu(menuBar);
+		MenuMargins menu(menuBar);
 		float left, top, right, bottom;
 		menu.GetItemMargins(&left, &top, &right, &bottom);
 		if (right > left)
@@ -740,7 +740,7 @@ DanoControlLook::_DrawMenuFieldBox(BView* view, BMenuBar* menuBar, BRect bar,
 		right = std::min(bar.right,
 			bar.left + floorf(item->Frame().right) + 3);
 	}
-	BPrivate::MenuPrivate menu(menuBar);
+	MenuMargins menu(menuBar);
 	float left, top, padRight, bottom;
 	menu.GetItemMargins(&left, &top, &padRight, &bottom);
 	const bool arrow = fabsf(left - padRight) > 0;
@@ -987,7 +987,7 @@ DanoControlLook::DrawGroupFrame(BView* view, BRect& rect,
 		return;
 	}
 	if (borders != B_ALL_BORDERS) {
-		HaikuControlLook::DrawGroupFrame(view, rect, updateRect, base,
+		ForwardingControlLook::DrawGroupFrame(view, rect, updateRect, base,
 			borders);
 		return;
 	}
@@ -1025,7 +1025,7 @@ DanoControlLook::DrawScrollViewFrame(BView* view, BRect& rect,
 	border_style borderStyle, uint32 flags, uint32 borders)
 {
 	BRect outer(rect);
-	HaikuControlLook::DrawScrollViewFrame(view, outer, updateRect,
+	ForwardingControlLook::DrawScrollViewFrame(view, outer, updateRect,
 		verticalScrollBarFrame, horizontalScrollBarFrame, base, borderStyle,
 		flags, borders);
 	BRect result(outer);
@@ -1200,7 +1200,7 @@ DanoControlLook::DrawArrowShape(BView* view, BRect& rect,
 	uint32 flags, float tint)
 {
 	if (direction > B_DOWN_ARROW) {
-		HaikuControlLook::DrawArrowShape(view, rect, updateRect, base,
+		ForwardingControlLook::DrawArrowShape(view, rect, updateRect, base,
 			direction, flags, tint);
 		return;
 	}
@@ -1408,7 +1408,7 @@ DanoControlLook::DrawSliderTriangle(BView* view, BRect& rect,
 		return;
 
 	if (orientation != B_HORIZONTAL) {
-		HaikuControlLook::DrawSliderTriangle(view, rect, updateRect, base, fill,
+		ForwardingControlLook::DrawSliderTriangle(view, rect, updateRect, base, fill,
 			flags, orientation);
 		return;
 	}
@@ -1583,7 +1583,7 @@ DanoControlLook::DrawBorder(BView* view, BRect& rect, const BRect& updateRect,
 	uint32 borders)
 {
 	if (dynamic_cast<BTabView*>(view) == NULL || borderStyle == B_NO_BORDER) {
-		HaikuControlLook::DrawBorder(view, rect, updateRect, base, borderStyle,
+		ForwardingControlLook::DrawBorder(view, rect, updateRect, base, borderStyle,
 			flags, borders);
 		return;
 	}
@@ -1608,7 +1608,7 @@ DanoControlLook::DrawLabel(BView* view, const char* label, const BBitmap* icon,
 		&& dynamic_cast<BButton*>(view) != NULL) {
 		textColor = &kPressedLabel;
 	}
-	HaikuControlLook::DrawLabel(view, label, icon, rect, updateRect, base,
+	ForwardingControlLook::DrawLabel(view, label, icon, rect, updateRect, base,
 		flags, alignment, textColor);
 }
 

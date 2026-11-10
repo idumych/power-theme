@@ -58,7 +58,8 @@ DECOR_INCLUDES := \
 	-I$(HEADER_ROOT)/headers/libs/agg \
 	-I$(FREETYPE_HEADERS)
 
-override CXXFLAGS += -O2 -Wall -Wno-multichar -fPIC $(SYSROOT_FLAGS)
+override CXXFLAGS += -O2 -Wall -Wno-multichar -fPIC $(SYSROOT_FLAGS) \
+	-Isrc/controllook-kit
 
 BUILD := build
 DECOR := $(BUILD)/Reactionary
@@ -204,6 +205,9 @@ decorator-source:
 		$(DECOR_SOURCE)/source/control_looks/Gonx/
 	cp $(FLAT)/controllook/* $(DECOR_SOURCE)/source/control_looks/FlatControlLook/
 	cp LICENSE src/themes/AddOnGuard.cpp $(DECOR_SOURCE)/source/
+	mkdir -p $(DECOR_SOURCE)/source/controllook-kit
+	cp src/controllook-kit/*.h src/controllook-kit/*.cpp \
+		$(DECOR_SOURCE)/source/controllook-kit/
 
 # Gonx's control look, for the Gonx theme (its decorator is built by Power Theme).
 $(BUILD)/GonxControlLook.o: $(GONX)/controllook/GonxControlLook.cpp $(GONX)/controllook/GonxControlLook.h

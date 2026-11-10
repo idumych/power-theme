@@ -16,13 +16,13 @@
 #define SMOKE_CONTROL_LOOK_H
 
 
-#include <HaikuControlLook.h>
+#include "ForwardingControlLook.h"
 
 
 namespace BPrivate {
 
 
-class SmokeControlLook : public HaikuControlLook {
+class SmokeControlLook : public ForwardingControlLook {
 public:
 								SmokeControlLook();
 	virtual						~SmokeControlLook();

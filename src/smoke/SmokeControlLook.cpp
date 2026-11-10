@@ -966,7 +966,7 @@ SmokeControlLook::DrawArrowShape(BView* view, BRect& rect,
 	const BRect& updateRect, const rgb_color& base, uint32 direction,
 	uint32 flags, float tint)
 {
-	HaikuControlLook::DrawArrowShape(view, rect, updateRect, base, direction,
+	ForwardingControlLook::DrawArrowShape(view, rect, updateRect, base, direction,
 		flags, tint);
 }
 
@@ -988,7 +988,7 @@ SmokeControlLook::DrawSliderBar(BView* view, BRect rect,
 	orientation orientation)
 {
 	// splits the bar, drawing all of it clipped to each side
-	HaikuControlLook::DrawSliderBar(view, rect, updateRect, base,
+	ForwardingControlLook::DrawSliderBar(view, rect, updateRect, base,
 		leftFillColor, rightFillColor, sliderScale, flags, orientation);
 }
 
@@ -1068,7 +1068,7 @@ SmokeControlLook::DrawSliderTriangle(BView* view, BRect& rect,
 	const BRect& updateRect, const rgb_color& base, uint32 flags,
 	orientation orientation)
 {
-	HaikuControlLook::DrawSliderTriangle(view, rect, updateRect, base, flags,
+	ForwardingControlLook::DrawSliderTriangle(view, rect, updateRect, base, flags,
 		orientation);
 }
 
@@ -1078,7 +1078,7 @@ SmokeControlLook::DrawSliderTriangle(BView* view, BRect& rect,
 	const BRect& updateRect, const rgb_color& base, const rgb_color& fill,
 	uint32 flags, orientation orientation)
 {
-	HaikuControlLook::DrawSliderTriangle(view, rect, updateRect, base, fill,
+	ForwardingControlLook::DrawSliderTriangle(view, rect, updateRect, base, fill,
 		flags, orientation);
 }
 

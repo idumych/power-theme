@@ -16,7 +16,7 @@
 #define DANO_CONTROL_LOOK_H
 
 
-#include <HaikuControlLook.h>
+#include "ForwardingControlLook.h"
 
 
 class BMenuBar;
@@ -25,7 +25,7 @@ class BMenuBar;
 namespace BPrivate {
 
 
-class DanoControlLook : public HaikuControlLook {
+class DanoControlLook : public ForwardingControlLook {
 public:
 								DanoControlLook();
 	virtual						~DanoControlLook();
@@ -265,7 +265,7 @@ public:
 									uint32 borders = B_ALL_BORDERS);
 
 	// a pressed button greys its label
-	using HaikuControlLook::DrawLabel;
+	using ForwardingControlLook::DrawLabel;
 	virtual	void				DrawLabel(BView* view, const char* label,
 									const BBitmap* icon, BRect rect,
 									const BRect& updateRect,

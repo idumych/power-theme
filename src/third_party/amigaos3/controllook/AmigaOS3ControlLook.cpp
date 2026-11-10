@@ -269,7 +269,7 @@ AmigaOS3ControlLook::DrawLabel(BView* view, const char* label,
 	const rgb_color& base, uint32 flags, const BAlignment& alignment,
 	const rgb_color* textColor)
 {
-	HaikuControlLook::DrawLabel(view, label, icon, rect, updateRect, base,
+	ForwardingControlLook::DrawLabel(view, label, icon, rect, updateRect, base,
 		flags, alignment, textColor);
 }
 
@@ -638,7 +638,7 @@ AmigaOS3ControlLook::DrawGroupFrame(BView* view, BRect& rect,
 	const BRect& updateRect, const rgb_color& base, uint32 borders)
 {
 	if (borders != B_ALL_BORDERS) {
-		HaikuControlLook::DrawGroupFrame(view, rect, updateRect, base, borders);
+		ForwardingControlLook::DrawGroupFrame(view, rect, updateRect, base, borders);
 		return;
 	}
 

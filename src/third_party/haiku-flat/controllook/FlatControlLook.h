@@ -10,9 +10,7 @@
 #define FLAT_CONTROL_LOOK_H
 
 
-#include <ControlLook.h>
-
-#include "HaikuControlLook.h"
+#include "ForwardingControlLook.h"
 
 
 class BBitmap;
@@ -22,9 +20,9 @@ class BView;
 
 namespace BPrivate {
 
-using BPrivate::HaikuControlLook;
+using BPrivate::ForwardingControlLook;
 
-class FlatControlLook : public HaikuControlLook {
+class FlatControlLook : public ForwardingControlLook {
 public:
 								FlatControlLook();
 	virtual						~FlatControlLook();

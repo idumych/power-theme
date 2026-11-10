@@ -14,7 +14,7 @@
 #define GONX_CONTROL_LOOK_H
 
 
-#include <HaikuControlLook.h>
+#include "ForwardingControlLook.h"
 
 
 class BMenuBar;
@@ -23,7 +23,7 @@ class BMenuBar;
 namespace BPrivate {
 
 
-class GonxControlLook : public HaikuControlLook {
+class GonxControlLook : public ForwardingControlLook {
 public:
 								GonxControlLook();
 	virtual						~GonxControlLook();
