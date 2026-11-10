@@ -187,10 +187,11 @@ Power Theme comes as a package for Haiku R1/beta6 and later, and Renku OS
 pkgman install ./powertheme-1.0-1-x86_64.hpkg
 ```
 
-Then open **Power Theme** (Deskbar → Applications), click **Build
-add-ons…** once and apply a theme. The window borders and controls are
-built on your own system, because they use private parts of app_server
-and libbe; build them again after a system update. Power Theme offers to
+Then open **Power Theme** (Deskbar → Applications). It opens **Build
+add-ons…** first, and applies no theme until they are built. The window
+borders and controls are built on your own system, because they use
+private parts of app_server and libbe; after a system update, Power Theme
+asks for them to be built again before it applies a theme. It offers to
 install the compiler if it is missing.
 
 On systems whose running applications can follow a theme, new controls and
@@ -204,10 +205,22 @@ powertheme --revert           # your previous decorator, controls, colours, font
 pkgman uninstall powertheme   # then remove Power Theme
 ```
 
-If the desktop ever fails to start (for example after a system update),
-hold Space while booting, open **Select safe mode options** and choose
-**Disable user add-ons**. Once you're on the desktop, open Power Theme and
-click **Build add-ons…** again.
+The add-ons are built for the system they're built on. A system update can
+change app_server under them, and then the desktop can crash at startup
+(app_server stops in the Debugger, in one of the add-ons). Safe mode's
+**Disable user add-ons** doesn't help: app_server loads the decorator chosen
+in its settings regardless. To get back to the desktop:
+
+- **After an update:** hold Space while booting, choose **Select system
+  state** and boot the state from before the update. Run
+  `powertheme --revert`, update again, then open Power Theme and click
+  **Build add-ons…**.
+- **Otherwise:** boot from a Haiku USB stick, open the installed disk and
+  delete `home/config/settings/system/app_server/decorator_settings`, so that
+  app_server starts with its own decorator. Back on your desktop, open Power
+  Theme and click **Build add-ons…**.
+
+Build the add-ons again after every system update.
 
 ### On Linux, with Hokku
 
@@ -562,7 +575,8 @@ Rebuild the package when Hokku's decorator classes change; until then,
     controls, colours, fonts, wallpaper, Deskbar position, icons), and any
     icon theme with
     any theme. Parts whose add-ons or files aren't installed are shown as
-    such and left out.
+    such and left out. The wallpaper is left alone unless you check
+    **Wallpaper** (`--parts=…,wallpaper` from a Terminal).
   - Shows a theme's light and dark versions as one, with a **Mode** menu, and
     switches between them with the parts you applied (see below).
   - Saves your look and icons the first time, so **Revert** always gets
@@ -580,7 +594,10 @@ Rebuild the package when Hokku's decorator classes change; until then,
     commit as many past it as the revision says, then just the 42 header
     files. If the compiler isn't installed, it offers to install it (gcc
     and haiku_devel). A decorator in use is switched to its new build, and
-    set aside if app_server doesn't take it. The same from a Terminal:
+    set aside if app_server doesn't take it. It notes the revision it built
+    for, and no theme is applied, from the window, a Terminal or the light
+    and dark schedule, while that isn't the running system's, or while add-ons
+    are missing and were never built. The same from a Terminal:
     `powertheme --build-decorators
     [--install-tools]` (`src/themes/build-decorators.sh`).
   - `powertheme --list`, `--apply=NAME [--parts=…] [--mode=light|dark]`,
