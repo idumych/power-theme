@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Decorator Style Engine</title>
-<meta name="description" content="The plan for a stable decorator plug-in interface in Renku OS, so window borders no longer need rebuilding after a system update.">
+<meta name="description" content="How Renku OS gets a stable decorator plug-in interface, and a draft one for control looks, so window borders and controls no longer need rebuilding after a system update.">
 <style>
 :root {
 	--bg: #e9e8e3; --panel: #f6f5f1; --text: #1b1b1c; --muted: #5b5b58;
@@ -99,36 +99,140 @@ footer { border-top: 1px solid var(--line); padding: 24px 0 48px; color: var(--m
 	</div>
 
 	<header>
-		<h1>Window borders that survive system updates</h1>
-		<p>A plan for a decorator style engine in Renku OS: a stable plug-in interface, so a theme's window borders are compiled once and keep working on every later Renku.</p>
+		<h1>Window borders and controls that survive system updates</h1>
+		<p>A stable plug-in interface for window decorators in Renku OS, so a theme's window borders are compiled once and keep working on every later Renku. A matching change for control looks is in draft.</p>
 	</header>
-	<p class="status"><b>Status:</b> planned, November 2026. Nothing below is written yet.</p>
+	<p class="status"><b>Status, 10 November 2026:</b> built and tested in a VM. The Renku side is in review as <a href="https://github.com/RenkuOS/Source/pull/357">#357</a>–<a href="https://github.com/RenkuOS/Source/pull/360">#360</a>, and Power Theme's styles are on its <a href="https://github.com/idumych/power-theme/tree/decor-styles"><code>decor-styles</code></a> branch. Control looks: draft <a href="https://github.com/RenkuOS/Source/pull/361">#361</a>, proposal <a href="https://github.com/RenkuOS/Source/issues/362">#362</a>. None of it is in a release yet.</p>
 
 	<section>
 		<h2>Why</h2>
 		<div class="sheet">
-			<p>Power Theme's 15 window decorators subclass app_server's private <code>Decorator</code> class and draw through its private <code>DrawingEngine</code>. That ties each one to the exact system build it was compiled for. In January Haiku reordered <code>DrawingEngine</code>'s methods, and a decorator built before that change crashed app_server for a user, so the desktop wouldn't start.</p>
+			<p>Power Theme's 15 window decorators subclass app_server's private <code>Decorator</code> class and draw through its private <code>DrawingEngine</code>. That ties each one to the exact system build it was compiled for. In January Haiku reordered <code>DrawingEngine</code>'s methods, and a decorator built before that change crashed app_server for a user, so the desktop wouldn't start. Safe mode's "Disable user add-ons" doesn't help, because app_server loads the decorator its settings name.</p>
 			<p><a href="https://github.com/idumych/power-theme/releases/tag/v1.0.1">Power Theme 1.0.1</a> contains the damage: its add-ons refuse to load on a system build they weren't made for, and are rebuilt at the next login. That still needs a compiler on every machine. Haiku has no public decorator API to build against instead, but Renku can have one.</p>
 			<p>It's feasible because, across all 15 decorators (about 16,000 lines), the drawing they do is small: lines, points, rectangles, gradient fills, text, one bitmap, clipping and the system colours.</p>
 		</div>
 	</section>
 
 	<section>
-		<h2>The design</h2>
+		<h2>How it works in Renku</h2>
 		<div class="sheet">
-			<h3>A stable interface</h3>
-			<p>A new public header, <code>DecorStyle.h</code>, in plain C. Only C structs and function tables cross between app_server and a style. Every struct starts with its size and later versions only add to the end, so styles built against an older version keep loading. A style add-on exports <code>instantiate_decor_style()</code>.</p>
+			<p>Four pull requests, each building on the one before, about 2,800 lines in all:</p>
+			<h3>1. The interface: <code>DecorStyle.h</code> (#357)</h3>
+			<p>A new public header, <code>headers/os/add-ons/decorator/DecorStyle.h</code>. Only plain C structures and tables of function pointers cross between app_server and a style, so a style depends on nothing private and nothing C++-specific, such as class layouts or vtables.</p>
 			<ul>
-				<li><b>Layout:</b> a pure function. Given the window's frame, look, flags, tabs and font metrics, it returns the border rectangles, each tab, the title, the buttons (plus extras such as QNX's menu box), the resize corner and, optionally, the exact outline with rounded corners.</li>
-				<li><b>Drawing:</b> callbacks for the frame, tab, title, each button in each state, the resize corner and the live-resize outline.</li>
-				<li><b>The canvas:</b> app_server's side, a table of drawing calls. It covers lines and rectangles, gradients, text and truncation, fonts, bitmaps, drawing modes, clipping and the system colours.</li>
+				<li><b>Versioned by size:</b> every structure starts with its size and only ever grows at the end. A style names the interface version it was built for (<code>DECOR_STYLE_API_VERSION</code>), and app_server refuses one newer than its own.</li>
+				<li><b>The window, <code>decor_window</code>:</b> what app_server tells the style (the content frame, the tabs and which is in front, highlights, the outline while resizing), and what the style's layout fills in (the four borders, the title bar, each tab's buttons, the resize corner, whether tabs slide). A <code>cookie</code> holds the style's own state for each window.</li>
+				<li><b>The style, <code>decor_style</code>:</b> what a style does. Only layout and drawing are required; the rest is optional:</li>
 			</ul>
-			<h3>One engine in app_server</h3>
-			<p>A <code>StyleDecorator</code> implements app_server's decorator once and asks the style for layout and drawing. Tabs, stacked windows, sliding BeOS-style tabs, hit-testing, moving, resizing and button highlights live in the engine, so each style only describes what it looks like.</p>
-			<h3>Loading safely</h3>
-			<p>app_server loads styles from the usual decorators folder, alongside today's decorators, which keep working. A style asking for an unknown version of the interface is refused, and the window gets the default decorator instead of a crash.</p>
-			<h3>Power Theme's decorators as styles</h3>
-			<p>Each decorator is ported once. Its layout code becomes the layout function, and its drawing code stays almost line for line, drawing on the canvas instead of app_server's engine. A small shared kit holds what several decorators repeat. The package then ships the compiled styles, so on Renku no compiler is needed for window borders. Haiku keeps today's build-on-your-system approach.</p>
+<pre>typedef struct decor_style {
+	uint32  size;
+	uint32  api_version;
+	const char* name;
+
+	status_t (*create_window)(decor_window*, decor_canvas*);
+	void     (*delete_window)(decor_window*);
+	void     (*update_font)(decor_window*, decor_canvas*);
+	void     (*layout)(decor_window*, decor_canvas*);      // where everything goes
+	void     (*draw_frame)(decor_window*, decor_canvas*, decor_rect invalid);
+	void     (*draw_tab)(decor_window*, decor_canvas*, int32 tab, decor_rect invalid);
+	void     (*draw_button)(decor_window*, decor_canvas*, int32 tab, int32 button, ...);
+	...
+	// optional: take over what the engine would do
+	int32    (*region_at)(decor_window*, decor_point where, int32* tab);
+	void     (*footprint)(decor_window*, decor_region*);
+	void     (*size_limits)(decor_window*, int32* minW, int32* minH, ...);
+	void     (*update_colors)(decor_window*, decor_canvas*);
+} decor_style;
+
+extern "C" decor_style* instantiate_decor_style();</pre>
+			<h3>2. The canvas (#358)</h3>
+			<p><code>decor_canvas</code> is the other direction: a table of drawing calls app_server hands the style. <code>StyleCanvas</code> implements it on app_server's <code>DrawingEngine</code>. It covers:</p>
+			<ul>
+				<li>lines, points, rectangles, gradient fills, patterns, and drawing and blending modes;</li>
+				<li><code>B_RGBA32</code> bitmaps;</li>
+				<li>the system's plain, bold, fixed and menu fonts, with rotation, for measuring, shortening and drawing text;</li>
+				<li>the system colours, and whether drawing goes straight to the screen.</li>
+			</ul>
+			<p>When app_server's drawing code changes, only <code>StyleCanvas</code> has to follow. The styles don't notice.</p>
+			<h3>3. The engine and loading (#359)</h3>
+			<p><code>StyleDecorator</code> is one ordinary app_server <code>Decorator</code> that asks a style for layout and drawing, and does everything else as app_server's own decorators do:</p>
+			<ul>
+				<li>tabs and stacked windows;</li>
+				<li>sliding a lone tab along the top, BeOS-style;</li>
+				<li>moving, resizing and the resize outline;</li>
+				<li>hit testing, button highlights, the footprint and size limits.</li>
+			</ul>
+			<p>A style describes only how it looks, and can take any of these over when it needs to.</p>
+			<p><code>DecorManager</code> loads a style from the usual decorators folder, alongside today's decorators, which keep working. It tells the two apart by whether the add-on exports <code>instantiate_decor_style()</code> or <code>instantiate_decor_addon()</code>. A style built for a newer interface, or missing a required call, is refused with a line in the system log, and app_server keeps its own decorator instead of crashing.</p>
+			<h3>4. Tidy, an example style (#360)</h3>
+			<p>Tidy, written against <code>DecorStyle.h</code> and libbe's public classes alone. It shows the parts a style can take on: its own tab layout, hit testing, a footprint with cut corners, a rotated title font for left-titled windows, and per-window state. It also compiles with gcc 2.95 for 32-bit Renku.</p>
+		</div>
+	</section>
+
+	<section>
+		<h2>Power Theme's decorators as styles</h2>
+		<div class="sheet">
+			<p>On the <code>decor-styles</code> branch, all 15 decorators run as styles, in two ways:</p>
+			<ul>
+				<li><b>Ported by hand:</b> QNX and Reactionary. Their layout code became the layout function, and their drawing stayed almost line for line, drawing on the canvas instead of app_server's engine. <code>StyleKit.h</code> shows the interface's structures as <code>BRect</code> and <code>BPoint</code>, so a style's drawing reads as the decorator's did.</li>
+				<li><b>Through a shim:</b> the other 13 (Tidy, Flat, Smoke, Gonx, Gershwix, Leopard, NeXT, System 7, Amiga, AmigaOS 3, Platinum, Expose and TidySquare) need no changes at all. The shim stands in for the private headers they were written against:
+					<ul>
+						<li>It provides app_server's <code>Decorator</code>, <code>DrawingEngine</code>, <code>DrawState</code>, <code>ServerFont</code> and <code>DesktopSettings</code>, as far as the decorators use them, rebuilt on the canvas.</li>
+						<li>A decorator's unchanged source is compiled against these instead of app_server's headers, with its entry point renamed.</li>
+						<li><code>StyleShim.cpp</code> then calls it the way app_server would.</li>
+					</ul>
+					The result depends only on <code>DecorStyle.h</code>, like a hand-written style.</li>
+			</ul>
+			<p>On Renku, the package will ship the compiled styles, so no compiler is needed for window borders. On Haiku, Power Theme keeps today's build-on-your-system approach.</p>
+		</div>
+	</section>
+
+	<section>
+		<h2>How it was tested</h2>
+		<div class="sheet">
+			<p>In VirtualBox, on the Power Renku image with the engine built into its app_server, which ran in place of the stock one:</p>
+			<ul>
+				<li><b>Pixel for pixel:</b> a test app opens eight windows: titled, document, floating, modal, bordered, not resizable, a shortened title and left-titled. Each was screenshotted active and inactive, with title bars and with BeOS-style tabs. All 15 styles matched their original decorators exactly.</li>
+				<li><b>By hand:</b> pressing buttons and sliding off them, moving by the tab, resizing from a corner, zooming and restoring, tiling, and stacking two windows by their tabs all behaved as with the originals.</li>
+				<li><b>Across builds:</b> the same style binaries, not rebuilt, were run on an app_server with an extra virtual method at the top of <code>DrawingEngine</code>. That shifts every slot after it, as January's change did. They loaded and drew identically, with no crashes.</li>
+				<li><b>Two existing bugs,</b> seen with the original decorators too: Expose leaves two pixels of its resize grip unpainted, and Reactionary's BeOS tab shows no title on a window that can't be zoomed.</li>
+				<li><b>Not tested yet:</b> real hardware, running on 32-bit Renku, the composited desktop and multiple monitors.</li>
+			</ul>
+		</div>
+	</section>
+
+	<section>
+		<h2>Controls too (draft)</h2>
+		<div class="sheet">
+			<p>Control looks, which draw buttons, check boxes, menus, tabs and scroll bars inside every application, have the same problem. All 15 of Power Theme's subclass libbe's private <code>HaikuControlLook</code>, so they depend on its data members, its vtable and its private helpers:</p>
+			<ul>
+				<li>a member added to that class makes an old look write over memory;</li>
+				<li>a look that no longer fits can crash every application that loads it.</li>
+			</ul>
+			<p>1.0.1 rebuilds them at login too. The same fix is proposed for them, in <a href="https://github.com/RenkuOS/Source/issues/362">#362</a>.</p>
+			<h3>In libbe: one new function (#361, draft, about 90 lines)</h3>
+<pre>extern "C" BControlLook* create_default_control_look(BControlLook* outer);</pre>
+			<p>It returns a new default look that an add-on <b>wraps instead of subclassing</b>. The add-on subclasses the public <code>BControlLook</code>, keeps the default look, and passes it every call it doesn't handle itself.</p>
+			<ul>
+				<li><b>Overrides keep working:</b> the default look sometimes calls its own methods. For example, a slider's thumb draws its background with <code>DrawButtonBackground()</code>. With a subclass, the look's override is used there. To keep that, the default look now makes those calls through <code>outer</code> (about 15 places), so they reach the add-on's override. For libbe's own default look, <code>outer</code> is the look itself, so nothing changes for applications.</li>
+				<li><b>C linkage:</b> the name is the same for gcc 2 and current gcc. Its presence is also the compatibility check: on a system without it (Haiku, or an older Renku), such a look fails to load with a missing symbol, and libbe falls back to the default look. Nothing crashes.</li>
+				<li><b>A promise:</b> <code>BControlLook</code> itself only changes through its reserved slots, so a look built this way depends on that public layout and nothing else.</li>
+			</ul>
+			<h3>In Power Theme: a forwarding base class</h3>
+			<p>On the <a href="https://github.com/idumych/power-theme/tree/control-look-kit"><code>control-look-kit</code></a> branch, <code>ForwardingControlLook</code> is generated from <code>ControlLook.h</code> by a script:</p>
+			<ul>
+				<li>it forwards all 54 of <code>BControlLook</code>'s methods to the default look;</li>
+				<li>it carries copies of the few private helpers some looks call, such as <code>_DrawFrame()</code>, <code>_FillGradient()</code> and the round corners.</li>
+			</ul>
+			<p>Each look derives from it instead of <code>HaikuControlLook</code>, and nothing else in the look changes. Built for a system without the new function, <code>ForwardingControlLook</code> is just <code>HaikuControlLook</code>, so the same source still builds the old way. Looks are linked with <code>-Bsymbolic</code>, so two looks loaded in one application at once, as happens during a live theme switch, each keep their own copy of the base class.</p>
+			<h3>Tested so far</h3>
+			<ul>
+				<li><b>Pixel comparison:</b> the 15 looks, built once against public headers only, against the same looks built the old way, in a window with every kind of control. 14 are pixel-identical. Leopard differs by 8 pixels in a tab row, which differs by 13 between two runs of the old build.</li>
+				<li><b>The default look:</b> pixel-identical with and without the change.</li>
+				<li><b>On a system without the function:</b> the look is refused and the default look shows, with no crash.</li>
+				<li><b>Live switching</b> between two built-once looks in a running application works, and switching back is pixel-identical.</li>
+				<li><b>Old looks are unsafe:</b> a look built the old way crashed on the changed libbe, which is the failure this removes.</li>
+			</ul>
 		</div>
 	</section>
 
@@ -136,26 +240,17 @@ footer { border-top: 1px solid var(--line); padding: 24px 0 48px; color: var(--m
 		<h2>Steps</h2>
 		<div class="sheet">
 			<div class="table"><table>
-				<tr><th>#</th><th>Where</th><th>What</th></tr>
-				<tr><td class="n">1</td><td>Power Theme</td><td>List what each decorator's layout needs, and check the interface draft covers it</td></tr>
-				<tr><td class="n">2</td><td>Renku</td><td>The interface, the canvas, the engine and loading, as pull requests to RenkuOS/Source</td></tr>
-				<tr><td class="n">3</td><td>Renku</td><td>Haiku's Flat decorator as a reference style</td></tr>
-				<tr><td class="n">4</td><td>Power Theme</td><td>The shared kit, then QNX and Reactionary as the first styles</td></tr>
-				<tr><td class="n">5</td><td>Power Theme</td><td>The other 13 styles, and packaging them</td></tr>
-				<tr><td class="n">6</td><td>Both</td><td>Rounded outlines feeding the compositor, once that work is merged</td></tr>
+				<tr><th>#</th><th>Where</th><th>What</th><th>Status</th></tr>
+				<tr><td class="n">1</td><td>Power Theme</td><td>List what each decorator's layout needs, and check the interface covers it</td><td>Done</td></tr>
+				<tr><td class="n">2</td><td>Renku</td><td>The interface, the canvas, the engine and loading</td><td>In review: #357–#359</td></tr>
+				<tr><td class="n">3</td><td>Renku</td><td>A reference style (Tidy, rather than Flat)</td><td>In review: #360</td></tr>
+				<tr><td class="n">4</td><td>Power Theme</td><td>The style kit, QNX and Reactionary as hand-ported styles</td><td>Done, on <code>decor-styles</code></td></tr>
+				<tr><td class="n">5</td><td>Power Theme</td><td>The other 13 decorators, through the shim</td><td>Done, on <code>decor-styles</code></td></tr>
+				<tr><td class="n">6</td><td>Renku</td><td><code>create_default_control_look()</code> for control looks</td><td>Draft: #361</td></tr>
+				<tr><td class="n">7</td><td>Power Theme</td><td>The 15 control looks on <code>ForwardingControlLook</code></td><td>Done, on <code>control-look-kit</code></td></tr>
+				<tr><td class="n">8</td><td>Power Theme</td><td>Shipping the prebuilt styles and looks, and choosing them on Renku: release 1.1</td><td>To do</td></tr>
+				<tr><td class="n">9</td><td>Both</td><td>Rounded outlines feeding the compositor, once that work is merged</td><td>To do</td></tr>
 			</table></div>
-		</div>
-	</section>
-
-	<section>
-		<h2>How it will be checked</h2>
-		<div class="sheet">
-			<ul>
-				<li><b>Pixel for pixel:</b> a test app opens the same set of windows in every theme, with the old decorator and with the new style. The screenshots must match exactly.</li>
-				<li><b>Across builds:</b> styles built once must keep loading and drawing the same after app_server is rebuilt with an unrelated change to its drawing engine, like January's.</li>
-				<li><b>Layout on its own:</b> the layout functions don't depend on app_server, so they're tested on Linux too.</li>
-				<li><b>By hand:</b> dragging, resizing, the buttons and stacking windows by their tabs.</li>
-			</ul>
 		</div>
 	</section>
 
