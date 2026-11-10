@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Decorator Style Engine</title>
+<meta name="description" content="The plan for a stable decorator plug-in interface in Renku OS, so window borders no longer need rebuilding after a system update.">
+<style>
+:root {
+	--bg: #e9e8e3; --panel: #f6f5f1; --text: #1b1b1c; --muted: #5b5b58;
+	--line: #c9c7bf; --accent: #ffcb00; --on-accent: #1b1b1c; --link: #174a9c;
+	--code: #ecebe5; color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+	:root:not([data-theme="light"]) {
+		--bg: #0c0c0d; --panel: #1c1c1e; --text: #ecebe6; --muted: #a7a6a0;
+		--line: #38383a; --accent: #ffcb00; --on-accent: #1b1b1c; --link: #ffd84d;
+		--code: #262628; color-scheme: dark;
+	}
+}
+:root[data-theme="dark"] {
+	--bg: #0c0c0d; --panel: #1c1c1e; --text: #ecebe6; --muted: #a7a6a0;
+	--line: #38383a; --accent: #ffcb00; --on-accent: #1b1b1c; --link: #ffd84d;
+	--code: #262628; color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+	margin: 0; background: var(--bg); color: var(--text);
+	font: 17px/1.6 "Noto Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+a { color: var(--link); }
+img { display: block; max-width: 100%; height: auto; }
+.wrap { max-width: 1040px; margin: 0 auto; padding: 0 16px; }
+.top { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 18px 0; }
+.name { font-weight: 700; }
+a.name { color: var(--text); text-decoration: none; }
+button.mode {
+	font: inherit; font-size: 15px; color: var(--text); background: var(--panel);
+	border: 1px solid var(--line); border-radius: 4px; padding: 5px 12px; cursor: pointer;
+}
+header h1 { font-size: clamp(2rem, 6vw, 3.4rem); line-height: 1.08; margin: 26px 0 14px; letter-spacing: -.02em; max-width: 24ch; }
+header p { font-size: 1.15rem; color: var(--muted); max-width: 62ch; margin: 0 0 30px; }
+
+/* the slider between the two themes */
+.compare {
+	position: relative; overflow: hidden; border: 1px solid var(--line);
+	aspect-ratio: 4 / 3; background: #000; touch-action: pan-y;
+}
+.compare img { position: absolute; inset: 0; width: 100%; height: 100%; }
+.compare .over { clip-path: inset(0 calc(100% - var(--at, 50%)) 0 0); }
+.compare .bar { position: absolute; top: 0; bottom: 0; left: var(--at, 50%); width: 3px; margin-left: -1px; background: var(--accent); pointer-events: none; }
+.compare input { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; opacity: 0; cursor: ew-resize; }
+.compare .tag { position: absolute; bottom: 10px; font-size: 13px; font-weight: 700; padding: 2px 9px; background: var(--accent); color: var(--on-accent); pointer-events: none; }
+.compare .tag.l { left: 10px; } .compare .tag.r { right: 10px; }
+.caption { color: var(--muted); font-size: 15px; margin: 10px 0 0; }
+
+section { margin: 68px 0; }
+/* a section heading wears a window tab */
+h2 {
+	display: inline-block; margin: 0; padding: 5px 16px 4px; font-size: 1.15rem;
+	background: var(--accent); color: var(--on-accent); border-radius: 3px 3px 0 0;
+}
+.sheet { background: var(--panel); border: 1px solid var(--line); padding: 24px; }
+.sheet > :first-child { margin-top: 0; }
+.sheet > :last-child { margin-bottom: 0; }
+h3 { margin: 26px 0 8px; font-size: 1.05rem; }
+.status { font-size: 14px; color: var(--muted); }
+.status b { color: var(--text); }
+.pair { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; margin: 20px 0 6px; }
+.pair.narrow { max-width: 620px; }
+.pair figure { margin: 0; }
+.pair img { border: 1px solid var(--line); }
+figcaption { font-size: 14px; color: var(--muted); margin-top: 6px; }
+pre {
+	background: var(--code); padding: 14px 16px; overflow-x: auto; margin: 18px 0;
+	font: 14px/1.5 "Noto Sans Mono", ui-monospace, Menlo, Consolas, monospace;
+}
+code { font-family: "Noto Sans Mono", ui-monospace, Menlo, Consolas, monospace; font-size: .92em; }
+.table { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; font-size: 15.5px; }
+th, td { text-align: left; padding: 9px 12px 9px 0; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { font-size: 14px; color: var(--muted); font-weight: 600; }
+td.n { white-space: nowrap; font-weight: 700; }
+ul { padding-left: 1.2em; } li { margin: 6px 0; }
+footer { border-top: 1px solid var(--line); padding: 24px 0 48px; color: var(--muted); font-size: 14.5px; }
+@media (max-width: 560px) {
+	body { font-size: 16px; }
+	.sheet { padding: 16px; }
+	.pair { gap: 10px; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+	<div class="top">
+		<a class="name" href="./">Power Theme</a>
+		<button class="mode" id="mode" type="button">Switch to dark</button>
+	</div>
+
+	<header>
+		<h1>Window borders that survive system updates</h1>
+		<p>A plan for a decorator style engine in Renku OS: a stable plug-in interface, so a theme's window borders are compiled once and keep working on every later Renku.</p>
+	</header>
+	<p class="status"><b>Status:</b> planned, November 2026. Nothing below is written yet.</p>
+
+	<section>
+		<h2>Why</h2>
+		<div class="sheet">
+			<p>Power Theme's 15 window decorators subclass app_server's private <code>Decorator</code> class and draw through its private <code>DrawingEngine</code>. That ties each one to the exact system build it was compiled for. In January Haiku reordered <code>DrawingEngine</code>'s methods, and a decorator built before that change crashed app_server for a user, so the desktop wouldn't start.</p>
+			<p><a href="https://github.com/idumych/power-theme/releases/tag/v1.0.1">Power Theme 1.0.1</a> contains the damage: its add-ons refuse to load on a system build they weren't made for, and are rebuilt at the next login. That still needs a compiler on every machine. Haiku has no public decorator API to build against instead, but Renku can have one.</p>
+			<p>It's feasible because, across all 15 decorators (about 16,000 lines), the drawing they do is small: lines, points, rectangles, gradient fills, text, one bitmap, clipping and the system colours.</p>
+		</div>
+	</section>
+
+	<section>
+		<h2>The design</h2>
+		<div class="sheet">
+			<h3>A stable interface</h3>
+			<p>A new public header, <code>DecorStyle.h</code>, in plain C. Only C structs and function tables cross between app_server and a style. Every struct starts with its size and later versions only add to the end, so styles built against an older version keep loading. A style add-on exports <code>instantiate_decor_style()</code>.</p>
+			<ul>
+				<li><b>Layout:</b> a pure function. Given the window's frame, look, flags, tabs and font metrics, it returns the border rectangles, each tab, the title, the buttons (plus extras such as QNX's menu box), the resize corner and, optionally, the exact outline with rounded corners.</li>
+				<li><b>Drawing:</b> callbacks for the frame, tab, title, each button in each state, the resize corner and the live-resize outline.</li>
+				<li><b>The canvas:</b> app_server's side, a table of drawing calls. It covers lines and rectangles, gradients, text and truncation, fonts, bitmaps, drawing modes, clipping and the system colours.</li>
+			</ul>
+			<h3>One engine in app_server</h3>
+			<p>A <code>StyleDecorator</code> implements app_server's decorator once and asks the style for layout and drawing. Tabs, stacked windows, sliding BeOS-style tabs, hit-testing, moving, resizing and button highlights live in the engine, so each style only describes what it looks like.</p>
+			<h3>Loading safely</h3>
+			<p>app_server loads styles from the usual decorators folder, alongside today's decorators, which keep working. A style asking for an unknown version of the interface is refused, and the window gets the default decorator instead of a crash.</p>
+			<h3>Power Theme's decorators as styles</h3>
+			<p>Each decorator is ported once. Its layout code becomes the layout function, and its drawing code stays almost line for line, drawing on the canvas instead of app_server's engine. A small shared kit holds what several decorators repeat. The package then ships the compiled styles, so on Renku no compiler is needed for window borders. Haiku keeps today's build-on-your-system approach.</p>
+		</div>
+	</section>
+
+	<section>
+		<h2>Steps</h2>
+		<div class="sheet">
+			<div class="table"><table>
+				<tr><th>#</th><th>Where</th><th>What</th></tr>
+				<tr><td class="n">1</td><td>Power Theme</td><td>List what each decorator's layout needs, and check the interface draft covers it</td></tr>
+				<tr><td class="n">2</td><td>Renku</td><td>The interface, the canvas, the engine and loading, as pull requests to RenkuOS/Source</td></tr>
+				<tr><td class="n">3</td><td>Renku</td><td>Haiku's Flat decorator as a reference style</td></tr>
+				<tr><td class="n">4</td><td>Power Theme</td><td>The shared kit, then QNX and Reactionary as the first styles</td></tr>
+				<tr><td class="n">5</td><td>Power Theme</td><td>The other 13 styles, and packaging them</td></tr>
+				<tr><td class="n">6</td><td>Both</td><td>Rounded outlines feeding the compositor, once that work is merged</td></tr>
+			</table></div>
+		</div>
+	</section>
+
+	<section>
+		<h2>How it will be checked</h2>
+		<div class="sheet">
+			<ul>
+				<li><b>Pixel for pixel:</b> a test app opens the same set of windows in every theme, with the old decorator and with the new style. The screenshots must match exactly.</li>
+				<li><b>Across builds:</b> styles built once must keep loading and drawing the same after app_server is rebuilt with an unrelated change to its drawing engine, like January's.</li>
+				<li><b>Layout on its own:</b> the layout functions don't depend on app_server, so they're tested on Linux too.</li>
+				<li><b>By hand:</b> dragging, resizing, the buttons and stacking windows by their tabs.</li>
+			</ul>
+		</div>
+	</section>
+
+	<footer>
+		<p>By <a href="https://github.com/idumych">idumych</a>, built with <a href="https://claude.com/claude-code">Claude Code</a>. See <a href="https://github.com/idumych/power-theme">Power Theme</a> and <a href="https://github.com/RenkuOS/Source">Renku OS</a>.</p>
+		<p>This is an independent project, not affiliated with or endorsed by the Haiku project.</p>
+	</footer>
+</div>
+<script>
+(function () {
+	var root = document.documentElement, button = document.getElementById("mode");
+	function isDark() {
+		var chosen = root.getAttribute("data-theme");
+		return chosen ? chosen === "dark"
+			: matchMedia("(prefers-color-scheme: dark)").matches;
+	}
+	function label() {
+		button.textContent = isDark() ? "Switch to light" : "Switch to dark";
+	}
+	try {
+		var saved = localStorage.getItem("theme");
+		if (saved) root.setAttribute("data-theme", saved);
+	} catch (e) {}
+	label();
+	button.addEventListener("click", function () {
+		var next = isDark() ? "light" : "dark";
+		root.setAttribute("data-theme", next);
+		try { localStorage.setItem("theme", next); } catch (e) {}
+		label();
+	});
+	matchMedia("(prefers-color-scheme: dark)").addEventListener("change", label);
+
+	document.querySelectorAll(".compare").forEach(function (compare) {
+		compare.querySelector("input").addEventListener("input", function (event) {
+			compare.style.setProperty("--at", event.target.value + "%");
+		});
+	});
+})();
+</script>
+</body>
+</html>
