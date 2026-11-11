@@ -59,14 +59,18 @@ for entry in $decorators; do
 		files="$files $file"
 	done
 	tab=""
-	if grep -q "TabDecorator" $files; then
+	if grep -q "TabDecorator" "$folder"/*.cpp "$folder"/*.h 2>/dev/null; then
 		tab=$shim/TabDecorator.cpp
 	fi
 
 	output=$dest/decorators/$name
 	echo "g++ $name"
+	# -Bsymbolic: the style calls its own shim and TabDecorator, never
+	# app_server's classes of the same names, which it is loaded into;
+	# --no-undefined: nor anything of app_server's that it lacks
 	# shellcheck disable=SC2086
 	g++ $flags -DSHIM_STYLE_NAME="\"$name\"" -I"$folder" -shared -s \
+		-Wl,-Bsymbolic -Wl,--no-undefined \
 		-o "$output" $files $tab "$shim/StyleShim.cpp" -lbe -lstdc++ 2>&1 \
 		|| fail "$name: doesn't build"
 	for rdef in "$folder"/$resources; do
