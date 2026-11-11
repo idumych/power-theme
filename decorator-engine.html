@@ -102,7 +102,7 @@ footer { border-top: 1px solid var(--line); padding: 24px 0 48px; color: var(--m
 		<h1>Window borders and controls that survive system updates</h1>
 		<p>A stable plug-in interface for window decorators in Renku OS, so a theme's window borders are compiled once and keep working on every later Renku. A matching change for control looks is in draft.</p>
 	</header>
-	<p class="status"><b>Status, 10 November 2026:</b> built, and shipped in the <a href="https://github.com/idumych/power-theme/releases/tag/power-renku-4">Power Renku 4</a> test image, with all of Power Theme's window borders as styles and its controls as build-once looks. The Renku side is in review as <a href="https://github.com/RenkuOS/Source/pull/357">#357</a>–<a href="https://github.com/RenkuOS/Source/pull/360">#360</a>; control looks: draft <a href="https://github.com/RenkuOS/Source/pull/361">#361</a>, proposal <a href="https://github.com/RenkuOS/Source/issues/362">#362</a>. Power Theme's side is on its <a href="https://github.com/idumych/power-theme/tree/power-renku-4"><code>power-renku-4</code></a> branch. None of it is in a Power Theme release yet.</p>
+	<p class="status"><b>Status, 10 November 2026:</b> built, and shipped in the <a href="https://github.com/idumych/power-theme/releases/tag/power-renku-4">Power Renku 4</a> test image, with all of Power Theme's window borders as styles and its controls as build-once looks. The Renku side is in review as <a href="https://github.com/RenkuOS/Source/pull/357">#357</a>–<a href="https://github.com/RenkuOS/Source/pull/360">#360</a>; control looks: draft <a href="https://github.com/RenkuOS/Source/pull/361">#361</a>, proposal <a href="https://github.com/RenkuOS/Source/issues/379">#379</a>, which covers both and is their splitting plan. Power Theme's side is on its <a href="https://github.com/idumych/power-theme/tree/power-renku-4"><code>power-renku-4</code></a> branch. None of it is in a Power Theme release yet.</p>
 
 	<section>
 		<h2>Why</h2>
@@ -209,7 +209,7 @@ extern "C" decor_style* instantiate_decor_style();</pre>
 				<li>a member added to that class makes an old look write over memory;</li>
 				<li>a look that no longer fits can crash every application that loads it.</li>
 			</ul>
-			<p>1.0.1 rebuilds them at login too. The same fix is proposed for them, in <a href="https://github.com/RenkuOS/Source/issues/362">#362</a>.</p>
+			<p>1.0.1 rebuilds them at login too. The same fix is proposed for them, in <a href="https://github.com/RenkuOS/Source/issues/379">#379</a>.</p>
 			<h3>In libbe: one new function (#361, draft, about 90 lines)</h3>
 <pre>extern "C" BControlLook* create_default_control_look(BControlLook* outer);</pre>
 			<p>It returns a new default look that an add-on <b>wraps instead of subclassing</b>. The add-on subclasses the public <code>BControlLook</code>, keeps the default look, and passes it every call it doesn't handle itself.</p>

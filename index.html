@@ -193,7 +193,7 @@ footer { border-top: 1px solid var(--line); padding: 24px 0 48px; color: var(--m
 			<p>The compositor can cut a window's corners away, but only a decorator knows how to draw its own border along the curve. A decorator opts in to rounding by also inheriting a small class, <code>RoundedDecorator</code>, and decorators built without it keep their square corners, still with a shadow. Renku's Default and Flat decorators round their corners, and since <a href="https://github.com/idumych/power-theme/releases/tag/v0.6.1">Power Theme 0.6.1</a> so does every decorator Power Theme has. With the option unticked, Tidy, Expose and Gonx fall back to their own small curves.</p>
 			<p>Power Theme's themes switch live with the compositor on, and the shadow or glow follows each theme.</p>
 			<p><b>Try it:</b> <a href="https://github.com/idumych/power-theme/releases/tag/power-renku-4">Power Renku 4</a> is an unofficial bootable x86_64 image with everything on this page. It starts in Tidy Square, with the compositor's shadows, rounded corners and see-through dragging all on, transparent windows, and window borders and controls built once. It has only run in VirtualBox, so expect rough edges, and don't update it.</p>
-			<p class="status"><b>Proposed:</b> merging the compositor into Renku, off by default, is proposed in <a href="https://github.com/RenkuOS/Source/issues/320">RenkuOS/Source#320</a>, ahead of a series of PRs. It isn't in Renku yet.</p>
+			<p class="status"><b>Proposed:</b> merging the compositor into Renku, off by default, is proposed in <a href="https://github.com/RenkuOS/Source/issues/378">RenkuOS/Source#378</a>, as a series of 12 draft PRs (<a href="https://github.com/RenkuOS/Source/pull/330">#330</a>–<a href="https://github.com/RenkuOS/Source/pull/341">#341</a>). It isn't in Renku yet.</p>
 		</div>
 	</section>
 
@@ -203,7 +203,7 @@ footer { border-top: 1px solid var(--line); padding: 24px 0 48px; color: var(--m
 			<p>With the compositor on, a window can now ask for a transparent background, with the new <code>B_TRANSPARENT_WINDOW</code> flag. Where it draws nothing, what's behind it shows through. Half-transparent drawing blends with what's behind, and clicks on the clear parts go to the window underneath. Docks, notifications and on-screen displays can then have any shape.</p>
 			<img src="img/transparent-windows.png" width="1024" height="768" alt="Two test windows and a Qt window over a Terminal: their red and green blocks are solid, a half-transparent blue ellipse and a dark rounded panel let the Terminal's text show through, and the rest of each window is clear." loading="lazy">
 			<p>Qt applications get it too: a patched Qt platform plugin turns <code>Qt::WA_TranslucentBackground</code> into the new flag. An application can ask <code>is_composited_desktop()</code> whether there's a compositor, and draw a background of its own when there isn't.</p>
-			<p class="status"><b>Not proposed yet:</b> it follows the compositor series of <a href="https://github.com/RenkuOS/Source/issues/320">#320</a>, on the <a href="https://github.com/idumych/Source/tree/compositor/13-transparent-windows"><code>compositor/13-transparent-windows</code></a> branch of my fork. It's in Power Renku 4.</p>
+			<p class="status"><b>Draft:</b> <a href="https://github.com/RenkuOS/Source/pull/377">#377</a>, part 13 of the compositor series (<a href="https://github.com/RenkuOS/Source/issues/378">#378</a>), and <a href="https://github.com/RenkuOS/RenkuOSPorts/pull/8">RenkuOSPorts#8</a> for Qt. It's in Power Renku 4.</p>
 		</div>
 	</section>
 
@@ -212,7 +212,7 @@ footer { border-top: 1px solid var(--line); padding: 24px 0 48px; color: var(--m
 		<div class="sheet">
 			<p>Power Theme's window borders and controls used to be built for one exact system, and had to be rebuilt after every update. A stable interface for <b>decorator styles</b> and a way to build <b>control looks</b> on Renku's default look change that: built once, they keep working on later systems. All 15 of Power Theme's window borders and all 15 of its control looks are built this way in Power Renku 4, with rounded corners on the compositor.</p>
 			<p><a href="decorator-engine.html">How the decorator engine works</a>, with the control look changes.</p>
-			<p class="status"><b>In review:</b> <a href="https://github.com/RenkuOS/Source/pull/357">#357</a>–<a href="https://github.com/RenkuOS/Source/pull/360">#360</a> for decorator styles, draft <a href="https://github.com/RenkuOS/Source/pull/361">#361</a> for control looks.</p>
+			<p class="status"><b>In review:</b> <a href="https://github.com/RenkuOS/Source/pull/357">#357</a>–<a href="https://github.com/RenkuOS/Source/pull/360">#360</a> for decorator styles, draft <a href="https://github.com/RenkuOS/Source/pull/361">#361</a> for control looks, proposed together in <a href="https://github.com/RenkuOS/Source/issues/379">#379</a>.</p>
 		</div>
 	</section>
 
