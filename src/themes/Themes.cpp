@@ -32,6 +32,7 @@
 #include <Messenger.h>
 #include <Notification.h>
 #include <Path.h>
+#include <Alert.h>
 #include <Roster.h>
 #include <image.h>
 #include <StringList.h>
@@ -295,11 +296,38 @@ notify_after_update(const char* text, notification_type type)
 }
 
 
+/*!	Explains, at login, window borders or controls that didn't load when
+	the system started, so that windows have Haiku's own look, unless
+	Power Theme is building them again for an updated system.
+*/
+static int
+explain_fallback()
+{
+	BString explanation;
+	if (!addons_fell_back(explanation))
+		return 0;
+
+	// over the desktop, once it's there
+	for (int32 i = 0; i < 240 && !be_roster->IsRunning(
+			"application/x-vnd.Be-TRAK"); i++)
+		snooze(250000);
+	snooze(3000000);
+
+	BAlert* alert = new BAlert("Power Theme", explanation.String(),
+		"OK", "Open Power Theme", NULL, B_WIDTH_AS_USUAL, B_OFFSET_SPACING,
+		B_WARNING_ALERT);
+	alert->SetShortcut(0, B_ESCAPE);
+	if (alert->Go() == 1)
+		be_roster->Launch(kThemeAppSignature);
+	return 0;
+}
+
+
 /*!	Runs at every login, from the launch_daemon job set_after_update_job()
 	writes. After a system update the add-ons Power Theme built no longer
 	load (AddOnGuard.cpp), and windows have Haiku's own look: this builds
-	them for the new system and applies the theme's again. Without a system
-	update, or if they were never built here, it does nothing.
+	them for the new system and applies the theme's again. Otherwise, if
+	the window borders or controls set didn't load, it says why.
 */
 static int
 after_update()
@@ -307,7 +335,7 @@ after_update()
 	BApplication app(kThemeAppSignature);
 	BString why;
 	if (!addons_built_before() || !addons_need_building(&why))
-		return 0;
+		return explain_fallback();
 
 	BString script;
 	if (find_build_script(script) != B_OK)
@@ -557,6 +585,12 @@ command_line(int argc, char** argv)
 	// colours, fonts and bitmaps need a connection to app_server
 	BApplication app(kThemeAppSignature);
 
+	if (build && prebuilt_addons_supported() == PREBUILT_ALL) {
+		printf("Not needed on this system version: Power Theme's window "
+			"borders and controls come built.\n");
+		return 0;
+	}
+
 	if (build) {
 		BString script;
 		if (find_build_script(script) != B_OK) {
@@ -668,6 +702,11 @@ command_line(int argc, char** argv)
 			}
 		}
 		printf("BeOS-style tabs: %s\n", beos_tabs() ? "on" : "off");
+		const uint32 prebuilt = prebuilt_addons_supported();
+		printf("window borders: %s\n", (prebuilt & PREBUILT_DECORATORS) != 0
+			? "built once (decorator styles)" : "built for this system");
+		printf("controls: %s\n", (prebuilt & PREBUILT_CONTROL_LOOKS) != 0
+			? "built once" : "built for this system");
 		printf("shell: %s\n", photon_shell() ? "photon" : "deskbar");
 		const shell_entry entry = photon_shell_entry();
 		printf("shell at login: %s\n", entry == SHELL_ENTRY_SERVICE

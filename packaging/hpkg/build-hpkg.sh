@@ -17,7 +17,7 @@ set -eu
 
 build=${1:?usage: build-hpkg.sh <build-dir> <icons-dir> [<version>]}
 icons=${2:?usage: build-hpkg.sh <build-dir> <icons-dir> [<version>]}
-version=${3:-1.0.1}
+version=${3:-1.2}
 here=$(cd "$(dirname "$0")" && pwd)
 root=$(cd "$here/../.." && pwd)
 
@@ -54,6 +54,18 @@ cp -R "$root/data/icons/NineIconsRedux" "$root/data/icons/elementary" \
 cp "$root"/data/fonts/*.ttf "$work/data/fonts/ttfonts/"
 cp -R "$build/data/PowerTheme" "$work/data/PowerTheme"
 cp "$root/data/PowerTheme/icon-map" "$work/data/PowerTheme/icon-map"
+# the window borders and controls built once, for systems that run them
+# (tools/build-styles.sh and tools/build-prebuilt-looks.sh, built on Renku)
+if [ -d "$build/prebuilt" ]; then
+	mkdir -p "$work/data/PowerTheme/prebuilt"
+	for kind in decorators control_look; do
+		[ -d "$build/prebuilt/$kind" ] \
+			&& cp -R "$build/prebuilt/$kind" "$work/data/PowerTheme/prebuilt/"
+	done
+else
+	echo "note: no $build/prebuilt, so the package has only the add-ons" \
+		"built for each system" >&2
+fi
 cp "$root/README.md" "$root/LICENSE" "$root/packaging/zip/INSTALL.txt" \
 	"$work/documentation/packages/powertheme/"
 

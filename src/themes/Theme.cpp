@@ -41,6 +41,7 @@
 #include <fs_attr.h>
 #include <be_apps/Tracker/Background.h>
 
+#include <algorithm>
 #include <new>
 #include <vector>
 
@@ -447,6 +448,9 @@ system_revision()
 }
 
 
+static bool find_prebuilt(const char* kind, const char* name, BString& path);
+
+
 /*!	Whether every window decorator and control look that Build add-ons makes
 	is installed. Others that themes name, such as Dano's BeDecorator, don't
 	count: building can't make them.
@@ -491,7 +495,9 @@ buildable_addons_installed()
 			char name[B_FILE_NAME_LENGTH];
 			if (!entry.IsDirectory() || entry.GetName(name) != B_OK)
 				continue;
-			bool installed = false;
+			// or shipped built once, where the system can use it
+			BString prebuilt;
+			bool installed = find_prebuilt(kKinds[k][1], name, prebuilt);
 			for (size_t d = 0; d < sizeof(kAddOnDirectories)
 					/ sizeof(kAddOnDirectories[0]) && !installed; d++) {
 				BPath path;
@@ -512,6 +518,12 @@ buildable_addons_installed()
 bool
 addons_need_building(BString* why)
 {
+	// nothing is built where the system runs every add-on built once
+	if (prebuilt_addons_supported() == PREBUILT_ALL
+		&& buildable_addons_installed()) {
+		return false;
+	}
+
 	BString built;
 	BPath path;
 	if (themes_settings_path(path, kAddOnsBuiltName) == B_OK) {
@@ -606,6 +618,216 @@ static bool
 libbe_has(const char* symbol)
 {
 	return libbe_function(symbol) != NULL;
+}
+
+
+#ifndef APP_COSMOE
+/*!	Whether the file at \a path contains \a text, read in pieces that
+	overlap by its length.
+*/
+static bool
+file_contains(const char* path, const char* text)
+{
+	const size_t length = strlen(text);
+	FILE* file = fopen(path, "rb");
+	if (file == NULL || length == 0)
+		return false;
+
+	char buffer[65536];
+	size_t kept = 0;
+	bool found = false;
+	size_t bytes;
+	while (!found && (bytes = fread(buffer + kept, 1,
+			sizeof(buffer) - kept, file)) > 0) {
+		const size_t end = kept + bytes;
+		for (size_t i = 0; i + length <= end && !found; i++)
+			found = memcmp(buffer + i, text, length) == 0;
+		kept = std::min(length - 1, end);
+		memmove(buffer, buffer + end - kept, kept);
+	}
+	fclose(file);
+	return found;
+}
+
+
+/*!	The executable of the app_server that is running, which may not be
+	the system's: a test one can be started in its place.
+*/
+static BString
+running_app_server()
+{
+	team_info team;
+	int32 cookie = 0;
+	while (get_next_team_info(&cookie, &team) == B_OK) {
+		image_info image;
+		int32 imageCookie = 0;
+		while (get_next_image_info(team.team, &imageCookie, &image) == B_OK) {
+			if (image.type != B_APP_IMAGE)
+				continue;
+			const char* leaf = strrchr(image.name, '/');
+			leaf = leaf != NULL ? leaf + 1 : image.name;
+			if (strncmp(leaf, "app_server", 10) == 0)
+				return BString(image.name);
+			break;
+		}
+	}
+	return BString("/boot/system/servers/app_server");
+}
+#endif
+
+
+uint32
+prebuilt_addons_supported()
+{
+#ifdef APP_COSMOE
+	return 0;
+#else
+	// The system doesn't change while Power Theme runs.
+	static int32 supported = -1;
+	if (supported >= 0)
+		return supported;
+
+	supported = 0;
+	// app_server looks this up in a decorator add-on when it has the engine
+	if (file_contains(running_app_server().String(), "instantiate_decor_style"))
+		supported |= PREBUILT_DECORATORS;
+	if (libbe_has("create_default_control_look"))
+		supported |= PREBUILT_CONTROL_LOOKS;
+	return supported;
+#endif
+}
+
+
+#ifndef APP_COSMOE
+//! Whether \a path is one of the add-ons Power Theme ships built once.
+static bool
+is_prebuilt_path(const BString& path)
+{
+	return path.FindFirst("/prebuilt/decorators/") >= 0
+		|| path.FindFirst("/prebuilt/control_look/") >= 0;
+}
+
+
+/*!	Why an add-on at \a path that should have loaded didn't, of \a kind
+	(decorator styles or control looks), and what to do about it.
+*/
+static BString
+fallback_cause(const BString& path, uint32 kind)
+{
+	if (!BEntry(path.String()).Exists()) {
+		return "The add-on isn't installed anymore. Open Power Theme and "
+			"apply a theme.";
+	}
+	if (is_prebuilt_path(path)) {
+		if ((prebuilt_addons_supported() & kind) == 0) {
+			return "They are built once for systems that can run them that "
+				"way, and this one can't, as after an update to a system "
+				"without that support. Open Power Theme and click Build "
+				"add-ons" B_UTF8_ELLIPSIS " to build them for this system.";
+		}
+		return "This system refused them, perhaps because they need a newer "
+			"one. Open Power Theme and apply another theme.";
+	}
+	return "They were built for another build of the system, as after a "
+		"system update. Open Power Theme and click Build add-ons"
+		B_UTF8_ELLIPSIS " to build them for this one.";
+}
+
+
+bool
+addons_fell_back(BString& explanation)
+{
+	// app_server keeps the decorator its settings name, and if it can't
+	// load it, stays with its own and says that's "Default"
+	BString wanted;
+	BPath settings;
+	if (find_directory(B_USER_SETTINGS_DIRECTORY, &settings) == B_OK
+		&& settings.Append("system/app_server/decorator_settings") == B_OK) {
+		BFile file(settings.Path(), B_READ_ONLY);
+		BMessage message;
+		if (file.InitCheck() == B_OK && message.Unflatten(&file) == B_OK)
+			message.FindString("decorator", &wanted);
+	}
+	BString current;
+	const bool decoratorFellBack = !wanted.IsEmpty() && wanted != "Default"
+		&& BPrivate::get_decorator(current) && current == "Default";
+
+	// libbe loads the control look into every application as it starts:
+	// this one too
+	BString look;
+	bool lookFellBack = false;
+	if (BPrivate::get_control_look(look) && !look.IsEmpty()) {
+		BPath lookPath(look.String(), NULL, true);
+		lookFellBack = true;
+		image_info image;
+		int32 cookie = 0;
+		while (get_next_image_info(B_CURRENT_TEAM, &cookie, &image) == B_OK) {
+			BPath loaded(image.name, NULL, true);
+			if (loaded == lookPath) {
+				lookFellBack = false;
+				break;
+			}
+		}
+	}
+
+	if (!decoratorFellBack && !lookFellBack)
+		return false;
+
+	if (decoratorFellBack && lookFellBack) {
+		explanation = "Windows and controls have Haiku's own look: Power "
+			"Theme's window borders and controls didn't load when the system "
+			"started. ";
+	} else if (decoratorFellBack) {
+		explanation = "Windows have Haiku's own borders: Power Theme's window "
+			"borders didn't load when the system started. ";
+	} else {
+		explanation = "Controls have Haiku's own look: Power Theme's controls "
+			"didn't load when the system started. ";
+	}
+	explanation << (decoratorFellBack
+		? fallback_cause(wanted, PREBUILT_DECORATORS)
+		: fallback_cause(look, PREBUILT_CONTROL_LOOKS));
+	return true;
+}
+#endif
+
+
+/*!	An add-on built once that Power Theme ships, of \a kind ("decorators"
+	or "control_look"), if the running system can use that kind: in the
+	package's data folder, or beside the application in a source tree's
+	build folder.
+*/
+static bool
+find_prebuilt(const char* kind, const char* name, BString& path)
+{
+	const uint32 needed = strcmp(kind, "decorators") == 0
+		? PREBUILT_DECORATORS : PREBUILT_CONTROL_LOOKS;
+	if ((prebuilt_addons_supported() & needed) == 0 || name == NULL
+		|| name[0] == '\0' || strchr(name, '/') != NULL) {
+		return false;
+	}
+
+	BStringList folders;
+	data_directories(folders);
+	for (int32 i = 0; i < folders.CountStrings(); i++)
+		folders.Replace(i, BPath(folders.StringAt(i), "PowerTheme").Path());
+	app_info info;
+	BPath app;
+	if (be_app != NULL && be_app->GetAppInfo(&info) == B_OK
+		&& app.SetTo(&info.ref) == B_OK && app.GetParent(&app) == B_OK) {
+		folders.Add(app.Path());
+	}
+
+	for (int32 i = 0; i < folders.CountStrings(); i++) {
+		BPath candidate(folders.StringAt(i), "prebuilt");
+		candidate.Append(kind);
+		candidate.Append(name);
+		if (BEntry(candidate.Path()).IsFile()) {
+			path = candidate.Path();
+			return true;
+		}
+	}
+	return false;
 }
 
 
@@ -917,6 +1139,35 @@ find_decorator(DecorInfoUtility& decorators, const BString& names)
 }
 
 
+/*!	The add-on of the first installed decorator of \a names: one Power
+	Theme ships built once, where the system can use it, or else one in the
+	add-ons folders. \a path is "Default" for app_server's own.
+*/
+static bool
+find_decorator_path(const BString& names, BString& path)
+{
+	DecorInfoUtility decorators;
+	BStringList alternatives;
+	names.Split("|", true, alternatives);
+	for (int32 i = 0; i < alternatives.CountStrings(); i++) {
+		const BString name = trimmed(alternatives.StringAt(i));
+		// a theme names a decorator, or now and then gives its path
+		const int32 slash = name.FindLast('/');
+		const BString leaf = slash >= 0
+			? BString(name.String() + slash + 1) : name;
+		if (find_prebuilt("decorators", leaf.String(), path)) {
+			return true;
+		}
+		DecorInfo* decor = find_decorator(decorators, name);
+		if (decor != NULL) {
+			path = decor->IsDefault() ? BString("Default") : decor->Path();
+			return true;
+		}
+	}
+	return false;
+}
+
+
 /*!	The first installed control look of \a names; "haiku" is the built-in
 	one, an empty path.
 */
@@ -943,8 +1194,8 @@ Theme::Missing(BStringList* what, uint32 parts) const
 {
 	uint32 missing = 0;
 	if ((parts & THEME_DECORATOR) != 0 && !fDecorator.IsEmpty()) {
-		DecorInfoUtility decorators;
-		if (find_decorator(decorators, fDecorator) == NULL) {
+		BString path;
+		if (!find_decorator_path(fDecorator, path)) {
 			missing |= THEME_DECORATOR;
 			if (what != NULL) {
 				what->Add(BString("the window decorator \"") << fDecorator
@@ -1128,6 +1379,9 @@ font_installed(const char* familyName, const char* styleName)
 static bool
 find_control_look(const char* name, BString& path)
 {
+	if (find_prebuilt("control_look", name, path))
+		return true;
+
 	static const directory_which kDirectories[] = {
 		B_USER_NONPACKAGED_ADDONS_DIRECTORY,
 		B_USER_ADDONS_DIRECTORY,
@@ -1620,7 +1874,8 @@ set_after_update_job(const char* program)
 
 	BString text;
 	text << "# Written by Power Theme: after a system update, builds its window\n"
-		"# decorators and control looks again for the new system.\n"
+		"# decorators and control looks again for the new system, and says why\n"
+		"# if they didn't load.\n"
 		"target desktop {\n"
 		"\tjob x-vnd.idumych-PowerTheme-after-update {\n"
 		"\t\tlaunch \"" << program << "\" --after-update\n"
@@ -2005,11 +2260,9 @@ static const char* kBeOSTabsName = "beos tabs";
 
 //! The window borders that can draw a BeOS-style tab.
 static bool
-draws_beos_tabs(DecorInfo* decor)
+draws_beos_tabs(const BString& decorator)
 {
-	if (decor == NULL || decor->Ref() == NULL)
-		return false;
-	BPath path(decor->Ref());
+	BPath path(decorator.String());
 	static const char* const kNames[] = { "Reactionary", "Expose", "Platinum",
 		"Leopard", "Gershwix", "NeXT",
 		"System7", "Amiga", "AmigaOS3", "QNX" };
@@ -2052,9 +2305,9 @@ set_beos_tabs(bool on, BString& log)
 	}
 
 	// Add-ons read this as they load.
-	DecorInfoUtility decorators;
-	DecorInfo* current = decorators.CurrentDecorator();
-	if (draws_beos_tabs(current) && decorators.SetDecorator(current) != B_OK)
+	BString current;
+	if (BPrivate::get_decorator(current) && draws_beos_tabs(current)
+		&& BPrivate::set_decorator(current) != B_OK)
 		log << "Can't reload the window borders.\n";
 	return B_OK;
 }
@@ -2063,9 +2316,10 @@ set_beos_tabs(bool on, BString& log)
 bool
 has_beos_tabs(const Theme& theme)
 {
-	DecorInfoUtility decorators;
+	BString path;
 	return !theme.Decorator().IsEmpty()
-		&& draws_beos_tabs(find_decorator(decorators, theme.Decorator()));
+		&& find_decorator_path(theme.Decorator(), path)
+		&& draws_beos_tabs(path);
 }
 
 
@@ -2151,6 +2405,31 @@ set_ask_for_shell_entry(bool ask)
 	if (themes_settings_path(path, kNoShellEntryQuestion) != B_OK)
 		return;
 	if (ask)
+		BEntry(path.Path()).Remove();
+	else
+		BFile(path.Path(), B_WRITE_ONLY | B_CREATE_FILE);
+}
+
+
+static const char* kNoClassicWarning = "don't warn about classic add-ons";
+
+
+bool
+warn_about_classic_addons()
+{
+	BPath path;
+	return themes_settings_path(path, kNoClassicWarning) != B_OK
+		|| !BEntry(path.Path()).Exists();
+}
+
+
+void
+set_warn_about_classic_addons(bool warn)
+{
+	BPath path;
+	if (themes_settings_path(path, kNoClassicWarning) != B_OK)
+		return;
+	if (warn)
 		BEntry(path.Path()).Remove();
 	else
 		BFile(path.Path(), B_WRITE_ONLY | B_CREATE_FILE);
@@ -2474,12 +2753,11 @@ apply_appearance(const Theme& theme, uint32 parts, BString& log)
 		set_wallpaper(theme, log);
 
 	if ((parts & THEME_DECORATOR) != 0) {
-		DecorInfoUtility decorators;
-		DecorInfo* decor = find_decorator(decorators, theme.Decorator());
-		if (decor == NULL)
+		BString path;
+		if (!find_decorator_path(theme.Decorator(), path))
 			log << "The window decorator \"" << theme.Decorator()
 				<< "\" isn't installed.\n";
-		else if (decorators.SetDecorator(decor) != B_OK)
+		else if (BPrivate::set_decorator(path) != B_OK)
 			log << "Can't switch to the \"" << theme.Decorator()
 				<< "\" window decorator.\n";
 	}
@@ -2585,11 +2863,10 @@ describe_theme(const Theme& theme, BString& out)
 		out << "version of: " << theme.VariantOf() << "\n";
 
 	if (!theme.Decorator().IsEmpty()) {
-		DecorInfoUtility decorators;
-		DecorInfo* decor = find_decorator(decorators, theme.Decorator());
+		BString path;
 		out << "decorator: " << theme.Decorator() << " -> "
-			<< (decor != NULL ? decor->Name().String() : "(none installed)")
-			<< "\n";
+			<< (find_decorator_path(theme.Decorator(), path) ? path.String()
+				: "(none installed)") << "\n";
 	}
 	if (!theme.ControlLook().IsEmpty()) {
 		BString path;

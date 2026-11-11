@@ -62,6 +62,7 @@ private:
 			void				_UpdateButtons();
 			void				_CheckAddOns(bool offerBuild);
 			void				_CheckShellEntry();
+			void				_WarnAboutClassicAddOns();
 			void				_ShellEntryAnswered(int32 which);
 			void				_UpdateSchedule();
 			void				_ScheduleChanged();

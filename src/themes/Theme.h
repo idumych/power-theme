@@ -320,6 +320,10 @@ shell_entry	photon_shell_entry();
 // Whether to offer to add that entry when the shell runs without it.
 bool		ask_for_shell_entry();
 void		set_ask_for_shell_entry(bool ask);
+// Whether the window shows its warning about add-ons built for one system
+// build, where the system can't use the ones built once.
+bool		warn_about_classic_addons();
+void		set_warn_about_classic_addons(bool warn);
 
 // What applying \a theme would do on this system, line by line: the
 // decorator and control look found, fonts, colours and wallpapers.
@@ -353,6 +357,18 @@ status_t	restart_tracker();
 // (build-decorators.sh): in a data folder's "Themes", or next to Themes.
 status_t	find_build_script(BString& path);
 
+// What the running system can use of the add-ons Power Theme ships built
+// once, rather than built for one system build: window decorators as
+// decorator styles, where app_server runs them (DecorStyle.h), and control
+// looks on create_default_control_look(), where libbe has it. On Haiku and
+// on Renku without these, neither, and the add-ons are built as before.
+enum {
+	PREBUILT_DECORATORS		= 1 << 0,
+	PREBUILT_CONTROL_LOOKS	= 1 << 1,
+	PREBUILT_ALL			= PREBUILT_DECORATORS | PREBUILT_CONTROL_LOOKS
+};
+uint32		prebuilt_addons_supported();
+
 // Whether the window decorators and control looks have to be built before a
 // theme can be applied: when they never were and some are missing, or when
 // they were built for another system build (as after a system update). \a why
@@ -360,6 +376,13 @@ status_t	find_build_script(BString& path);
 bool		addons_need_building(BString* why = NULL);
 // Whether build-decorators.sh has built the add-ons here before.
 bool		addons_built_before();
+
+#ifndef APP_COSMOE
+// Whether the window decorator or control look that is set didn't load when
+// the system started, so that app_server and applications fell back to their
+// own; \a explanation says why, and what to do.
+bool		addons_fell_back(BString& explanation);
+#endif
 
 // Applies the window decorator and control look of the theme in use again,
 // if it was applied with them, as after building them for a new system.

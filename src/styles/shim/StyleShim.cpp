@@ -1518,8 +1518,11 @@ static decor_style sStyle;
 extern "C" const decor_style*
 instantiate_decor_style(uint32 apiVersion)
 {
-	if (apiVersion < DECOR_STYLE_API_VERSION)
+	// version 1 engines run it too, without the rounded corners of 2
+	if (apiVersion < 1)
 		return NULL;
+	const uint32 version = std::min(apiVersion,
+		(uint32)DECOR_STYLE_API_VERSION);
 
 	if (sAddOn == NULL) {
 		sAddOn = shim_instantiate_decor_addon(-1, SHIM_STYLE_NAME);
@@ -1528,8 +1531,10 @@ instantiate_decor_style(uint32 apiVersion)
 	}
 
 	memset(&sStyle, 0, sizeof(sStyle));
-	sStyle.size = sizeof(sStyle);
-	sStyle.api_version = DECOR_STYLE_API_VERSION;
+	// an engine reads no further than its own version's fields
+	sStyle.size = version >= 2
+		? sizeof(sStyle) : offsetof(decor_style, rounded_shape);
+	sStyle.api_version = version;
 	sStyle.name = SHIM_STYLE_NAME;
 	sStyle.create_window = &shim_create_window;
 	sStyle.delete_window = &shim_delete_window;
@@ -1546,6 +1551,7 @@ instantiate_decor_style(uint32 apiVersion)
 	sStyle.size_limits = &shim_size_limits;
 	sStyle.moved = &shim_moved;
 	sStyle.update_colors = &shim_update_colors;
-	sStyle.rounded_shape = &shim_rounded_shape;
+	if (version >= 2)
+		sStyle.rounded_shape = &shim_rounded_shape;
 	return &sStyle;
 }

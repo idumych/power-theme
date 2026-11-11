@@ -55,6 +55,8 @@ enum {
 	kMsgCheckAddOns		= 'chad',
 	kMsgCheckShellEntry	= 'chse',
 	kMsgShellEntryAnswer	= 'shea',
+	kMsgClassicWarning	= 'clwa',
+	kMsgClassicWarningAnswer	= 'clwn',
 	kMsgIconsChosen		= 'icch',
 	kMsgApply			= 'aply',
 	kMsgRevert			= 'rvrt',
@@ -586,9 +588,18 @@ ThemesWindow::ThemesWindow(BRect frame, const char* selected, bool wallpaper)
 		new BMessage(kMsgRestartTracker));
 	fBuildDecorators = new BButton("build", "Build add-ons" B_UTF8_ELLIPSIS,
 		new BMessage(kMsgBuildDecorators));
-	fBuildDecorators->SetToolTip("Compile the window borders and controls "
-		"for this system. They build on app_server's and Haiku's own "
-		"private classes, so they must match the exact system build.");
+	if (prebuilt_addons_supported() == PREBUILT_ALL) {
+		// the ones Power Theme ships, built once, work here
+		fBuildDecorators->SetEnabled(false);
+		fBuildDecorators->SetToolTip("Not needed on this system version: "
+			"Power Theme's window borders and controls come built, and keep "
+			"working after system updates.");
+	} else {
+		fBuildDecorators->SetToolTip("Compile the window borders and "
+			"controls for this system. They build on app_server's and "
+			"Haiku's own private classes, so they must match the exact "
+			"system build.");
+	}
 	fRevert = new BButton("revert", "Revert", new BMessage(kMsgRevert));
 	fApply = new BButton("apply", "Apply", new BMessage(kMsgApply));
 
@@ -681,7 +692,51 @@ ThemesWindow::Show()
 	BMessage check(kMsgCheckAddOns);
 	check.AddBool("offer build", true);
 	PostMessage(&check);
+	PostMessage(kMsgClassicWarning);
 	PostMessage(kMsgCheckShellEntry);
+}
+
+
+/*!	Where the window borders or controls are built for this one system
+	build, says what that means after a system update, and how to get back
+	a desktop that doesn't start. Not on Hokku, where they don't run in a
+	server.
+*/
+void
+ThemesWindow::_WarnAboutClassicAddOns()
+{
+#ifndef APP_COSMOE
+	if (prebuilt_addons_supported() == PREBUILT_ALL
+		|| !warn_about_classic_addons()) {
+		return;
+	}
+
+	// what of them is built for this one system build
+	const uint32 prebuilt = prebuilt_addons_supported();
+	const char* what = prebuilt == PREBUILT_DECORATORS ? "controls"
+		: prebuilt == PREBUILT_CONTROL_LOOKS ? "window borders"
+		: "window borders and controls";
+	const char* uses = prebuilt == PREBUILT_DECORATORS ? "libbe"
+		: prebuilt == PREBUILT_CONTROL_LOOKS ? "app_server"
+		: "app_server and libbe";
+
+	BString text;
+	text << "On this system, Power Theme's " << what << " are built for this "
+		"exact system build: they use private parts of " << uses << ".\n\n"
+		"After a system update they refuse to load, and Haiku's own look "
+		"takes their place until Power Theme builds them again at the next "
+		"login. This needs the compiler, which Build add-ons" B_UTF8_ELLIPSIS
+		" installs. Add-ons built by Power Theme 1.0 or earlier don't check: "
+		"build them again once.\n\n"
+		"If the desktop ever fails to start after an update, hold Space while "
+		"booting, choose \"Select system state\" and boot the state from "
+		"before the update.";
+	BAlert* alert = new BAlert("Power Theme", text.String(),
+		"Don't show again", "OK", NULL, B_WIDTH_AS_USUAL, B_OFFSET_SPACING,
+		B_WARNING_ALERT);
+	alert->SetShortcut(1, B_ESCAPE);
+	alert->Go(new BInvoker(new BMessage(kMsgClassicWarningAnswer), this));
+#endif
 }
 
 
@@ -820,6 +875,15 @@ ThemesWindow::MessageReceived(BMessage* message)
 			_CheckShellEntry();
 			break;
 
+		case kMsgClassicWarning:
+			_WarnAboutClassicAddOns();
+			break;
+
+		case kMsgClassicWarningAnswer:
+			if (message->GetInt32("which", 1) == 0)
+				set_warn_about_classic_addons(false);
+			break;
+
 		case kMsgShellEntryAnswer:
 			_ShellEntryAnswered(message->GetInt32("which", 1));
 			break;
@@ -930,6 +994,8 @@ ThemesWindow::MessageReceived(BMessage* message)
 
 		case kMsgBuildDecorators:
 		{
+			if (prebuilt_addons_supported() == PREBUILT_ALL)
+				break;
 			// one build window
 			if (fBuildWindow.IsValid()) {
 				BLooper* looper = NULL;

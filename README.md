@@ -184,15 +184,32 @@ Power Theme comes as a package for Haiku R1/beta6 and later, and Renku OS
 (x86_64), on the [releases page](https://github.com/idumych/power-theme/releases):
 
 ```sh
-pkgman install ./powertheme-1.0.1-1-x86_64.hpkg
+pkgman install ./powertheme-1.2-1-x86_64.hpkg
 ```
 
-Then open **Power Theme** (Deskbar → Applications). It opens **Build
-add-ons…** first, and applies no theme until they are built. The window
-borders and controls are built on your own system, because they use
-private parts of app_server and libbe; after a system update, Power Theme
-asks for them to be built again before it applies a theme. It offers to
-install the compiler if it is missing.
+Then open **Power Theme** (Deskbar → Applications). How its window borders
+and controls get onto your system depends on the system:
+
+- **Built once,** on a Renku whose app_server runs decorator styles
+  ([RenkuOS/Source#357](https://github.com/RenkuOS/Source/pull/357)) and whose
+  libbe has `create_default_control_look()`
+  ([#361](https://github.com/RenkuOS/Source/pull/361)): they come in the
+  package, built once, and keep working after system updates. Themes apply
+  straight away, and **Build add-ons…** is greyed out, as it isn't needed.
+- **Built for your system** (classic mode), on Haiku and on Renku without
+  those changes: they use private parts of app_server and libbe, so they are
+  built on your own system. Power Theme opens **Build add-ons…** first, and
+  applies no theme until they are built; it offers to install the compiler if
+  it is missing. The first time, it shows a warning about what happens after a
+  system update (below).
+
+Power Theme checks each part on its own: a system that runs decorator styles
+but not control looks built once uses the window borders from the package
+and builds only the controls. `powertheme --status` says which applies.
+
+If the window borders or controls set didn't load when the system started,
+so that windows have Haiku's own look, Power Theme says why at login, and
+what to do.
 
 On systems whose running applications can follow a theme, new controls and
 fonts appear straight away, although an application that keeps fonts or sizes of
@@ -205,8 +222,8 @@ powertheme --revert           # your previous decorator, controls, colours, font
 pkgman uninstall powertheme   # then remove Power Theme
 ```
 
-The add-ons are built for the system they're built on, and a system update
-can change app_server under them. Add-ons built by this version check that
+In classic mode, the add-ons are built for the system they're built on, and
+a system update can change app_server under them. Add-ons built by this version check that
 when they load: on another system build they don't load, so windows get
 Haiku's own borders and controls instead of crashing app_server. At the next
 login Power Theme builds them again for the new system, in the background,
