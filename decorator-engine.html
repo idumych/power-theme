@@ -102,7 +102,7 @@ footer { border-top: 1px solid var(--line); padding: 24px 0 48px; color: var(--m
 		<h1>Window borders and controls that survive system updates</h1>
 		<p>A stable plug-in interface for window decorators in Renku OS, so a theme's window borders are compiled once and keep working on every later Renku. A matching change for control looks is in draft.</p>
 	</header>
-	<p class="status"><b>Status, 10 November 2026:</b> built and tested in a VM. The Renku side is in review as <a href="https://github.com/RenkuOS/Source/pull/357">#357</a>–<a href="https://github.com/RenkuOS/Source/pull/360">#360</a>, and Power Theme's styles are on its <a href="https://github.com/idumych/power-theme/tree/decor-styles"><code>decor-styles</code></a> branch. Control looks: draft <a href="https://github.com/RenkuOS/Source/pull/361">#361</a>, proposal <a href="https://github.com/RenkuOS/Source/issues/362">#362</a>. None of it is in a release yet.</p>
+	<p class="status"><b>Status, 10 November 2026:</b> built, and shipped in the <a href="https://github.com/idumych/power-theme/releases/tag/power-renku-4">Power Renku 4</a> test image, with all of Power Theme's window borders as styles and its controls as build-once looks. The Renku side is in review as <a href="https://github.com/RenkuOS/Source/pull/357">#357</a>–<a href="https://github.com/RenkuOS/Source/pull/360">#360</a>; control looks: draft <a href="https://github.com/RenkuOS/Source/pull/361">#361</a>, proposal <a href="https://github.com/RenkuOS/Source/issues/362">#362</a>. Power Theme's side is on its <a href="https://github.com/idumych/power-theme/tree/power-renku-4"><code>power-renku-4</code></a> branch. None of it is in a Power Theme release yet.</p>
 
 	<section>
 		<h2>Why</h2>
@@ -248,8 +248,8 @@ extern "C" decor_style* instantiate_decor_style();</pre>
 				<tr><td class="n">5</td><td>Power Theme</td><td>The other 13 decorators, through the shim</td><td>Done, on <code>decor-styles</code></td></tr>
 				<tr><td class="n">6</td><td>Renku</td><td><code>create_default_control_look()</code> for control looks</td><td>Draft: #361</td></tr>
 				<tr><td class="n">7</td><td>Power Theme</td><td>The 15 control looks on <code>ForwardingControlLook</code></td><td>Done, on <code>control-look-kit</code></td></tr>
-				<tr><td class="n">8</td><td>Power Theme</td><td>Shipping the prebuilt styles and looks, and choosing them on Renku: release 1.1</td><td>To do</td></tr>
-				<tr><td class="n">9</td><td>Both</td><td>Rounded outlines feeding the compositor, once that work is merged</td><td>To do</td></tr>
+				<tr><td class="n">8</td><td>Power Theme</td><td>Shipping the prebuilt styles and looks, and choosing them on Renku: release 1.1</td><td>Built by <code>tools/build-styles.sh</code> and <code>tools/build-prebuilt-looks.sh</code>, and in Power Renku 4; not in a Power Theme release yet</td></tr>
+				<tr><td class="n">9</td><td>Both</td><td>Rounded outlines feeding the compositor, once that work is merged</td><td>Done in Power Renku 4: interface version 2 (<code>rounded_shape</code>, <code>corners_cut</code>, <code>stroke_corner</code>); not proposed yet</td></tr>
 			</table></div>
 		</div>
 	</section>

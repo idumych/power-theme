@@ -113,12 +113,19 @@ footer { border-top: 1px solid var(--line); padding: 24px 0 48px; color: var(--m
 	<p class="caption">Drag across the picture. One command switches between these two, with every window left open. The windows are the same ones, on Renku OS in a virtual machine.</p>
 
 	<section>
-		<h2>Get Power Theme 0.7</h2>
+		<h2>Get Power Theme 1.0.1</h2>
 		<div class="sheet">
-			<p>New in 0.7: <b>Leopard</b> and <b>Leopard Graphite</b>, in the style of Mac OS X 10.5, with gel buttons, blue gel controls, the Deskbar across the top and elementary's blue-grey folders, all drawn from scratch.</p>
-			<img src="img/leopard.png" width="1024" height="768" alt="The Leopard theme: a window of controls with a grey title bar, red, yellow and green buttons and a blue menu selection, beside a Tracker window of file types, over an aurora." loading="lazy">
-			<p>Leopard, Expose, Platinum, Dano, the Tidy family, light and dark versions, the daily schedule, Haiku Dark, Renku Light, the dark icons, BeOS-style tabs and rounded corners on a compositor are in <a href="https://github.com/idumych/power-theme/releases/tag/v0.7">this release</a>, for Haiku R1/beta6 and later and Renku OS on x86_64. On Linux, it themes the applications of <a href="https://github.com/idumych/hokku">Hokku</a>, built from source or as an Arch and CachyOS package.</p>
-			<pre>pkgman install ./powertheme-0.7-1-x86_64.hpkg</pre>
+			<p>Since 0.7, Power Theme has gained <b>Gershwix</b> (seven accent colours, after Mintar's ShapeShifter theme), <b>NeXT</b>, <b>System 7</b>, <b>Amiga</b> (Workbench 1.3), <b>AmigaOS 3</b> and <b>QNX</b>, with the <b>Photon shell</b>, a taskbar and shelf that can stand in for the Deskbar.</p>
+			<div class="pair">
+				<figure><img src="img/theme-qnx.png" width="480" height="315" alt="The QNX theme: Photon's grey windows over a lavender desktop." loading="lazy"><figcaption>QNX</figcaption></figure>
+				<figure><img src="img/theme-gershwix.png" width="480" height="315" alt="The Gershwix Crimson theme: light grey windows with square boxes and crimson accents, over a crimson desktop." loading="lazy"><figcaption>Gershwix Crimson</figcaption></figure>
+				<figure><img src="img/theme-next.png" width="480" height="315" alt="The NeXT theme: black title bars and grey bevelled controls, over a purple desktop." loading="lazy"><figcaption>NeXT</figcaption></figure>
+				<figure><img src="img/theme-system7.png" width="480" height="315" alt="The System 7 theme: plain grey windows with lined title bars, over a grey desktop." loading="lazy"><figcaption>System 7</figcaption></figure>
+				<figure><img src="img/theme-amiga.png" width="480" height="315" alt="The Amiga theme: Workbench 1.3's blue, white and orange, in a pixel font." loading="lazy"><figcaption>Amiga</figcaption></figure>
+				<figure><img src="img/theme-amigaos3.png" width="480" height="315" alt="The AmigaOS 3 theme: Workbench 3's grey windows over a blue desktop." loading="lazy"><figcaption>AmigaOS 3</figcaption></figure>
+			</div>
+			<p>1.0.1 is a safety release: Power Theme's window borders and controls now refuse to load on a system build other than the one they were built for, so a system update can't crash the desktop, and they're rebuilt at login after an update. It's in <a href="https://github.com/idumych/power-theme/releases/tag/v1.0.1">this release</a>, for Haiku R1/beta6 and later and Renku OS on x86_64. On Linux, it themes the applications of <a href="https://github.com/idumych/hokku">Hokku</a>, built from source or as an Arch and CachyOS package.</p>
+			<pre>pkgman install ./powertheme-1.0.1-1-x86_64.hpkg</pre>
 			<p>Then open Power Theme, click <b>Build add-ons…</b> once and apply a theme. The Renku changes described below are separate: some are merged into Renku, and the rest are still in review.</p>
 		</div>
 	</section>
@@ -166,8 +173,27 @@ footer { border-top: 1px solid var(--line); padding: 24px 0 48px; color: var(--m
 			<h3>Rounded corners on any decorator</h3>
 			<p>The compositor can cut a window's corners away, but only a decorator knows how to draw its own border along the curve. A decorator opts in to rounding by also inheriting a small class, <code>RoundedDecorator</code>, and decorators built without it keep their square corners, still with a shadow. Renku's Default and Flat decorators round their corners, and since <a href="https://github.com/idumych/power-theme/releases/tag/v0.6.1">Power Theme 0.6.1</a> so does every decorator Power Theme has. With the option unticked, Tidy, Expose and Gonx fall back to their own small curves.</p>
 			<p>Power Theme's themes switch live with the compositor on, and the shadow or glow follows each theme.</p>
-			<p><b>Try it:</b> <a href="https://github.com/idumych/power-theme/releases/tag/power-renku-3">Power Renku 3</a> is an unofficial bootable x86_64 image that starts in Power Theme 1.0's Renku theme with the Photon shell, and the compositor's shadows, rounded corners and see-through dragging all on. It has only run in VirtualBox, so expect rough edges.</p>
+			<p><b>Try it:</b> <a href="https://github.com/idumych/power-theme/releases/tag/power-renku-4">Power Renku 4</a> is an unofficial bootable x86_64 image with everything on this page. It starts in Tidy Square, with the compositor's shadows, rounded corners and see-through dragging all on, transparent windows, and window borders and controls built once. It has only run in VirtualBox, so expect rough edges, and don't update it.</p>
 			<p class="status"><b>Proposed:</b> merging the compositor into Renku, off by default, is proposed in <a href="https://github.com/RenkuOS/Source/issues/320">RenkuOS/Source#320</a>, ahead of a series of PRs. It isn't in Renku yet.</p>
+		</div>
+	</section>
+
+	<section>
+		<h2 id="transparency">Transparent windows</h2>
+		<div class="sheet">
+			<p>With the compositor on, a window can now ask for a transparent background, with the new <code>B_TRANSPARENT_WINDOW</code> flag. Where it draws nothing, what's behind it shows through. Half-transparent drawing blends with what's behind, and clicks on the clear parts go to the window underneath. Docks, notifications and on-screen displays can then have any shape.</p>
+			<img src="img/transparent-windows.png" width="1024" height="768" alt="Two test windows and a Qt window over a Terminal: their red and green blocks are solid, a half-transparent blue ellipse and a dark rounded panel let the Terminal's text show through, and the rest of each window is clear." loading="lazy">
+			<p>Qt applications get it too: a patched Qt platform plugin turns <code>Qt::WA_TranslucentBackground</code> into the new flag. An application can ask <code>is_composited_desktop()</code> whether there's a compositor, and draw a background of its own when there isn't.</p>
+			<p class="status"><b>Not proposed yet:</b> it follows the compositor series of <a href="https://github.com/RenkuOS/Source/issues/320">#320</a>, on the <a href="https://github.com/idumych/Source/tree/compositor/13-transparent-windows"><code>compositor/13-transparent-windows</code></a> branch of my fork. It's in Power Renku 4.</p>
+		</div>
+	</section>
+
+	<section>
+		<h2 id="built-once">Window borders that survive updates</h2>
+		<div class="sheet">
+			<p>Power Theme's window borders and controls used to be built for one exact system, and had to be rebuilt after every update. A stable interface for <b>decorator styles</b> and a way to build <b>control looks</b> on Renku's default look change that: built once, they keep working on later systems. All 15 of Power Theme's window borders and all 15 of its control looks are built this way in Power Renku 4, with rounded corners on the compositor.</p>
+			<p><a href="decorator-engine.html">How the decorator engine works</a>, with the control look changes.</p>
+			<p class="status"><b>In review:</b> <a href="https://github.com/RenkuOS/Source/pull/357">#357</a>–<a href="https://github.com/RenkuOS/Source/pull/360">#360</a> for decorator styles, draft <a href="https://github.com/RenkuOS/Source/pull/361">#361</a> for control looks.</p>
 		</div>
 	</section>
 
@@ -360,6 +386,7 @@ powertheme --mode=toggle</pre>
 				<tr><td class="n">Options and glow</td><td>All four combinations of shadows and corners switched live with the compositor on, including on another workspace, kept over a restart, and reset by Defaults. Both restart buttons and Escape worked. 13 themes switched live through all 8 decorators with every window look open, corners compared at 4×, and the glow measured on four dark themes.</td></tr>
 				<tr><td class="n">See-through drag</td><td>Opaque with the option off and see-through with it on, solid again on release, and unchanged when the tab is only clicked. The new tab greyed out, reverted, reset and kept its setting over a restart.</td></tr>
 				<tr><td class="n">60,000 operations</td><td>Stress runs on the compositor before the respin: 30 windows moved, resized, hidden, minimized and closed while drawing. App_server didn't restart. BDirectWindow, BWindowScreen and screen mode changes also worked on that build.</td></tr>
+				<tr><td class="n">Power Renku 4</td><td>Booted live: straight to the desktop in Tidy Square, with app_server running the TidySquare decorator style and apps the build-once Tidy control look. The transparency tests showed a Terminal through their clear and half-transparent parts. Power Theme switched to Leopard and back live.</td></tr>
 				<tr><td class="n">Exact revert</td><td>After 20 rounds of applying and reverting icons, the file count stayed the same. A separate check found every icon restored exactly.</td></tr>
 				</tbody>
 			</table></div>
@@ -377,6 +404,7 @@ powertheme --mode=toggle</pre>
 				<li>Tracker sometimes crashes in its Attributes menu code when a script resizes a window just after a restart, with Haiku's icons or the dark ones, and with or without the Tracker changes. The cause is unknown, and it's <a href="https://github.com/RenkuOS/Source/issues/294">reported as #294</a>.</li>
 				<li>One crash of a test Deskbar on closing a ZSnake menu was seen once.</li>
 				<li>The compositor has never used a real vertical sync, as the virtual machines it ran on have no retrace signal, so screen updates are paced by a timer there. Video overlays and high resolutions weren't tested.</li>
+				<li>On a transparent window, anti-aliased edges drawn straight onto a clear area get a dark fringe. Drawing with <code>B_ALPHA_COMPOSITE</code> or from a bitmap with alpha, as Qt does, is clean.</li>
 				<li>About 1 boot in 20 hung at the logo in testing, from a kernel deadlock that has nothing to do with this work, <a href="https://github.com/RenkuOS/Source/issues/308">reported as #308</a>.</li>
 				<li>In scripted tests, about 1 in 3 clicks on a menu item did nothing when the menu had been open for two seconds. A stock nightly did the same, so it doesn't come from this work, and it may be how the test clicks.</li>
 								<li>While a schedule is on, its background process appears as a second Power Theme entry in the Deskbar.</li>
