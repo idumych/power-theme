@@ -1368,7 +1368,7 @@ GershwixControlLook::DrawGroupFrame(BView* view, BRect& rect,
 	const BRect& updateRect, const rgb_color& base, uint32 borders)
 {
 	if (borders != B_ALL_BORDERS) {
-		HaikuControlLook::DrawGroupFrame(view, rect, updateRect, base, borders);
+		ForwardingControlLook::DrawGroupFrame(view, rect, updateRect, base, borders);
 		return;
 	}
 

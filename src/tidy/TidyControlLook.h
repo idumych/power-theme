@@ -13,13 +13,13 @@
 #define TIDY_CONTROL_LOOK_H
 
 
-#include <HaikuControlLook.h>
+#include "ForwardingControlLook.h"
 
 
 namespace BPrivate {
 
 
-class TidyControlLook : public HaikuControlLook {
+class TidyControlLook : public ForwardingControlLook {
 public:
 								TidyControlLook();
 	virtual						~TidyControlLook();
@@ -35,7 +35,7 @@ public:
 									border_style borderStyle, uint32 flags = 0,
 									uint32 borders = B_ALL_BORDERS);
 
-	using HaikuControlLook::DrawButtonBackground;
+	using ForwardingControlLook::DrawButtonBackground;
 	virtual	void				DrawButtonBackground(BView* view, BRect& rect,
 									const BRect& updateRect,
 									const rgb_color& base, uint32 flags = 0,

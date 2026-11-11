@@ -20,7 +20,7 @@
 #include <MenuField.h>
 #include <MenuItem.h>
 
-#include <MenuPrivate.h>
+#include "MenuMargins.h"
 #include <Rect.h>
 #include <TabView.h>
 #include <View.h>
@@ -414,7 +414,7 @@ GonxControlLook::DrawMenuFieldBackground(BView* view, BRect& rect,
 	// the field's size, is unchanged.
 	BMenuBar* menuBar = dynamic_cast<BMenuBar*>(view);
 	if (menuBar != NULL && popupIndicator) {
-		BPrivate::MenuPrivate menu(menuBar);
+		MenuMargins menu(menuBar);
 		float left, top, right, bottom;
 		menu.GetItemMargins(&left, &top, &right, &bottom);
 		if (right > left)
@@ -462,7 +462,7 @@ GonxControlLook::_DrawMenuFieldBox(BView* view, BMenuBar* menuBar,
 		right = std::min(bar.right,
 			bar.left + floorf(item->Frame().right) + 3);
 	}
-	BPrivate::MenuPrivate menu(menuBar);
+	MenuMargins menu(menuBar);
 	float left, top, padRight, bottom;
 	menu.GetItemMargins(&left, &top, &padRight, &bottom);
 	const float arrowWidth = fabsf(left - padRight);
@@ -713,7 +713,7 @@ GonxControlLook::DrawGroupFrame(BView* view, BRect& rect,
 	const BRect& updateRect, const rgb_color& base, uint32 borders)
 {
 	if (borders != B_ALL_BORDERS) {
-		HaikuControlLook::DrawGroupFrame(view, rect, updateRect, base,
+		ForwardingControlLook::DrawGroupFrame(view, rect, updateRect, base,
 			borders);
 		return;
 	}
@@ -893,7 +893,7 @@ GonxControlLook::DrawArrowShape(BView* view, BRect& rect,
 	uint32 flags, float tint)
 {
 	if (direction > B_DOWN_ARROW) {
-		HaikuControlLook::DrawArrowShape(view, rect, updateRect, base,
+		ForwardingControlLook::DrawArrowShape(view, rect, updateRect, base,
 			direction, flags, tint);
 		return;
 	}
@@ -924,7 +924,7 @@ GonxControlLook::DrawSliderBar(BView* view, BRect rect,
 	orientation orientation)
 {
 	// splits the bar and draws each side through the one-colour version
-	HaikuControlLook::DrawSliderBar(view, rect, updateRect, base,
+	ForwardingControlLook::DrawSliderBar(view, rect, updateRect, base,
 		leftFillColor, rightFillColor, sliderScale, flags, orientation);
 }
 

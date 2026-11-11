@@ -481,8 +481,11 @@ flags="-O2 -Wall -Wno-multichar -fPIC -std=gnu++17
 	-iquote $app/drawing -iquote $app/drawing/Painter -iquote $app/font
 	-I$private -I$private/app -I$private/shared -I$private/interface
 	-I$private/graphics -I$headers/renku/headers/libs/agg -I$freetype"
+# the base every control look shares (ForwardingControlLook.h)
+lookKit=$source/controllook-kit
+[ -d "$lookKit" ] || lookKit=$source/src/controllook-kit
 lookFlags="-O2 -Wall -Wno-multichar -Wno-unused-variable -fPIC
-	-std=gnu++17 -I$private/interface"
+	-std=gnu++17 -I$private/interface -I$lookKit"
 decorLink="-lbe /boot/system/servers/app_server -lstdc++"
 lookLink="-lbe -lstdc++"
 systemAddons=/boot/system/add-ons

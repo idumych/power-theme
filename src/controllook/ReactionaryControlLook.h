@@ -15,13 +15,13 @@
 #define REACTIONARY_CONTROL_LOOK_H
 
 
-#include <HaikuControlLook.h>
+#include "ForwardingControlLook.h"
 
 
 namespace BPrivate {
 
 
-class ReactionaryControlLook : public HaikuControlLook {
+class ReactionaryControlLook : public ForwardingControlLook {
 public:
 								ReactionaryControlLook();
 	virtual						~ReactionaryControlLook();
@@ -271,7 +271,7 @@ public:
 									uint32 borders = B_ALL_BORDERS);
 
 	// labels
-	using HaikuControlLook::DrawLabel;
+	using ForwardingControlLook::DrawLabel;
 	virtual	void				DrawLabel(BView* view, const char* label,
 									const rgb_color& base, uint32 flags,
 									const BPoint& where,

@@ -432,10 +432,10 @@ PlatinumControlLook::DrawLabel(BView* view, const char* label,
 {
 	if (textColor == NULL && (flags & B_ACTIVATED) != 0
 		&& dynamic_cast<BButton*>(view) != NULL) {
-		HaikuControlLook::DrawLabel(view, label, base, flags, where, &kWhite);
+		ForwardingControlLook::DrawLabel(view, label, base, flags, where, &kWhite);
 		return;
 	}
-	HaikuControlLook::DrawLabel(view, label, base, flags, where, textColor);
+	ForwardingControlLook::DrawLabel(view, label, base, flags, where, textColor);
 }
 
 
@@ -973,7 +973,7 @@ PlatinumControlLook::DrawGroupFrame(BView* view, BRect& rect,
 	const BRect& updateRect, const rgb_color& base, uint32 borders)
 {
 	if (borders != B_ALL_BORDERS) {
-		HaikuControlLook::DrawGroupFrame(view, rect, updateRect, base, borders);
+		ForwardingControlLook::DrawGroupFrame(view, rect, updateRect, base, borders);
 		return;
 	}
 

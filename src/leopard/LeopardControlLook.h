@@ -17,18 +17,18 @@
 #define LEOPARD_CONTROL_LOOK_H
 
 
-#include <HaikuControlLook.h>
+#include "ForwardingControlLook.h"
 
 
 namespace BPrivate {
 
 
-class LeopardControlLook : public HaikuControlLook {
+class LeopardControlLook : public ForwardingControlLook {
 public:
 								LeopardControlLook();
 	virtual						~LeopardControlLook();
 
-	using HaikuControlLook::DrawButtonFrame;
+	using ForwardingControlLook::DrawButtonFrame;
 	virtual	void				DrawButtonFrame(BView* view, BRect& rect,
 									const BRect& updateRect,
 									const rgb_color& base,
@@ -36,14 +36,14 @@ public:
 									uint32 flags = 0,
 									uint32 borders = B_ALL_BORDERS);
 
-	using HaikuControlLook::DrawButtonBackground;
+	using ForwardingControlLook::DrawButtonBackground;
 	virtual	void				DrawButtonBackground(BView* view, BRect& rect,
 									const BRect& updateRect,
 									const rgb_color& base, uint32 flags = 0,
 									uint32 borders = B_ALL_BORDERS,
 									orientation orientation = B_HORIZONTAL);
 
-	using HaikuControlLook::DrawButtonWithPopUpBackground;
+	using ForwardingControlLook::DrawButtonWithPopUpBackground;
 	virtual	void				DrawButtonWithPopUpBackground(BView* view,
 									BRect& rect, const BRect& updateRect,
 									const rgb_color& base, uint32 flags = 0,
@@ -55,7 +55,7 @@ public:
 									const rgb_color& base, uint32 flags = 0,
 									uint32 borders = B_ALL_BORDERS);
 
-	using HaikuControlLook::DrawMenuFieldFrame;
+	using ForwardingControlLook::DrawMenuFieldFrame;
 	virtual	void				DrawMenuFieldFrame(BView* view, BRect& rect,
 									const BRect& updateRect,
 									const rgb_color& base,
@@ -63,7 +63,7 @@ public:
 									uint32 flags = 0,
 									uint32 borders = B_ALL_BORDERS);
 
-	using HaikuControlLook::DrawMenuFieldBackground;
+	using ForwardingControlLook::DrawMenuFieldBackground;
 	virtual	void				DrawMenuFieldBackground(BView* view,
 									BRect& rect, const BRect& updateRect,
 									const rgb_color& base, bool popupIndicator,
@@ -123,7 +123,7 @@ public:
 	virtual	float				GetScrollBarWidth(
 									orientation orientation = B_VERTICAL);
 
-	using HaikuControlLook::DrawSliderBar;
+	using ForwardingControlLook::DrawSliderBar;
 	virtual	void				DrawSliderBar(BView* view, BRect rect,
 									const BRect& updateRect,
 									const rgb_color& base,
@@ -133,7 +133,7 @@ public:
 									const BRect& updateRect,
 									const rgb_color& base, uint32 flags,
 									orientation orientation);
-	using HaikuControlLook::DrawSliderTriangle;
+	using ForwardingControlLook::DrawSliderTriangle;
 	virtual	void				DrawSliderTriangle(BView* view, BRect& rect,
 									const BRect& updateRect,
 									const rgb_color& base,

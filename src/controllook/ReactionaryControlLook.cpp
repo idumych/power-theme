@@ -887,7 +887,7 @@ ReactionaryControlLook::DrawArrowShape(BView* view, BRect& rect,
 	uint32 flags, float tint)
 {
 	if (direction > B_DOWN_ARROW) {
-		HaikuControlLook::DrawArrowShape(view, rect, updateRect, base,
+		ForwardingControlLook::DrawArrowShape(view, rect, updateRect, base,
 			direction, flags, tint);
 		return;
 	}
@@ -916,7 +916,7 @@ ReactionaryControlLook::DrawSliderBar(BView* view, BRect rect,
 	orientation orientation)
 {
 	// splits the bar, drawing all of it clipped to each side
-	HaikuControlLook::DrawSliderBar(view, rect, updateRect, base,
+	ForwardingControlLook::DrawSliderBar(view, rect, updateRect, base,
 		leftFillColor, rightFillColor, sliderScale, flags, orientation);
 }
 
@@ -1212,7 +1212,7 @@ ReactionaryControlLook::DrawLabel(BView* view, const char* label,
 		= background.red + background.green + background.blue > 128 * 3;
 	if ((flags & B_DISABLED) == 0 || !lightBackground
 		|| (flags & B_IGNORE_OUTLINE) != 0) {
-		HaikuControlLook::DrawLabel(view, label, base, flags, where,
+		ForwardingControlLook::DrawLabel(view, label, base, flags, where,
 			textColor);
 		return;
 	}
@@ -1236,7 +1236,7 @@ ReactionaryControlLook::DrawLabel(BView* view, const char* label,
 	const rgb_color& base, uint32 flags, const BAlignment& alignment,
 	const rgb_color* textColor)
 {
-	HaikuControlLook::DrawLabel(view, label, icon, rect, updateRect, base,
+	ForwardingControlLook::DrawLabel(view, label, icon, rect, updateRect, base,
 		flags, alignment, textColor);
 
 	if (label == NULL || (flags & (B_FOCUSED | B_DISABLED)) != B_FOCUSED

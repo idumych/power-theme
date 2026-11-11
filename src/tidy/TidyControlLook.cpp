@@ -19,7 +19,7 @@
 #include <MenuBar.h>
 #include <Window.h>
 
-#include <MenuPrivate.h>
+#include "MenuMargins.h"
 #include <Rect.h>
 #include <TabView.h>
 #include <View.h>
@@ -387,7 +387,7 @@ TidyControlLook::DrawMenuBarBackground(BView* view, BRect& rect,
 	BWindow* window = view->Window();
 	if (menuBar != NULL && window != NULL && (window->Look() == B_TITLED_WINDOW_LOOK
 			|| window->Look() == B_DOCUMENT_WINDOW_LOOK)) {
-		BPrivate::MenuPrivate menu(menuBar);
+		MenuMargins menu(menuBar);
 		float left, top, right, bottom;
 		menu.GetItemMargins(&left, &top, &right, &bottom);
 		if (top >= bottom && top >= kMenuTextShift)
@@ -407,7 +407,7 @@ TidyControlLook::DrawBorder(BView* view, BRect& rect, const BRect& updateRect,
 	// Tracker's folder icon sits at the end of its menu bar, as a view of its own
 	if (dynamic_cast<BMenuBar*>(view) == NULL && (view->Name() == NULL
 			|| strcmp(view->Name(), "DraggableContainerIcon") != 0)) {
-		HaikuControlLook::DrawBorder(view, rect, updateRect, base, borderStyle,
+		ForwardingControlLook::DrawBorder(view, rect, updateRect, base, borderStyle,
 			flags, borders);
 		return;
 	}
@@ -426,7 +426,7 @@ TidyControlLook::DrawButtonBackground(BView* view, BRect& rect,
 	// Tracker's column headers are drawn as a button's background; the view's
 	// name is the only thing that tells them from any other button
 	if (view->Name() == NULL || strcmp(view->Name(), "TitleView") != 0) {
-		HaikuControlLook::DrawButtonBackground(view, rect, updateRect, base,
+		ForwardingControlLook::DrawButtonBackground(view, rect, updateRect, base,
 			flags, borders, orientation);
 		return;
 	}
@@ -513,7 +513,7 @@ TidyControlLook::DrawScrollViewFrame(BView* view, BRect& rect,
 	border_style borderStyle, uint32 flags, uint32 borders)
 {
 	BRect result(rect);
-	HaikuControlLook::DrawScrollViewFrame(view, result, updateRect,
+	ForwardingControlLook::DrawScrollViewFrame(view, result, updateRect,
 		verticalScrollBarFrame, horizontalScrollBarFrame, base, borderStyle,
 		flags, borders);
 
@@ -856,7 +856,7 @@ TidyControlLook::DrawGroupFrame(BView* view, BRect& rect,
 	const BRect& updateRect, const rgb_color& base, uint32 borders)
 {
 	if (borders != B_ALL_BORDERS) {
-		HaikuControlLook::DrawGroupFrame(view, rect, updateRect, base, borders);
+		ForwardingControlLook::DrawGroupFrame(view, rect, updateRect, base, borders);
 		return;
 	}
 
