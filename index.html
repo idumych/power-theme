@@ -125,6 +125,16 @@ footer { border-top: 1px solid var(--line); padding: 24px 0 48px; color: var(--m
 				<figure><img src="img/theme-amigaos3.png" width="480" height="315" alt="The AmigaOS 3 theme: Workbench 3's grey windows over a blue desktop." loading="lazy"><figcaption>AmigaOS 3</figcaption></figure>
 			</div>
 			<p>New in 1.2: Power Theme works two ways, and picks the right one by itself. On a Renku with the new decorator engine and control looks, as in <a href="https://github.com/idumych/power-theme/releases/tag/power-renku-4">Power Renku 4</a>, its window borders and controls come <a href="#built-once">built once</a> in the package and keep working after updates, so there's nothing to build. On Haiku and on other Renku builds, it builds them for your system as before, and warns once about what that means after a system update. If they ever don't load when the system starts, it says why at login. The Photon shell now follows the theme.</p>
+			<h3 id="safety">Safety in 1.2</h3>
+			<ul>
+				<li><b>Built-once add-ons only where they work:</b> Power Theme checks the running app_server and libbe, and uses them only where the system can run them, each part on its own.</li>
+				<li><b>No rebuilding where it isn't needed:</b> <b>Build add-ons…</b> is greyed out there, so built-once add-ons can't be replaced by ones tied to a single system build.</li>
+				<li><b>A warning in classic mode:</b> the first time, Power Theme explains that its add-ons are tied to this exact system build, what happens after an update, and how to recover with "Select system state".</li>
+				<li><b>An explanation when the look falls back:</b> if the window borders or controls didn't load at startup, a popup at login says why and what to do.</li>
+				<li><b>Built-once add-ons can't lean on private code:</b> they're linked so that one that would quietly use app_server's or libbe's private classes doesn't build.</li>
+				<li><b>Styles run on older engines too,</b> instead of being refused by one with an earlier interface version.</li>
+				<li><b>As in 1.0.1:</b> classic add-ons refuse to load on another system build, and are built again at login after an update.</li>
+			</ul>
 			<p>It's in <a href="https://github.com/idumych/power-theme/releases/tag/v1.2">this release</a>, for Haiku R1/beta6 and later and Renku OS on x86_64. On Linux, it themes the applications of <a href="https://github.com/idumych/hokku">Hokku</a>, built from source or as an Arch and CachyOS package.</p>
 			<pre>pkgman install ./powertheme-1.2-1-x86_64.hpkg</pre>
 			<p>Then open Power Theme and apply a theme; on Haiku and Renku without the new engine, click <b>Build add-ons…</b> once first. The Renku changes described below are separate: some are merged into Renku, and the rest are still in review.</p>
