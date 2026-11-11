@@ -28,6 +28,8 @@
 #include <String.h>
 #include <Window.h>
 
+#include <vector>
+
 #include <decorator/DecorStyle.h>
 
 
@@ -202,6 +204,7 @@ protected:
 			bool				_Record(const ShimDrawing& drawing);
 
 private:
+	friend class RoundedDecorator;
 	friend class Decorator;
 	friend class StyleShim;
 
@@ -304,6 +307,22 @@ public:
 		ServerBitmap*			zoomBitmaps[4];
 	};
 
+	struct ShapeRect {
+		BRect					rect;
+		float					leftTop;
+		float					rightTop;
+		float					leftBottom;
+		float					rightBottom;
+
+		bool operator==(const ShapeRect& other) const
+		{
+			return rect == other.rect && leftTop == other.leftTop
+				&& rightTop == other.rightTop
+				&& leftBottom == other.leftBottom
+				&& rightBottom == other.rightBottom;
+		}
+	};
+
 	enum Region {
 		REGION_NONE,
 
@@ -370,6 +389,7 @@ public:
 
 			const BRegion&		GetFootprint();
 			::Desktop*			GetDesktop() { return NULL; }
+			void				GetShape(std::vector<ShapeRect>& shape) const;
 
 			bool				IsOutlineResizing() const
 									{ return fOutlinesDelta != BPoint(0, 0); }

@@ -13,6 +13,10 @@
 
 
 #include "StyleShim.h"
+#include "RoundedDecorator.h"
+#include "WindowPrivate.h"
+
+#include <stddef.h>
 
 #include <algorithm>
 #include <new>
@@ -565,6 +569,108 @@ BitmapDrawingEngine::ExportToBitmap(int32 width, int32 height,
 }
 
 
+//	#pragma mark - RoundedDecorator
+
+
+// Whether app_server cuts off the corners of the window being drawn: set
+// for each call from the engine, which can come from several threads.
+static __thread bool sCornersCut = false;
+
+
+/*static*/ bool
+RoundedDecorator::IsActive(Desktop* desktop)
+{
+	return sCornersCut;
+}
+
+
+/*!	As app_server's RoundedDecorator::RoundShape(). */
+/*static*/ void
+RoundedDecorator::RoundShape(std::vector<Decorator::ShapeRect>& shape,
+	window_look look, int32 frameRadius, int32 tabRadius)
+{
+	if (look != B_TITLED_WINDOW_LOOK && look != B_DOCUMENT_WINDOW_LOOK
+		&& look != B_MODAL_WINDOW_LOOK && look != B_FLOATING_WINDOW_LOOK
+		&& look != kLeftTitledWindowLook) {
+		return;
+	}
+
+	Decorator::ShapeRect& frame = shape[0];
+	const BRect border = frame.rect;
+	frame.leftTop = frame.rightTop = frame.leftBottom = frame.rightBottom
+		= frameRadius;
+
+	for (size_t i = 1; i < shape.size(); i++) {
+		Decorator::ShapeRect& tab = shape[i];
+
+		// A title bar inside the frame has no corners of its own to round.
+		if (border.Contains(tab.rect))
+			continue;
+
+		tab.leftTop = tabRadius;
+
+		// The frame keeps its corner where a tab grows out of it.
+		if (look == kLeftTitledWindowLook) {
+			tab.leftBottom = tabRadius;
+			if (tab.rect.top <= border.top + frameRadius)
+				frame.leftTop = 0;
+			if (tab.rect.bottom >= border.bottom - frameRadius)
+				frame.leftBottom = 0;
+		} else {
+			tab.rightTop = tabRadius;
+			if (tab.rect.left <= border.left + frameRadius)
+				frame.leftTop = 0;
+			if (tab.rect.right >= border.right - frameRadius)
+				frame.rightTop = 0;
+		}
+	}
+}
+
+
+/*static*/ void
+RoundedDecorator::StrokeCorners(DrawingEngine* engine,
+	const Decorator::ShapeRect& shape, rgb_color leftTop, rgb_color rightTop,
+	rgb_color leftBottom, rgb_color rightBottom)
+{
+	const BRect& rect = shape.rect;
+	const int32 lt = (int32)shape.leftTop;
+	const int32 rt = (int32)shape.rightTop;
+	const int32 lb = (int32)shape.leftBottom;
+	const int32 rb = (int32)shape.rightBottom;
+
+	if (lt > 0)
+		StrokeCorner(engine, rect.LeftTop(), lt, WindowShape::LEFT_TOP, leftTop);
+	if (rt > 0) {
+		StrokeCorner(engine, BPoint(rect.right - rt + 1, rect.top), rt,
+			WindowShape::RIGHT_TOP, rightTop);
+	}
+	if (lb > 0) {
+		StrokeCorner(engine, BPoint(rect.left, rect.bottom - lb + 1), lb,
+			WindowShape::LEFT_BOTTOM, leftBottom);
+	}
+	if (rb > 0) {
+		StrokeCorner(engine, BPoint(rect.right - rb + 1, rect.bottom - rb + 1),
+			rb, WindowShape::RIGHT_BOTTOM, rightBottom);
+	}
+}
+
+
+/*!	app_server draws the line, as for its own decorators. */
+/*static*/ void
+RoundedDecorator::StrokeCorner(DrawingEngine* engine, BPoint leftTop,
+	int32 radius, WindowShape::corner_kind kind, rgb_color color)
+{
+	decor_canvas* canvas = engine != NULL ? engine->fCanvas : NULL;
+	if (canvas == NULL || canvas->size < offsetof(decor_canvas, stroke_corner)
+			+ sizeof(canvas->stroke_corner)
+		|| canvas->stroke_corner == NULL) {
+		return;
+	}
+	canvas->stroke_corner(canvas, to_decor_point(leftTop), radius, kind,
+		color);
+}
+
+
 //	#pragma mark - Decorator
 
 
@@ -741,6 +847,23 @@ bool
 Decorator::GetSettings(BMessage* settings) const
 {
 	return false;
+}
+
+
+void
+Decorator::GetShape(std::vector<ShapeRect>& shape) const
+{
+	ShapeRect frame = { fBorderRect.IsValid() ? fBorderRect : fFrame,
+		0, 0, 0, 0 };
+	shape.push_back(frame);
+
+	for (int32 i = 0; i < fTabList.CountItems(); i++) {
+		const BRect& tabRect = fTabList.ItemAt(i)->tabRect;
+		if (tabRect.IsValid()) {
+			ShapeRect tab = { tabRect, 0, 0, 0, 0 };
+			shape.push_back(tab);
+		}
+	}
 }
 
 
@@ -1048,11 +1171,22 @@ public:
 		}
 
 		const BRect frame = to_rect(window->frame);
+		sCornersCut = window->size >= offsetof(decor_window, corners_cut)
+				+ sizeof(window->corners_cut)
+			&& window->corners_cut;
+
 		decorator->fOutlinesDelta = window->outline_resizing
 			? to_rect(window->outline_frame).RightBottom()
 				- frame.RightBottom()
 			: BPoint(0, 0);
 		decorator->_InvalidateFootprint();
+	}
+
+	//!	Bind() with the canvas it had, for calls that come without one.
+	void Rebind(decor_window* window)
+	{
+		if (fEngine.fCanvas != NULL)
+			Bind(window, fEngine.fCanvas);
 	}
 
 	//!	Frees tabs that are no longer the window's.
@@ -1350,6 +1484,34 @@ shim_size_limits(decor_window* window, int32* minWidth, int32* minHeight,
 }
 
 
+static void
+shim_rounded_shape(decor_window* window, decor_shape_rect* shape, int32 count)
+{
+	StyleShim* shim = StyleShim::Of(window);
+	RoundedDecorator* rounded = dynamic_cast<RoundedDecorator*>(shim->Get());
+	if (rounded == NULL)
+		return;
+
+	shim->Rebind(window);
+	std::vector<Decorator::ShapeRect> decoratorShape;
+	rounded->GetRoundedShape(decoratorShape);
+
+	// The engine's shape and the decorator's come from the same layout, in
+	// the same order: the frame, then each tab.
+	for (int32 i = 0; i < count && i < (int32)decoratorShape.size(); i++) {
+		if (to_decor_rect(decoratorShape[i].rect).left != shape[i].rect.left
+			|| to_decor_rect(decoratorShape[i].rect).top
+				!= shape[i].rect.top) {
+			continue;
+		}
+		shape[i].left_top = (int32)decoratorShape[i].leftTop;
+		shape[i].right_top = (int32)decoratorShape[i].rightTop;
+		shape[i].left_bottom = (int32)decoratorShape[i].leftBottom;
+		shape[i].right_bottom = (int32)decoratorShape[i].rightBottom;
+	}
+}
+
+
 static decor_style sStyle;
 
 
@@ -1384,5 +1546,6 @@ instantiate_decor_style(uint32 apiVersion)
 	sStyle.size_limits = &shim_size_limits;
 	sStyle.moved = &shim_moved;
 	sStyle.update_colors = &shim_update_colors;
+	sStyle.rounded_shape = &shim_rounded_shape;
 	return &sStyle;
 }
