@@ -9,10 +9,13 @@
 # the function refuses to load it (a missing symbol), and libbe falls back
 # to its default look.
 #
-#   sh tools/build-prebuilt-looks.sh [--dest=DIR] [--headers=DIR] [NAME...]
+#   sh tools/build-prebuilt-looks.sh [--dest=DIR] [--headers=DIR] [--libs=DIR]
+#       [NAME...]
 #
 #   --dest     where to put them, in "control_look" (default: build/prebuilt)
 #   --headers  a folder with a newer ControlLook.h than the system's
+#   --libs     a folder with a libbe.so that has create_default_control_look,
+#              when the system's doesn't
 #   NAME       only these looks (default: all of them)
 #
 # Runs on Renku with the compiler (pkgman: gcc, haiku_devel); the system's
@@ -27,10 +30,12 @@ dest=$here/build/prebuilt
 names=""
 headers=/boot/system/develop/headers/os/interface
 extra=""
+libs=""
 for arg in "$@"; do
 	case $arg in
 		--dest=*) dest=${arg#--dest=} ;;
 		--headers=*) headers=${arg#--headers=}; extra="-I$headers" ;;
+		--libs=*) libs="-L${arg#--libs=}" ;;
 		--*) fail "unknown option $arg" ;;
 		*) names="$names $arg" ;;
 	esac
@@ -72,9 +77,11 @@ for entry in $looks; do
 	done
 	output=$dest/control_look/$name
 	# -Bsymbolic: each look calls its own copy of the kit, even with another
-	# look loaded in the same team
+	# look loaded in the same team; --no-undefined: and never libbe's private
+	# HaikuControlLook in place of something it lacks
 	# shellcheck disable=SC2086
-	g++ -shared -s -Wl,-Bsymbolic -o "$output" $objects -lbe -lstdc++ 2>&1 \
+	g++ -shared -s -Wl,-Bsymbolic -Wl,--no-undefined -o "$output" $objects \
+		$libs -lbe -lstdc++ 2>&1 \
 		|| fail "$name: doesn't link"
 	for rdef in "$folder"/$resources; do
 		rc -o "$build/$name.rsrc" "$rdef" 2>&1 || fail "$name: rc failed"
