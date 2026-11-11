@@ -128,8 +128,6 @@ usage(FILE* out)
 		"                        or a title bar\n"
 		"      --shell=photon|deskbar  a taskbar and shelf in the style of QNX's\n"
 		"                        Photon in the Deskbar's place, or the Deskbar\n"
-		"      --shell-every-theme=on|off  keep that shell on whatever theme\n"
-		"                        is applied, or let each theme choose\n"
 		"  -i, --icons=ID        use only the icon theme in folder ID;\n"
 		"                        \"haiku\" puts Haiku's own icons back, and\n"
 		"                        \"haiku-dark\" uses dark versions of them\n"
@@ -671,8 +669,6 @@ command_line(int argc, char** argv)
 		}
 		printf("BeOS-style tabs: %s\n", beos_tabs() ? "on" : "off");
 		printf("shell: %s\n", photon_shell() ? "photon" : "deskbar");
-		printf("shell with every theme: %s\n",
-			shell_with_every_theme() ? "on" : "off");
 		const shell_entry entry = photon_shell_entry();
 		printf("shell at login: %s\n", entry == SHELL_ENTRY_SERVICE
 			? "service (started again if it ends)"
@@ -706,7 +702,11 @@ command_line(int argc, char** argv)
 			fprintf(stderr, "powertheme: --shell-every-theme is on or off\n");
 			return 2;
 		}
-		set_shell_with_every_theme(on);
+		// 1.0's setting: the shell now follows each theme, and --shell=photon
+		// turns it on by hand
+		fprintf(stderr, "powertheme: --shell-every-theme is no longer used: "
+			"each theme turns the Photon shell on or off, and "
+			"--shell=photon turns it on\n");
 		if (shell == NULL)
 			return 0;
 	}

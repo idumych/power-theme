@@ -66,10 +66,10 @@ Down the right is a shelf:
 - **Replicants**, the Deskbar's tray items: volume, network, power and the rest.
 
 With the QNX theme it looks just like Photon. With any other theme it's drawn in
-that theme's own buttons and colours. The QNX theme turns it on. To keep it as
-your desktop shell, check **Photon shell** and **With every theme** in Power
-Theme's window, or run `powertheme --shell=photon --shell-every-theme=on`.
-launch_daemon starts it at login and again if it ends. It keeps windows clear of
+that theme's own buttons and colours. The QNX theme turns it on, and other
+themes bring the Deskbar back. To use it with another theme, apply the theme and
+then check **Photon shell** in Power Theme's window, or run
+`powertheme --shell=photon`. launch_daemon starts it at login and again if it ends. It keeps windows clear of
 the taskbar and shelf. [More below](#whats-here).
 
 ## Haiku Dark
@@ -504,9 +504,8 @@ Rebuild the package when Hokku's decorator classes change; until then,
   Photon's, in place of the Deskbar. The QNX theme turns it on
   (`shell = photon`), and other themes and **Revert** bring the Deskbar back;
   turn it on or off yourself with **Photon shell** in the window or
-  `powertheme --shell=photon` or `--shell=deskbar`. Check **With every theme**
-  (or `powertheme --shell-every-theme=on`) to keep it with whatever theme you
-  apply, and through **Revert**, as your desktop shell. With QNX's controls
+  `powertheme --shell=photon` or `--shell=deskbar`, after applying a theme.
+  With QNX's controls
   it is drawn as Photon's, pixel for pixel; with any other theme, in that
   theme's buttons, menu bars, progress bars and colours, and bigger where the
   theme's fonts need room, changing along with the theme. Along the bottom is a taskbar: **Launch**, with a sun, opens

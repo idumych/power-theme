@@ -39,9 +39,8 @@
  * setting from before any theme. "shell = photon" puts PowerShelf, a taskbar
  * and shelf in the style of QNX's Photon, in the Deskbar's place (see
  * photon_shell()), and "shell = deskbar" or a theme without the key brings
- * the Deskbar back; it goes with the Deskbar's place. With the shell kept with
- * every theme (see shell_with_every_theme()), a theme leaves it on, drawn in
- * that theme's look.
+ * the Deskbar back; it goes with the Deskbar's place. Turned on by hand, the
+ * shell is drawn in the theme's look, until a theme without it is applied.
  *
  * A theme can be one version of another: "variant of = Flat" and "mode =
  * dark". Two themes that say they are the same theme's light and dark versions
@@ -305,10 +304,6 @@ bool		photon_shell();
 // Puts it there, from the next login too, or brings the Deskbar back. Not on
 // Hokku.
 status_t	set_photon_shell(bool on, BString& log);
-// Whether the shell, once on, stays on whatever theme is applied, and through
-// a revert, rather than following each theme.
-bool		shell_with_every_theme();
-void		set_shell_with_every_theme(bool every);
 // Whether PowerShelf is running now, however it was started.
 bool		photon_shell_running();
 
