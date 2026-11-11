@@ -868,8 +868,14 @@ Theme::Parts() const
 		parts |= THEME_ICONS;
 	if (HasWallpaper())
 		parts |= THEME_WALLPAPER;
+#ifdef APP_COSMOE
 	if (fDeskbarLocation >= 0)
 		parts |= THEME_DESKBAR;
+#else
+	// every theme chooses between the Deskbar and the Photon shell, even one
+	// that doesn't say where the Deskbar goes
+	parts |= THEME_DESKBAR;
+#endif
 	return parts;
 }
 
@@ -2126,31 +2132,6 @@ photon_shell_entry()
 }
 
 
-static const char* kShellEveryTheme = "photon shell with every theme";
-
-
-bool
-shell_with_every_theme()
-{
-	BPath path;
-	return themes_settings_path(path, kShellEveryTheme) == B_OK
-		&& BEntry(path.Path()).Exists();
-}
-
-
-void
-set_shell_with_every_theme(bool every)
-{
-	BPath path;
-	if (themes_settings_path(path, kShellEveryTheme) != B_OK)
-		return;
-	if (every)
-		BFile(path.Path(), B_WRITE_ONLY | B_CREATE_FILE);
-	else
-		BEntry(path.Path()).Remove();
-}
-
-
 static const char* kNoShellEntryQuestion = "don't offer shell entry";
 
 
@@ -2462,13 +2443,10 @@ apply_appearance(const Theme& theme, uint32 parts, BString& log)
 	if ((parts & THEME_DESKBAR) != 0) {
 		// the Deskbar comes back before it's placed; the shelf goes in its
 		// place after
-		// a theme without the key has the Deskbar, unless the shell is kept
-		// with every theme, which leaves it on
+		// a theme without the key has the Deskbar; the shell can be turned
+		// on again by hand
 		int32 shell = theme.Shell();
-		if (shell_with_every_theme()) {
-			if (photon_shell())
-				shell = 1;
-		} else if (shell < 0)
+		if (shell < 0)
 			shell = 0;
 		if (shell == 0 && photon_shell())
 			set_photon_shell(false, log);
@@ -2754,8 +2732,8 @@ revert_appearance(BString& log)
 	if (previous.FindBool("subpixel smoothing", &subpixel) == B_OK)
 		set_font_smoothing(subpixel);
 
-	// there was none before any theme, unless it's kept with every theme
-	if (photon_shell() && !shell_with_every_theme()) {
+	// there was none before any theme
+	if (photon_shell()) {
 		BString ignored;
 		set_photon_shell(false, ignored);
 	}

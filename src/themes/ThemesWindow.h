@@ -94,7 +94,6 @@ private:
 			BCheckBox*			fDecorator;
 			BCheckBox*			fBeOSTabs;
 			BCheckBox*			fPhotonShell;
-			BCheckBox*			fShellEveryTheme;
 			BCheckBox*			fControls;
 			BCheckBox*			fColors;
 			BCheckBox*			fFonts;
