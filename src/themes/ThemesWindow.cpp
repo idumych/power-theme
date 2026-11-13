@@ -52,6 +52,7 @@ enum {
 	kMsgScheduleChanged	= 'schd',
 	kMsgBeOSTabs		= 'btab',
 	kMsgPhotonShell		= 'shel',
+	kMsgLeopardShell	= 'shlp',
 	kMsgCheckAddOns		= 'chad',
 	kMsgCheckShellEntry	= 'chse',
 	kMsgShellEntryAnswer	= 'shea',
@@ -565,6 +566,14 @@ ThemesWindow::ThemesWindow(BRect frame, const char* selected, bool wallpaper)
 		"look. The QNX theme turns it on, and other themes and Revert bring the "
 		"Deskbar back; check it again to keep the shell with them. This takes "
 		"effect at once.");
+	fLeopardShell = new BCheckBox("leopard shell", "Leopard shell",
+		new BMessage(kMsgLeopardShell));
+	fLeopardShell->SetToolTip("Puts a menu bar with the front window's menus "
+		"along the top of the screen and a dock along the bottom, in the style "
+		"of Mac OS X Leopard, in the Deskbar's place, with the icon theme's "
+		"icons. The Leopard themes turn it on, and other themes and Revert "
+		"bring the Deskbar back; check it again to keep it with them. This "
+		"takes effect at once.");
 	fControls = new BCheckBox("controls", "Controls",
 		new BMessage(kMsgPartChanged));
 	fColors = new BCheckBox("colors", "Colors", new BMessage(kMsgPartChanged));
@@ -574,7 +583,7 @@ ThemesWindow::ThemesWindow(BRect frame, const char* selected, bool wallpaper)
 	fDeskbar = new BCheckBox("deskbar", "Deskbar position",
 		new BMessage(kMsgPartChanged));
 	fDeskbar->SetToolTip("Puts the Deskbar where the theme has it, and the "
-		"Photon shell in its place if the theme uses it; otherwise the "
+		"theme's shell in its place if it has one; otherwise the "
 		"Deskbar comes back. Uncheck it to leave both as they are.");
 
 	fProgress = new BStatusBar("progress");
@@ -629,9 +638,10 @@ ThemesWindow::ThemesWindow(BRect frame, const char* selected, bool wallpaper)
 					.Add(fBeOSTabs, 2, 0)
 					.Add(fColors, 0, 1)
 					.Add(fFonts, 1, 1)
+					.Add(fPhotonShell, 2, 1)
 					.Add(fWallpaper, 0, 2)
 					.Add(fDeskbar, 1, 2)
-					.Add(fPhotonShell, 2, 2)
+					.Add(fLeopardShell, 2, 2)
 				.End()
 				.Add(new BSeparatorView(B_HORIZONTAL))
 				.AddGroup(B_HORIZONTAL)
@@ -756,7 +766,7 @@ ThemesWindow::_CheckAddOns(bool offerBuild)
 }
 
 
-/*!	Offers to add launch_daemon's entry for the Photon shell when it runs
+/*!	Offers to add launch_daemon's entry for the desktop shell when it runs
 	without one, started some other way, or with an older Power Theme's,
 	which doesn't start it again if it ends.
 */
@@ -770,17 +780,28 @@ ThemesWindow::_CheckShellEntry()
 		return;
 
 	const char* text = entry == SHELL_ENTRY_JOB
-		? "The Photon shell starts at login, but not again if it crashes: what "
+		? "The desktop shell starts at login, but not again if it crashes: what "
 			"starts it is from an older Power Theme.\n\nUpdate it, so that "
 			"launch_daemon starts the shell again if it ends?"
-		: "The Photon shell is running, but nothing starts it at login, or "
+		: "The desktop shell is running, but nothing starts it at login, or "
 			"again if it crashes.\n\nAdd it to what launch_daemon starts, as "
 			"it does the Deskbar?";
-	BAlert* alert = new BAlert("Photon shell", text, "Don't ask again",
+	BAlert* alert = new BAlert("Desktop shell", text, "Don't ask again",
 		"Not now", entry == SHELL_ENTRY_JOB ? "Update" : "Add",
 		B_WIDTH_AS_USUAL, B_OFFSET_SPACING, B_INFO_ALERT);
 	alert->SetShortcut(1, B_ESCAPE);
 	alert->Go(new BInvoker(new BMessage(kMsgShellEntryAnswer), this));
+}
+
+
+//!	Checks the shell in use, if any.
+void
+ThemesWindow::_UpdateShell()
+{
+	const bool on = photon_shell();
+	const bool leopard = current_shell_layout() == SHELL_LAYOUT_LEOPARD;
+	fPhotonShell->SetValue(on && !leopard ? B_CONTROL_ON : B_CONTROL_OFF);
+	fLeopardShell->SetValue(on && leopard ? B_CONTROL_ON : B_CONTROL_OFF);
 }
 
 
@@ -799,11 +820,11 @@ ThemesWindow::_ShellEntryAnswered(int32 which)
 	set_photon_shell(true, log);
 	log.Trim();
 	if (log.IsEmpty() && photon_shell_entry() == SHELL_ENTRY_SERVICE) {
-		log = "The Photon shell starts at login now, and again if it ends.";
+		log = "The desktop shell starts at login now, and again if it ends.";
 	}
 	fStatus->SetText(log);
 	fStatus->SetToolTip(log);
-	fPhotonShell->SetValue(photon_shell() ? B_CONTROL_ON : B_CONTROL_OFF);
+	_UpdateShell();
 }
 
 
@@ -889,14 +910,22 @@ ThemesWindow::MessageReceived(BMessage* message)
 			break;
 
 		case kMsgPhotonShell:
+		case kMsgLeopardShell:
 		{
+			// one shell at a time: checking one unchecks the other
+			BCheckBox* box = message->what == kMsgLeopardShell
+				? fLeopardShell : fPhotonShell;
+			const bool on = box->Value() == B_CONTROL_ON;
+			if (on) {
+				set_shell_layout(message->what == kMsgLeopardShell
+					? SHELL_LAYOUT_LEOPARD : SHELL_LAYOUT_PHOTON);
+			}
 			BString log;
-			set_photon_shell(fPhotonShell->Value() == B_CONTROL_ON, log);
+			set_photon_shell(on, log);
 			log.Trim();
 			fStatus->SetText(log);
 			fStatus->SetToolTip(log);
-			fPhotonShell->SetValue(photon_shell() ? B_CONTROL_ON
-				: B_CONTROL_OFF);
+			_UpdateShell();
 			break;
 		}
 
@@ -1324,7 +1353,7 @@ ThemesWindow::_ShowTheme(const Theme* theme)
 
 	fBeOSTabs->SetEnabled(!fBusy && has_beos_tabs(*theme));
 	fBeOSTabs->SetValue(beos_tabs() ? B_CONTROL_ON : B_CONTROL_OFF);
-	fPhotonShell->SetValue(photon_shell() ? B_CONTROL_ON : B_CONTROL_OFF);
+	_UpdateShell();
 
 	// parts whose add-ons or files aren't installed can't be applied
 	// (a version of a pair with icons chosen for it doesn't need its own)
@@ -1488,7 +1517,8 @@ ThemesWindow::_SetBusy(bool busy)
 	const Theme* theme = _SelectedTheme();
 	fBeOSTabs->SetEnabled(!busy && theme != NULL && has_beos_tabs(*theme));
 	fPhotonShell->SetEnabled(!busy);
-	fPhotonShell->SetValue(photon_shell() ? B_CONTROL_ON : B_CONTROL_OFF);
+	fLeopardShell->SetEnabled(!busy);
+	_UpdateShell();
 	fLightAt->SetEnabled(!busy);
 	fDarkAt->SetEnabled(!busy);
 	fIconsField->SetEnabled(!busy);

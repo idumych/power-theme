@@ -191,25 +191,6 @@ themes_settings_path(BPath& path, const char* leaf)
 }
 
 
-void
-data_directories(BStringList& directories)
-{
-	static const directory_which kDirectories[] = {
-		B_USER_NONPACKAGED_DATA_DIRECTORY,
-		B_USER_DATA_DIRECTORY,
-		B_SYSTEM_NONPACKAGED_DATA_DIRECTORY,
-		B_SYSTEM_DATA_DIRECTORY
-	};
-
-	for (size_t i = 0; i < sizeof(kDirectories) / sizeof(kDirectories[0]);
-			i++) {
-		BPath path;
-		if (find_directory(kDirectories[i], &path) == B_OK)
-			directories.Add(path.Path());
-	}
-}
-
-
 static status_t
 load_message(const char* leaf, BMessage& message)
 {
@@ -1020,6 +1001,8 @@ Theme::Load(const char* folder)
 			value.ToLower();
 			if (value == "photon")
 				fShell = 1;
+			else if (value == "leopard")
+				fShell = 2;
 			else if (value == "deskbar")
 				fShell = 0;
 		} else if (key == "wallpaper mode") {
@@ -1587,6 +1570,21 @@ restart_deskbar()
 	team_info info;
 	for (int32 i = 0; i < 50 && get_team_info(team, &info) == B_OK; i++)
 		snooze(100000);
+
+#ifndef APP_COSMOE
+	// launch_daemon starts it again, if it started it. One started some
+	// other way, or by a launch_daemon whose service can't start any more,
+	// is started here: through launch_daemon first, so that it's its again.
+	for (int32 i = 0; i < 30 && !be_roster->IsRunning(kDeskbarSignature); i++)
+		snooze(100000);
+	if (be_roster->IsRunning(kDeskbarSignature))
+		return;
+	system("launch_roster start x-vnd.Be-TSKB >/dev/null 2>&1");
+	for (int32 i = 0; i < 30 && !be_roster->IsRunning(kDeskbarSignature); i++)
+		snooze(100000);
+	if (!be_roster->IsRunning(kDeskbarSignature))
+		be_roster->Launch(kDeskbarSignature);
+#endif
 }
 
 
@@ -2386,6 +2384,43 @@ photon_shell_entry()
 }
 
 
+static const char* kShellLayoutName = "shell layout";
+
+
+shell_layout
+current_shell_layout()
+{
+	BPath path;
+	if (themes_settings_path(path, kShellLayoutName) != B_OK)
+		return SHELL_LAYOUT_PHOTON;
+	BFile file(path.Path(), B_READ_ONLY);
+	char text[32] = {};
+	if (file.InitCheck() != B_OK || file.Read(text, sizeof(text) - 1) <= 0)
+		return SHELL_LAYOUT_PHOTON;
+	return strncasecmp(text, "leopard", 7) == 0
+		? SHELL_LAYOUT_LEOPARD : SHELL_LAYOUT_PHOTON;
+}
+
+
+void
+set_shell_layout(shell_layout layout)
+{
+	if (layout == current_shell_layout())
+		return;
+	BPath path;
+	if (themes_settings_path(path, kShellLayoutName) != B_OK)
+		return;
+	// PowerShelf reads it, as "PowerTheme/shell layout"
+	if (layout == SHELL_LAYOUT_PHOTON)
+		BEntry(path.Path()).Remove();
+	else {
+		BFile file(path.Path(), B_WRITE_ONLY | B_CREATE_FILE | B_ERASE_FILE);
+		file.Write("leopard\n", 8);
+	}
+	BMessenger(kShellSignature).SendMessage('layt');
+}
+
+
 static const char* kNoShellEntryQuestion = "don't offer shell entry";
 
 
@@ -2466,13 +2501,13 @@ set_photon_shell(bool on, BString& log)
 {
 #ifdef APP_COSMOE
 	if (on)
-		log << "The Photon shell isn't available on Linux.\n";
+		log << "The desktop shell isn't available on Linux.\n";
 	return on ? B_NOT_SUPPORTED : B_OK;
 #else
 	BPath program;
 	status_t status = shell_program(program);
 	if (on && (status != B_OK || !BEntry(program.Path()).Exists())) {
-		log << "Can't find PowerShelf, the Photon shell.\n";
+		log << "Can't find PowerShelf, the desktop shell.\n";
 		return B_ENTRY_NOT_FOUND;
 	}
 
@@ -2545,7 +2580,7 @@ set_photon_shell(bool on, BString& log)
 	if (status == B_OK)
 		status = be_roster->Launch(&ref);
 	if (status != B_OK && status != B_ALREADY_RUNNING)
-		log << "Can't start the Photon shell: " << strerror(status) << ".\n";
+		log << "Can't start the desktop shell: " << strerror(status) << ".\n";
 	return B_OK;
 #endif
 }
@@ -2730,8 +2765,12 @@ apply_appearance(const Theme& theme, uint32 parts, BString& log)
 		if (shell == 0 && photon_shell())
 			set_photon_shell(false, log);
 		set_deskbar(theme.DeskbarLocation(), theme.DeskbarExpanded(), log);
-		if (shell == 1 && !photon_shell())
-			set_photon_shell(true, log);
+		if (shell >= 1) {
+			set_shell_layout(shell == 2 ? SHELL_LAYOUT_LEOPARD
+				: SHELL_LAYOUT_PHOTON);
+			if (!photon_shell())
+				set_photon_shell(true, log);
+		}
 	}
 
 	// They go with the controls. A theme that says nothing brings back the

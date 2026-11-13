@@ -127,8 +127,10 @@ usage(FILE* out)
 		"                        Platinum's, Leopard's, Gershwix's, NeXT's,\n"
 		"                        System 7's, Amiga's, AmigaOS 3's and QNX's),\n"
 		"                        or a title bar\n"
-		"      --shell=photon|deskbar  a taskbar and shelf in the style of QNX's\n"
-		"                        Photon in the Deskbar's place, or the Deskbar\n"
+		"      --shell=photon|leopard|deskbar  in the Deskbar's place, a\n"
+		"                        taskbar and shelf in the style of QNX's\n"
+		"                        Photon, or a menu bar and dock in the style\n"
+		"                        of Mac OS X Leopard; or the Deskbar\n"
 		"  -i, --icons=ID        use only the icon theme in folder ID;\n"
 		"                        \"haiku\" puts Haiku's own icons back, and\n"
 		"                        \"haiku-dark\" uses dark versions of them\n"
@@ -707,7 +709,9 @@ command_line(int argc, char** argv)
 			? "built once (decorator styles)" : "built for this system");
 		printf("controls: %s\n", (prebuilt & PREBUILT_CONTROL_LOOKS) != 0
 			? "built once" : "built for this system");
-		printf("shell: %s\n", photon_shell() ? "photon" : "deskbar");
+		printf("shell: %s\n", !photon_shell() ? "deskbar"
+			: current_shell_layout() == SHELL_LAYOUT_LEOPARD ? "leopard"
+			: "photon");
 		const shell_entry entry = photon_shell_entry();
 		printf("shell at login: %s\n", entry == SHELL_ENTRY_SERVICE
 			? "service (started again if it ends)"
@@ -751,10 +755,16 @@ command_line(int argc, char** argv)
 	}
 
 	if (shell != NULL) {
-		const bool on = strcasecmp(shell, "photon") == 0;
+		const bool leopard = strcasecmp(shell, "leopard") == 0;
+		const bool on = leopard || strcasecmp(shell, "photon") == 0;
 		if (!on && strcasecmp(shell, "deskbar") != 0) {
-			fprintf(stderr, "powertheme: --shell is photon or deskbar\n");
+			fprintf(stderr, "powertheme: --shell is photon, leopard or "
+				"deskbar\n");
 			return 2;
+		}
+		if (on) {
+			set_shell_layout(leopard ? SHELL_LAYOUT_LEOPARD
+				: SHELL_LAYOUT_PHOTON);
 		}
 		BString log;
 		status_t result = set_photon_shell(on, log);

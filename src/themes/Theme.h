@@ -18,7 +18,7 @@
  *   deskbar = right top, expanded
  *   scroll bar arrows = double
  *   font smoothing = grey
- *   shell = photon
+ *   shell = photon         (or leopard, or deskbar)
  *   font plain = Noto Sans, Regular, 10
  *   font bold = Noto Sans Display | Noto Sans, Medium | Bold, 12
  *   color B_PANEL_BACKGROUND_COLOR = #D4D0C8
@@ -38,8 +38,9 @@
  * pixel font whose squares must stay sharp; a theme without it brings back the
  * setting from before any theme. "shell = photon" puts PowerShelf, a taskbar
  * and shelf in the style of QNX's Photon, in the Deskbar's place (see
- * photon_shell()), and "shell = deskbar" or a theme without the key brings
- * the Deskbar back; it goes with the Deskbar's place. Turned on by hand, the
+ * photon_shell()), "shell = leopard" the same program laid out as Mac OS X
+ * Leopard's menu bar and dock, and "shell = deskbar" or a theme without the
+ * key brings the Deskbar back; it goes with the Deskbar's place. Turned on by hand, the
  * shell is drawn in the theme's look, until a theme without it is applied.
  *
  * A theme can be one version of another: "variant of = Flat" and "mode =
@@ -306,6 +307,16 @@ bool		photon_shell();
 status_t	set_photon_shell(bool on, BString& log);
 // Whether PowerShelf is running now, however it was started.
 bool		photon_shell_running();
+
+// How PowerShelf is laid out: as Photon's taskbar and shelf, or as Mac OS X
+// Leopard's menu bar and dock.
+enum shell_layout {
+	SHELL_LAYOUT_PHOTON,
+	SHELL_LAYOUT_LEOPARD
+};
+shell_layout	current_shell_layout();
+// Changes that, and tells PowerShelf if it's running.
+void		set_shell_layout(shell_layout layout);
 
 // What starts PowerShelf at login: launch_daemon's service, which starts it
 // again if it ends; an older Power Theme's job, which doesn't; or nothing.

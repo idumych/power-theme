@@ -554,16 +554,23 @@ $(THEMES): $(THEMES_OBJECTS) $(BUILD)/Themes.rsrc
 	$(XRES) -o $@ $(BUILD)/Themes.rsrc
 	mimeset -f $@ 2>/dev/null || true
 
-# the Photon shell: a taskbar and shelf in the Deskbar's place
-$(BUILD)/PowerShelf.o: src/shelf/PowerShelf.cpp
+# the desktop shell in the Deskbar's place: Photon's taskbar and shelf, or
+# Leopard's menu bar and dock
+# (the dock takes its icons from Power Theme's icon theme)
+SHELF_OBJECTS := $(BUILD)/PowerShelf.o $(BUILD)/Leopard.o $(BUILD)/Canvas.o \
+	$(BUILD)/themes/IconTheme.o $(BUILD)/themes/DataDirectories.o
+
+$(BUILD)/PowerShelf.o $(BUILD)/Leopard.o $(BUILD)/Canvas.o: $(BUILD)/%.o: \
+		src/shelf/%.cpp src/shelf/Shell.h src/shelf/Canvas.h \
+		src/themes/IconTheme.h
 	@mkdir -p $(BUILD)
-	$(CXX) $(CXXFLAGS) -std=gnu++17 -c $< -o $@
+	$(CXX) $(CXXFLAGS) -std=gnu++17 -Isrc/themes -c $< -o $@
 
 $(BUILD)/PowerShelf.rsrc: src/shelf/PowerShelf.rdef
 
-$(SHELF): $(BUILD)/PowerShelf.o $(BUILD)/PowerShelf.rsrc
-	$(CXX) $(SYSROOT_FLAGS) -s -o $@ $(BUILD)/PowerShelf.o -lbe -ltracker \
-		-lstdc++
+$(SHELF): $(SHELF_OBJECTS) $(BUILD)/PowerShelf.rsrc
+	$(CXX) $(SYSROOT_FLAGS) -s -o $@ $(SHELF_OBJECTS) -lbe -ltracker \
+		-ltranslation -lstdc++
 	$(XRES) -o $@ $(BUILD)/PowerShelf.rsrc
 	mimeset -f $@ 2>/dev/null || true
 

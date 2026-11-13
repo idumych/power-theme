@@ -2,11 +2,12 @@
  * Copyright 2026, idumych.
  * Distributed under the terms of the MIT License.
  *
- * PowerShelf: a desktop shell in the style of QNX 6's Photon, in place of
- * Deskbar. Power Theme starts it for themes that ask for it ("shell =
- * photon"), and it stops Deskbar while it runs and brings it back as it quits.
+ * PowerShelf: a desktop shell in place of the Deskbar, laid out as QNX 6's
+ * Photon or, in Leopard.cpp, as Mac OS X 10.5 Leopard. Power Theme starts it
+ * for themes that ask for it ("shell = photon" or "shell = leopard"), and it
+ * stops Deskbar while it runs and brings it back as it quits.
  *
- * It has two parts, drawn as Photon drew them: a taskbar along the bottom of
+ * Photon's layout has two parts, drawn as Photon drew them: a taskbar along the bottom of
  * the screen, with a Launch button opening the Deskbar's menu of applications,
  * a button for each window, and a clock; and a shelf down the right, with
  * groups of launchers that open and close (applications, utilities and
@@ -49,6 +50,8 @@
 #include <Window.h>
 #include <fs_info.h>
 
+#include "Shell.h"
+
 #include <algorithm>
 #include <fcntl.h>
 #include <unistd.h>
@@ -64,49 +67,10 @@
 #include <vector>
 
 
-// libbe's window list, as Deskbar uses it: BeOS's private window API, not in
-// the public headers (headers/private/interface/WindowInfo.h)
-struct window_info {
-	team_id		team;
-	int32		server_token;
-	int32		thread;
-	int32		client_token;
-	int32		client_port;
-	uint32		workspaces;
-	int32		layer;
-	uint32		feel;
-	uint32		flags;
-	int32		window_left;
-	int32		window_top;
-	int32		window_right;
-	int32		window_bottom;
-	int32		show_hide_level;
-	bool		is_mini;
-} _PACKED;
-
-struct client_window_info : window_info {
-	float		tab_height;
-	float		border_size;
-	char		name[0];
-} _PACKED;
-
-enum window_action {
-	B_MINIMIZE_WINDOW,
-	B_BRING_TO_FRONT
-};
-
-client_window_info* get_window_info(int32 token);
-int32* get_token_list(team_id app, int32* count);
-void do_window_action(int32 window_id, int32 action, BRect zoomRect,
-	bool zoom);
-
-namespace BPrivate {
-status_t get_window_order(int32 workspace, int32** _tokens, int32* _count);
-}
-
-
 static const char* kSignature = "application/x-vnd.idumych-PowerTheme-shelf";
-static const char* kDeskbarSignature = "application/x-vnd.Be-TSKB";
+const char* kDeskbarSignature = "application/x-vnd.Be-TSKB";
+const char* kTrackerSignature = "application/x-vnd.Be-TRAK";
+static const char* kLayoutName = "PowerTheme/shell layout";
 static const char* kSettingsName = "PowerTheme/shelf";
 // what keeps a crashing replicant from bringing the shell down for good: the
 // one being loaded, the ones that crashed while loading, and recent starts
@@ -114,8 +78,7 @@ static const char* kLoadingName = "PowerTheme/shelf-loading";
 static const char* kGuardName = "PowerTheme/shelf-guard";
 
 static const uint32 kTick = 'tick';
-static const uint32 kLaunch = 'lnch';
-static const uint32 kShutDown = 'shut';
+static const uint32 kLayout = 'layt';
 
 // the band round each part: dark lines either side of a ridge
 static const rgb_color kOutline = { 0x4b, 0x4b, 0x4b, 255 };
@@ -155,7 +118,6 @@ static const float kHeaderHeight = 19;
 static const float kItemHeight = 25;
 static const float kToggleWidth = 16;
 static const float kIconCellWidth = 29;
-static const float kIconSize = 16;
 
 
 static float
@@ -376,7 +338,7 @@ draw_band(BView* view, BRect r, bool horizontal)
 }
 
 
-static BBitmap*
+BBitmap*
 icon_for(const entry_ref& ref, float size)
 {
 	BBitmap* icon = new BBitmap(BRect(0, 0, size - 1, size - 1), B_RGBA32);
@@ -388,7 +350,7 @@ icon_for(const entry_ref& ref, float size)
 }
 
 
-static void
+void
 draw_icon(BView* view, const BBitmap* icon, BPoint where)
 {
 	if (icon == NULL)
@@ -424,7 +386,7 @@ draw_text(BView* view, const char* text, const BFont& font, BRect r,
 
 
 //!	The folders the Deskbar's menu is made of, the user's own last.
-static std::vector<BPath>
+std::vector<BPath>
 menu_folders()
 {
 	std::vector<BPath> folders;
@@ -444,56 +406,56 @@ menu_folders()
 }
 
 
-//!	A menu item with the icon of what it opens, as Photon's Launch menu had.
-class IconMenuItem : public BMenuItem {
-public:
-	IconMenuItem(const char* label, BMessage* message, const entry_ref& ref)
-		:
-		BMenuItem(label, message),
-		fIcon(icon_for(ref, kIconSize))
-	{
-	}
+//	A menu item with the icon of what it opens, as Photon's Launch menu had.
+IconMenuItem::IconMenuItem(const char* label, BMessage* message,
+	const entry_ref& ref)
+	:
+	BMenuItem(label, message),
+	fIcon(icon_for(ref, kIconSize))
+{
+}
 
-	IconMenuItem(BMenu* submenu, const entry_ref* ref)
-		:
-		BMenuItem(submenu),
-		fIcon(ref != NULL ? icon_for(*ref, kIconSize) : NULL)
-	{
-	}
 
-	~IconMenuItem()
-	{
-		delete fIcon;
-	}
+IconMenuItem::IconMenuItem(BMenu* submenu, const entry_ref* ref)
+	:
+	BMenuItem(submenu),
+	fIcon(ref != NULL ? icon_for(*ref, kIconSize) : NULL)
+{
+}
 
-protected:
-	virtual void GetContentSize(float* width, float* height)
-	{
-		BMenuItem::GetContentSize(width, height);
-		*width += kIconSize + 6;
-		*height = std::max(*height, kIconSize + 2);
-	}
 
-	virtual void DrawContent()
-	{
-		BMenu* menu = Menu();
-		const BPoint start = menu->PenLocation();
-		const BRect frame = Frame();
-		draw_icon(menu, fIcon, BPoint(start.x,
-			floorf((frame.top + frame.bottom - kIconSize) / 2) + 1));
-		menu->MovePenTo(start.x + kIconSize + 6, start.y);
-		BMenuItem::DrawContent();
-	}
+IconMenuItem::~IconMenuItem()
+{
+	delete fIcon;
+}
 
-private:
-	BBitmap*			fIcon;
-};
+
+void
+IconMenuItem::GetContentSize(float* width, float* height)
+{
+	BMenuItem::GetContentSize(width, height);
+	*width += kIconSize + 6;
+	*height = std::max(*height, kIconSize + 2);
+}
+
+
+void
+IconMenuItem::DrawContent()
+{
+	BMenu* menu = Menu();
+	const BPoint start = menu->PenLocation();
+	const BRect frame = Frame();
+	draw_icon(menu, fIcon, BPoint(start.x,
+		floorf((frame.top + frame.bottom - kIconSize) / 2) + 1));
+	menu->MovePenTo(start.x + kIconSize + 6, start.y);
+	BMenuItem::DrawContent();
+}
 
 
 /*!	Fills \a menu from \a folders, merged: a folder in any becomes a submenu
 	made from all of them, an entry an item that opens it; sorted by name.
 */
-static void
+void
 fill_menu(BMenu* menu, const std::vector<BPath>& folders, BHandler* target)
 {
 	std::map<BString, std::vector<BPath>> submenus;
@@ -537,7 +499,7 @@ fill_menu(BMenu* menu, const std::vector<BPath>& folders, BHandler* target)
 }
 
 
-static void
+void
 launch(const entry_ref& ref)
 {
 	BEntry entry(&ref, true);
@@ -548,10 +510,99 @@ launch(const entry_ref& ref)
 	if (entry.IsDirectory()) {
 		BMessage open(B_REFS_RECEIVED);
 		open.AddRef("refs", &target);
-		BMessenger("application/x-vnd.Be-TRAK").SendMessage(&open);
+		BMessenger(kTrackerSignature).SendMessage(&open);
 		return;
 	}
 	be_roster->Launch(&target);
+}
+
+
+//	#pragma mark - keeping windows clear
+
+
+/*!	A window that opens under what a layout takes is moved out, and shrunk if
+	it doesn't fit, and one that is zoomed or resized by its application,
+	rather than with the mouse, is fitted to the rest of the screen. One
+	dragged under them stays there.
+*/
+void
+keep_clear(const client_window_info* info, BRect free, BRect screen,
+	std::map<int32, BRect>& frames)
+{
+	if (info->is_mini)
+		return;
+	const BRect frame(info->window_left, info->window_top,
+		info->window_right, info->window_bottom);
+	auto known = frames.find(info->server_token);
+	const bool seen = known != frames.end();
+	// a new size with no button held: a zoom, or the application's own
+	BPoint where;
+	uint32 buttons = 0;
+	get_mouse(&where, &buttons);
+	const bool resized = seen && buttons == 0
+		&& (known->second.Width() != frame.Width()
+			|| known->second.Height() != frame.Height());
+	if (buttons == 0 || !seen)
+		frames[info->server_token] = frame;
+
+	// the window with its border and tab
+	const float border = info->border_size;
+	const float tab = info->tab_height;
+	const BRect outer(frame.left - border, frame.top - tab - border,
+		frame.right + border, frame.bottom + border);
+	if (free.Contains(outer))
+		return;
+
+	// zoomed, as Haiku zooms with no Deskbar: across the whole screen
+	const bool zoomed = outer.left <= screen.left + border
+		&& outer.right >= screen.right - border
+		&& outer.Height() >= screen.Height() * 0.9f;
+	if (seen && !zoomed && !resized)
+		return;
+
+	const bool resizable = (info->flags & B_NOT_RESIZABLE) == 0;
+	BRect fitted(frame);
+	if (zoomed && resizable) {
+		fitted.Set(free.left + border, free.top + tab + border,
+			free.right - border, free.bottom - border);
+	} else {
+		// in from the right and bottom, then the left and top
+		if (outer.right > free.right)
+			fitted.OffsetBy(free.right - outer.right, 0);
+		if (outer.bottom > free.bottom)
+			fitted.OffsetBy(0, free.bottom - outer.bottom);
+		if (fitted.left - border < free.left)
+			fitted.OffsetBy(free.left + border - fitted.left, 0);
+		if (fitted.top - tab - border < free.top)
+			fitted.OffsetBy(0, free.top + tab + border - fitted.top);
+		if (resizable) {
+			fitted.right = std::min(fitted.right, free.right - border);
+			fitted.bottom = std::min(fitted.bottom, free.bottom - border);
+		}
+	}
+	if (fitted == frame)
+		return;
+
+	BMessage message(B_SET_PROPERTY);
+	message.AddRect("data", fitted);
+	message.AddSpecifier("Frame");
+	message.AddSpecifier("Window", info->name);
+	BMessenger(NULL, info->team).SendMessage(&message);
+}
+
+
+void
+shut_down()
+{
+	BAlert* alert = new BAlert("Shutdown",
+		"Shut down or restart the computer?", "Cancel", "Restart",
+		"Shut down", B_WIDTH_AS_USUAL, B_OFFSET_SPACING, B_WARNING_ALERT);
+	alert->SetShortcut(0, B_ESCAPE);
+	const int32 choice = alert->Go();
+	if (choice == 1)
+		system("shutdown -r &");
+	else if (choice == 2)
+		system("shutdown &");
 }
 
 
@@ -670,7 +721,7 @@ public:
 				break;
 			}
 			case kShutDown:
-				_ShutDown();
+				shut_down();
 				break;
 			default:
 				BView::MessageReceived(message);
@@ -682,6 +733,7 @@ public:
 	{
 		std::vector<TaskButton> buttons;
 		int32 active = -1;
+		const BRect screen = BScreen(Window()).Frame();
 
 		// the window in front, of those listed
 		int32* order = NULL;
@@ -708,7 +760,10 @@ public:
 					&& info->show_hide_level <= 0
 					&& (info->workspaces & (1UL << current_workspace())) != 0
 					&& info->name[0] != '\0') {
-					_KeepClear(info);
+					keep_clear(info, BRect(screen.left, screen.top,
+						screen.right - shelf_width(),
+						screen.bottom - kBand - taskbar_height()), screen,
+						fFrames);
 					TaskButton button;
 					button.token = info->server_token;
 					button.team = team;
@@ -765,78 +820,6 @@ public:
 	}
 
 private:
-	/*!	Keeps a window clear of the taskbar and the shelf, as Haiku has no way
-		to set part of the screen aside: one that opens under them is moved
-		out, and shrunk if it doesn't fit, and one that is zoomed or resized
-		by its application, rather than with the mouse, is fitted to the rest
-		of the screen. One dragged under them stays there.
-	*/
-	void _KeepClear(const client_window_info* info)
-	{
-		if (info->is_mini)
-			return;
-		const BRect frame(info->window_left, info->window_top,
-			info->window_right, info->window_bottom);
-		auto known = fFrames.find(info->server_token);
-		const bool seen = known != fFrames.end();
-		// a new size with no button held: a zoom, or the application's own
-		BPoint where;
-		uint32 buttons = 0;
-		GetMouse(&where, &buttons, false);
-		const bool resized = seen && buttons == 0
-			&& (known->second.Width() != frame.Width()
-				|| known->second.Height() != frame.Height());
-		if (buttons == 0 || !seen)
-			fFrames[info->server_token] = frame;
-
-		const BRect screen = BScreen(Window()).Frame();
-		// what's left of the screen, and the window with its border and tab
-		const BRect free(screen.left, screen.top,
-			screen.right - shelf_width(), screen.bottom - kBand - taskbar_height());
-		const float border = info->border_size;
-		const float tab = info->tab_height;
-		const BRect outer(frame.left - border, frame.top - tab - border,
-			frame.right + border, frame.bottom + border);
-		if (free.Contains(outer))
-			return;
-
-		// zoomed, as Haiku zooms with no Deskbar: across the whole screen
-		const bool zoomed = outer.left <= screen.left + border
-			&& outer.right >= screen.right - border
-			&& outer.Height() >= screen.Height() * 0.9f;
-		if (seen && !zoomed && !resized)
-			return;
-
-		const bool resizable = (info->flags & B_NOT_RESIZABLE) == 0;
-		BRect fitted(frame);
-		if (zoomed && resizable) {
-			fitted.Set(free.left + border, free.top + tab + border,
-				free.right - border, free.bottom - border);
-		} else {
-			// in from the right and bottom, then the left and top
-			if (outer.right > free.right)
-				fitted.OffsetBy(free.right - outer.right, 0);
-			if (outer.bottom > free.bottom)
-				fitted.OffsetBy(0, free.bottom - outer.bottom);
-			if (fitted.left - border < free.left)
-				fitted.OffsetBy(free.left + border - fitted.left, 0);
-			if (fitted.top - tab - border < free.top)
-				fitted.OffsetBy(0, free.top + tab + border - fitted.top);
-			if (resizable) {
-				fitted.right = std::min(fitted.right, free.right - border);
-				fitted.bottom = std::min(fitted.bottom, free.bottom - border);
-			}
-		}
-		if (fitted == frame)
-			return;
-
-		BMessage message(B_SET_PROPERTY);
-		message.AddRect("data", fitted);
-		message.AddSpecifier("Frame");
-		message.AddSpecifier("Window", info->name);
-		BMessenger(NULL, info->team).SendMessage(&message);
-	}
-
 	BRect _LaunchFrame() const
 	{
 		const BRect b = Bounds();
@@ -975,19 +958,6 @@ private:
 			ConvertToScreen(launchButton), true);
 	}
 
-	void _ShutDown()
-	{
-		BAlert* alert = new BAlert("Shutdown",
-			"Shut down or restart the computer?", "Cancel", "Restart",
-			"Shut down", B_WIDTH_AS_USUAL, B_OFFSET_SPACING, B_WARNING_ALERT);
-		alert->SetShortcut(0, B_ESCAPE);
-		const int32 choice = alert->Go();
-		if (choice == 1)
-			system("shutdown -r &");
-		else if (choice == 2)
-			system("shutdown &");
-	}
-
 	std::vector<TaskButton>	fButtons;
 	std::map<team_id, BBitmap*> fIcons;
 	// each window's frame when last seen with no button held
@@ -1114,6 +1084,81 @@ private:
 static CrashGuard* sGuard = NULL;
 
 
+//	#pragma mark - replicants
+
+
+// how big a replicant may be: as Deskbar's at its smallest
+static const float kReplicantHeight = 16;
+
+
+/*!	The Deskbar's replicants, as it keeps them: add-ons and applications
+	listed in its settings, each asked for its view, which is archived and
+	made again from the archive, as the Deskbar's shelf does.
+*/
+void
+load_replicants(BView* tray, float maxWidth)
+{
+	BPath path;
+	if (find_directory(B_USER_SETTINGS_DIRECTORY, &path) != B_OK
+		|| path.Append("deskbar/replicants") != B_OK)
+		return;
+	BFile file(path.Path(), B_READ_ONLY);
+	BMessage settings;
+	if (file.InitCheck() != B_OK || settings.Unflatten(&file) != B_OK)
+		return;
+
+	if (sGuard != NULL && sGuard->Mode() != CrashGuard::NORMAL)
+		return;
+	const char* entry;
+	for (int32 i = 0; settings.FindString("replicant_path", i, &entry)
+			== B_OK; i++) {
+		if (sGuard != NULL && sGuard->Skipped(entry))
+			continue;
+		if (sGuard != NULL)
+			sGuard->Loading(entry);
+		BEntry addOn(entry, true);
+		entry_ref ref;
+		if (!addOn.Exists() || addOn.GetRef(&ref) != B_OK)
+			continue;
+		const image_id image = load_add_on(entry);
+		if (image < B_OK)
+			continue;
+		BView* (*entryFunction)(image_id, const entry_ref*, float, float);
+		BView* (*itemFunction)(float, float);
+		BView* view = NULL;
+		if (get_image_symbol(image, "instantiate_deskbar_entry",
+				B_SYMBOL_TYPE_TEXT, (void**)&entryFunction) == B_OK)
+			view = entryFunction(image, &ref, maxWidth, kReplicantHeight);
+		else if (get_image_symbol(image, "instantiate_deskbar_item",
+				B_SYMBOL_TYPE_TEXT, (void**)&itemFunction) == B_OK)
+			view = itemFunction(maxWidth, kReplicantHeight);
+		if (view == NULL) {
+			unload_add_on(image);
+			continue;
+		}
+
+		BMessage archive;
+		const bool archived = view->Archive(&archive) == B_OK;
+		BView* made = NULL;
+		if (archived) {
+			made = dynamic_cast<BView*>(instantiate_object(&archive));
+		}
+		if (made != NULL)
+			delete view;
+		else
+			made = view;
+		// some follow their parent's edges, as the Deskbar's tray never
+		// changes size; here they keep their own
+		const BRect frame = made->Frame();
+		made->SetResizingMode(B_FOLLOW_NONE);
+		tray->AddChild(made);
+		made->ResizeTo(frame.Width(), frame.Height());
+	}
+	if (sGuard != NULL)
+		sGuard->Loading(NULL);
+}
+
+
 //	#pragma mark - the shelf
 
 
@@ -1134,14 +1179,12 @@ struct ShelfGroup {
 	bool		tray;
 };
 
-// how big a replicant may be: as Deskbar's at its smallest
-static const float kReplicantHeight = 16;
 static const float kReplicantGap = 4;
 static const float kMonitorHeight = 66;
 
 
 //!	The first of \a names found in the system's apps, preferences or bin.
-static bool
+bool
 find_program(const char* name, entry_ref& ref)
 {
 	const directory_which places[] = { B_SYSTEM_APPS_DIRECTORY,
@@ -1260,7 +1303,7 @@ public:
 		fTray->SetViewColor(sPhoton ? kFace : panel());
 		fTray->SetLowColor(fTray->ViewColor());
 		AddChild(fTray);
-		_LoadReplicants();
+		load_replicants(fTray, Bounds().Width() - kBand - 8);
 		Relayout();
 	}
 
@@ -1508,73 +1551,6 @@ private:
 			if (fTray->IsHidden())
 				fTray->Show();
 		}
-	}
-
-	/*!	The Deskbar's replicants, as it keeps them: add-ons and applications
-		listed in its settings, each asked for its view, which is archived and
-		made again from the archive, as the Deskbar's shelf does.
-	*/
-	void _LoadReplicants()
-	{
-		BPath path;
-		if (find_directory(B_USER_SETTINGS_DIRECTORY, &path) != B_OK
-			|| path.Append("deskbar/replicants") != B_OK)
-			return;
-		BFile file(path.Path(), B_READ_ONLY);
-		BMessage settings;
-		if (file.InitCheck() != B_OK || settings.Unflatten(&file) != B_OK)
-			return;
-
-		if (sGuard != NULL && sGuard->Mode() != CrashGuard::NORMAL)
-			return;
-		const float maxWidth = Bounds().Width() - kBand - 8;
-		const char* entry;
-		for (int32 i = 0; settings.FindString("replicant_path", i, &entry)
-				== B_OK; i++) {
-			if (sGuard != NULL && sGuard->Skipped(entry))
-				continue;
-			if (sGuard != NULL)
-				sGuard->Loading(entry);
-			BEntry addOn(entry, true);
-			entry_ref ref;
-			if (!addOn.Exists() || addOn.GetRef(&ref) != B_OK)
-				continue;
-			const image_id image = load_add_on(entry);
-			if (image < B_OK)
-				continue;
-			BView* (*entryFunction)(image_id, const entry_ref*, float, float);
-			BView* (*itemFunction)(float, float);
-			BView* view = NULL;
-			if (get_image_symbol(image, "instantiate_deskbar_entry",
-					B_SYMBOL_TYPE_TEXT, (void**)&entryFunction) == B_OK)
-				view = entryFunction(image, &ref, maxWidth, kReplicantHeight);
-			else if (get_image_symbol(image, "instantiate_deskbar_item",
-					B_SYMBOL_TYPE_TEXT, (void**)&itemFunction) == B_OK)
-				view = itemFunction(maxWidth, kReplicantHeight);
-			if (view == NULL) {
-				unload_add_on(image);
-				continue;
-			}
-
-			BMessage archive;
-			const bool archived = view->Archive(&archive) == B_OK;
-			BView* made = NULL;
-			if (archived) {
-				made = dynamic_cast<BView*>(instantiate_object(&archive));
-			}
-			if (made != NULL)
-				delete view;
-			else
-				made = view;
-			// some follow their parent's edges, as the Deskbar's tray never
-			// changes size; here they keep their own
-			const BRect frame = made->Frame();
-			made->SetResizingMode(B_FOLLOW_NONE);
-			fTray->AddChild(made);
-			made->ResizeTo(frame.Width(), frame.Height());
-		}
-		if (sGuard != NULL)
-			sGuard->Loading(NULL);
 	}
 
 	/*!	Where the shelf's band meets the taskbar's, in the shelf's last rows,
@@ -1931,6 +1907,23 @@ private:
 //	#pragma mark - the application
 
 
+//!	The layout Power Theme chose, in its settings: Photon's unless Leopard's.
+shell_layout
+current_layout()
+{
+	BPath path;
+	if (find_directory(B_USER_SETTINGS_DIRECTORY, &path) != B_OK
+		|| path.Append(kLayoutName) != B_OK)
+		return SHELL_LAYOUT_PHOTON;
+	BFile file(path.Path(), B_READ_ONLY);
+	char text[32] = {};
+	if (file.InitCheck() != B_OK || file.Read(text, sizeof(text) - 1) <= 0)
+		return SHELL_LAYOUT_PHOTON;
+	return strncasecmp(text, "leopard", 7) == 0
+		? SHELL_LAYOUT_LEOPARD : SHELL_LAYOUT_PHOTON;
+}
+
+
 /*!	Stops the Deskbar, and keeps launch_daemon from starting it again, while
 	this runs; puts it back as this quits.
 */
@@ -1938,7 +1931,15 @@ static void
 set_deskbar_running(bool run)
 {
 	if (run) {
+		// launch_daemon's, which it starts again if it ends. Only if that
+		// doesn't come is one started here: launched at once, it would race
+		// launch_daemon's, which then fails as "already running" and leaves
+		// the service unable to start until the next boot, and this one
+		// isn't started again when it ends.
 		system("launch_roster start x-vnd.Be-TSKB >/dev/null 2>&1");
+		for (int32 i = 0; i < 30 && !be_roster->IsRunning(kDeskbarSignature);
+				i++)
+			snooze(100000);
 		if (!be_roster->IsRunning(kDeskbarSignature))
 			be_roster->Launch(kDeskbarSignature);
 		return;
@@ -1952,7 +1953,8 @@ class PowerShelf : public BApplication {
 public:
 	PowerShelf()
 		:
-		BApplication(kSignature)
+		BApplication(kSignature),
+		fLayout(SHELL_LAYOUT_PHOTON)
 	{
 	}
 
@@ -1969,17 +1971,62 @@ public:
 			return;
 		}
 		set_deskbar_running(false);
-		(new TaskbarWindow())->Show();
-		(new ShelfWindow())->Show();
+		_ShowLayout();
+	}
+
+	virtual void MessageReceived(BMessage* message)
+	{
+		switch (message->what) {
+			case kLayout:
+				// Power Theme changed it
+				if (current_layout() != fLayout) {
+					_CloseWindows();
+					_ShowLayout();
+				}
+				break;
+			default:
+				BApplication::MessageReceived(message);
+		}
 	}
 
 	virtual bool QuitRequested()
 	{
+		// the windows' own QuitRequested() put back what they changed
+		_CloseWindows();
 		if (sGuard != NULL)
 			sGuard->Quit();
 		set_deskbar_running(true);
 		return true;
 	}
+
+private:
+	void _ShowLayout()
+	{
+		fLayout = current_layout();
+		if (fLayout == SHELL_LAYOUT_LEOPARD) {
+			fWindows.push_back(new_leopard_menu_bar());
+			fWindows.push_back(new_leopard_dock());
+		} else {
+			fWindows.push_back(new TaskbarWindow());
+			fWindows.push_back(new ShelfWindow());
+		}
+		for (BWindow* window : fWindows)
+			window->Show();
+	}
+
+	void _CloseWindows()
+	{
+		for (BWindow* window : fWindows) {
+			if (window->Lock()) {
+				window->QuitRequested();
+				window->Quit();
+			}
+		}
+		fWindows.clear();
+	}
+
+	shell_layout		fLayout;
+	std::vector<BWindow*> fWindows;
 };
 
 

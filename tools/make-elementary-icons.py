@@ -9,8 +9,9 @@ elementary's icons are by Daniel Foré and the elementary contributors, under th
 GNU GPL, version 3 or later (its COPYING and AUTHORS files are copied along).
 Version 4.3.1 is the last with its blue-grey folders, which go well with Leopard.
 
-Power Theme only changes the icons of folders and file types, the ones
-data/PowerTheme/icon-map names, so only those are kept. The theme is SVG, and
+Power Theme only changes the icons of folders and file types, and the dock of
+the Leopard shell draws applications', the ones data/PowerTheme/icon-map names,
+so only those are kept; the dock's also at 64 and 128 pixels, as it magnifies. The theme is SVG, and
 many of its icons have blurred shadows, which the SVG renderer in Power Theme
 (nanosvg) can't draw; so they are rendered here with librsvg's rsvg-convert, each
 size from its own design, into PNG files: <context>/<size>/<name>.png.
@@ -26,6 +27,7 @@ OUT = os.path.join(ROOT, "data", "icons", "elementary")
 MAP = os.path.join(ROOT, "data", "PowerTheme", "icon-map")
 
 SIZES = (16, 24, 32, 48)
+DOCK_SIZES = (64, 128)
 CONTEXTS = {
 	"places": "Places",
 	"mimes": "MimeTypes",
@@ -49,6 +51,16 @@ def wanted_names():
 	return set(names)
 
 
+def dock_names():
+	names = []
+	with open(MAP) as f:
+		for line in f:
+			line = line.strip()
+			if line.startswith(("app ", "dock ")) and "=" in line:
+				names.extend(line.split("=", 1)[1].split())
+	return set(names)
+
+
 def main():
 	if len(sys.argv) != 2:
 		sys.exit(__doc__.strip())
@@ -57,6 +69,7 @@ def main():
 		sys.exit("%s: not a checkout of elementary's icons" % theme)
 
 	wanted = wanted_names()
+	dock = dock_names()
 
 	if os.path.exists(OUT):
 		shutil.rmtree(OUT)
@@ -66,12 +79,13 @@ def main():
 	names = set()
 	count = 0
 	for context in sorted(CONTEXTS):
-		for size in SIZES:
+		for size in SIZES + DOCK_SIZES:
 			source = os.path.join(theme, context, str(size))
 			if not os.path.isdir(source):
 				continue
+			keep = wanted if size in SIZES else dock
 			found = sorted(name[:-4] for name in os.listdir(source)
-				if name.endswith(".svg") and name[:-4] in wanted)
+				if name.endswith(".svg") and name[:-4] in keep)
 			if not found:
 				continue
 			folder = "%s/%d" % (context, size)
@@ -87,7 +101,8 @@ def main():
 
 	with open(os.path.join(OUT, "index.theme"), "w") as f:
 		f.write("[Icon Theme]\nName=elementary (4.3.1)\n"
-			"Comment=elementary's icons for folders and file types, from 2017\n"
+			"Comment=elementary's icons for folders, file types and "
+			"applications, from 2017\n"
 			"Directories=%s\n" % ",".join(used))
 		for folder in used:
 			context, size = folder.split("/")

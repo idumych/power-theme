@@ -479,6 +479,97 @@ IconTheme::_Images(const char* name, std::vector<IconImage>& images,
 }
 
 
+/*!	Finds \a name's design for \a size pixels in this theme, or the ones it
+	inherits from: drawn at that size if it's scalable, or else the smallest
+	one at least that big, or the biggest.
+*/
+bool
+IconTheme::_Nearest(const char* name, int size, BString& path, int& loadSize,
+	BStringList& visited) const
+{
+	if (visited.HasString(fID) || visited.CountStrings() > kInheritDepth)
+		return false;
+	visited.Add(fID);
+
+	int best = 0;
+	for (size_t i = 0; i < fFolders.size(); i++) {
+		const IconFolder& folder = fFolders[i];
+		for (int e = 0; e < 2; e++) {
+			BString file(folder.path);
+			file << "/" << name << (e == 0 ? ".png" : ".svg");
+			if (!BEntry(file).Exists())
+				continue;
+			int designSize = folder.size;
+			if (e == 1 && folder.scalable)
+				designSize = std::max(folder.minSize,
+					std::min(size, folder.maxSize));
+			// at the size, else bigger and nearest, else the biggest
+			const bool better = best == 0
+				|| (designSize >= size
+					? best < size || designSize < best
+					: best < size && designSize > best);
+			if (better) {
+				best = designSize;
+				path = file;
+				loadSize = designSize;
+			}
+		}
+	}
+	if (best > 0)
+		return true;
+
+	BStringList inherits(fInherits);
+	if (fID != "hicolor" && !inherits.HasString("hicolor"))
+		inherits.Add("hicolor");
+	for (int32 i = 0; i < inherits.CountStrings(); i++) {
+		if (visited.HasString(inherits.StringAt(i)))
+			continue;
+		IconTheme* parent = load_icon_theme(inherits.StringAt(i));
+		if (parent == NULL)
+			continue;
+		const bool found = parent->_Nearest(name, size, path, loadSize,
+			visited);
+		delete parent;
+		if (found)
+			return true;
+	}
+	return false;
+}
+
+
+BBitmap*
+IconTheme::BitmapAt(const BStringList& names, int size) const
+{
+	for (int32 n = 0; n < names.CountStrings(); n++) {
+		BStringList visited;
+		BString path;
+		int loadSize = size;
+		IconImage image;
+		if (!_Nearest(names.StringAt(n), size, path, loadSize, visited)
+			|| !load_icon_image(path, loadSize, image) || image.size <= 0)
+			continue;
+		BBitmap* bitmap = new BBitmap(BRect(0, 0, image.size - 1,
+			image.size - 1), B_RGBA32);
+		if (bitmap->InitCheck() != B_OK) {
+			delete bitmap;
+			return NULL;
+		}
+		for (int y = 0; y < image.size; y++) {
+			uint8* row = (uint8*)bitmap->Bits() + y * bitmap->BytesPerRow();
+			for (int x = 0; x < image.size; x++) {
+				const uint8* in = &image.rgba[(y * image.size + x) * 4];
+				row[x * 4] = in[2];
+				row[x * 4 + 1] = in[1];
+				row[x * 4 + 2] = in[0];
+				row[x * 4 + 3] = in[3];
+			}
+		}
+		return bitmap;
+	}
+	return NULL;
+}
+
+
 bool
 IconTheme::Images(const BStringList& names, std::vector<IconImage>& images,
 	BString* found) const

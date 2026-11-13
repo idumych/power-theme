@@ -1,7 +1,7 @@
 [Icon Theme]
 Name=elementary (4.3.1)
-Comment=elementary's icons for folders and file types, from 2017
-Directories=actions/16,actions/24,actions/32,actions/48,apps/16,apps/24,apps/32,apps/48,categories/32,categories/48,devices/16,devices/24,devices/32,devices/48,mimes/16,mimes/24,mimes/32,mimes/48,places/16,places/24,places/32,places/48
+Comment=elementary's icons for folders, file types and applications, from 2017
+Directories=actions/16,actions/24,actions/32,actions/48,actions/64,actions/128,apps/16,apps/24,apps/32,apps/48,apps/64,apps/128,categories/16,categories/24,categories/32,categories/48,categories/64,categories/128,devices/16,devices/24,devices/32,devices/48,devices/64,devices/128,mimes/16,mimes/24,mimes/32,mimes/48,mimes/64,mimes/128,places/16,places/24,places/32,places/48,places/64,places/128,status/16,status/24,status/32,status/48,status/64,status/128
 
 [actions/16]
 Context=Actions
@@ -21,6 +21,16 @@ Type=Fixed
 [actions/48]
 Context=Actions
 Size=48
+Type=Fixed
+
+[actions/64]
+Context=Actions
+Size=64
+Type=Fixed
+
+[actions/128]
+Context=Actions
+Size=128
 Type=Fixed
 
 [apps/16]
@@ -43,6 +53,26 @@ Context=Applications
 Size=48
 Type=Fixed
 
+[apps/64]
+Context=Applications
+Size=64
+Type=Fixed
+
+[apps/128]
+Context=Applications
+Size=128
+Type=Fixed
+
+[categories/16]
+Context=Categories
+Size=16
+Type=Fixed
+
+[categories/24]
+Context=Categories
+Size=24
+Type=Fixed
+
 [categories/32]
 Context=Categories
 Size=32
@@ -51,6 +81,16 @@ Type=Fixed
 [categories/48]
 Context=Categories
 Size=48
+Type=Fixed
+
+[categories/64]
+Context=Categories
+Size=64
+Type=Fixed
+
+[categories/128]
+Context=Categories
+Size=128
 Type=Fixed
 
 [devices/16]
@@ -73,6 +113,16 @@ Context=Devices
 Size=48
 Type=Fixed
 
+[devices/64]
+Context=Devices
+Size=64
+Type=Fixed
+
+[devices/128]
+Context=Devices
+Size=128
+Type=Fixed
+
 [mimes/16]
 Context=MimeTypes
 Size=16
@@ -93,6 +143,16 @@ Context=MimeTypes
 Size=48
 Type=Fixed
 
+[mimes/64]
+Context=MimeTypes
+Size=64
+Type=Fixed
+
+[mimes/128]
+Context=MimeTypes
+Size=128
+Type=Fixed
+
 [places/16]
 Context=Places
 Size=16
@@ -111,4 +171,44 @@ Type=Fixed
 [places/48]
 Context=Places
 Size=48
+Type=Fixed
+
+[places/64]
+Context=Places
+Size=64
+Type=Fixed
+
+[places/128]
+Context=Places
+Size=128
+Type=Fixed
+
+[status/16]
+Context=Status
+Size=16
+Type=Fixed
+
+[status/24]
+Context=Status
+Size=24
+Type=Fixed
+
+[status/32]
+Context=Status
+Size=32
+Type=Fixed
+
+[status/48]
+Context=Status
+Size=48
+Type=Fixed
+
+[status/64]
+Context=Status
+Size=64
+Type=Fixed
+
+[status/128]
+Context=Status
+Size=128
 Type=Fixed

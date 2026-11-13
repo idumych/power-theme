@@ -8,6 +8,9 @@
 # Types that aren't installed are left alone. "~" is the home folder.
 #
 # Application icons can't be changed: they are part of the applications.
+# The Leopard shell's dock draws them from the icon theme instead:
+#
+#   app <signature> = <icon name> ...
 
 # Tracker's own kinds of files
 mime application/x-vnd.Be-directory = folder inode-directory
@@ -16,7 +19,7 @@ mime application/x-vnd.Be-volume = drive-harddisk harddrive
 mime application/x-vnd.Be-query = folder-saved-search system-search
 mime application/x-vnd.Be-queryTemplate = folder-saved-search system-search
 mime application/x-vnd.Be-elfexecutable = application-x-executable application-x-ms-dos-executable
-mime application/x-vnd.Be-bookmark = text-html applications-internet
+mime application/x-vnd.Be-bookmark = text-html
 mime application/octet-stream = application-octet-stream unknown stock_unknown gnome-unknown text-x-generic
 mime application/x-person = x-office-address-book stock_person contact-new
 mime application/x-vnd.Be.printer = printer
@@ -95,3 +98,34 @@ mime video/* = video-x-generic
 folder ~ = user-home folder-home
 folder ~/queries = folder-saved-search
 folder ~/mail = folder-mail internet-mail
+
+# applications, for the dock (see above)
+app application/x-vnd.Be-TRAK = system-file-manager file-manager nautilus thunar
+app application/x-vnd.Haiku-WebPositive = web-browser internet-web-browser
+app application/x-vnd.Be-MAIL = internet-mail mail-client evolution mail-message-new
+app application/x-vnd.Be-PEPL = x-office-address-book contact-new stock_person
+app application/x-vnd.Haiku-Terminal = utilities-terminal terminal gnome-terminal
+app application/x-vnd.Haiku-StyledEdit = accessories-text-editor text-editor gedit
+app application/x-vnd.Haiku-MediaPlayer = multimedia-video-player totem
+app application/x-vnd.Haiku-ShowImage = image-viewer eog multimedia-photo-viewer
+app application/x-vnd.Haiku-HaikuDepot = system-software-install software-store package-x-generic
+app application/x-vnd.Haiku-SoftwareUpdater = system-software-update software-update-available
+app application/x-vnd.idumych-PowerTheme = preferences-desktop-theme preferences-desktop
+app application/x-vnd.Haiku-DeskCalc = accessories-calculator calc gnome-calculator
+app application/x-vnd.Haiku-ActivityMonitor = utilities-system-monitor gnome-system-monitor
+app application/x-vnd.haiku-screenshot = applets-screenshooter gnome-screenshot accessories-screenshot
+app application/x-vnd.Haiku-Expander = file-roller ark
+app application/x-vnd.Haiku-CharacterMap = accessories-character-map gucharmap
+app application/x-vnd.Haiku-DriveSetup = gnome-disks drive-harddisk
+app application/x-vnd.Haiku-Installer = system-installer system-os-installer
+app application/x-vnd.Haiku-About = help-about
+app application/x-vnd.Haiku-Vision = internet-group-chat
+app application/x-vnd.Haiku-Appearance = preferences-desktop-theme preferences-desktop
+app application/x-vnd.Haiku-Screen = preferences-desktop-display
+app application/x-vnd.Haiku-Network = preferences-system-network
+app application/x-vnd.Haiku-Backgrounds = preferences-desktop-wallpaper
+app application/x-vnd.Haiku-Time = preferences-system-time
+app application/x-vnd.Haiku-Keymap = preferences-desktop-keyboard
+app application/x-vnd.Haiku-Locale = preferences-desktop-locale
+app application/x-vnd.Haiku-Printers = printer
+dock trash = user-trash user-trash-full

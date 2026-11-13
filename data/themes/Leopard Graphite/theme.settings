@@ -11,6 +11,7 @@ wallpaper = wallpaper.jpg
 wallpaper mode = scaled
 desktop color = #1B2230
 deskbar = top, expanded
+shell = leopard
 font plain = Lucida Grande | Noto Sans, Regular, 12
 font bold = Lucida Grande | Noto Sans, Bold, 12
 font fixed = Monaco | Noto Sans Mono, Regular, 12

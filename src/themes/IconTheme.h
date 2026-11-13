@@ -47,6 +47,13 @@ public:
 
 			// one image of \a name at \a size pixels, for previews
 			BBitmap*			Bitmap(const char* name, int size) const;
+			/*!	The first of \a names this theme (or one it inherits from)
+				has, drawn at \a size pixels if it can be, or its design
+				nearest that size, at least as big if there is one; B_RGBA32.
+				NULL if it has none of them.
+			*/
+			BBitmap*			BitmapAt(const BStringList& names,
+									int size) const;
 
 private:
 	struct IconFolder {
@@ -59,6 +66,9 @@ private:
 
 			bool				_Images(const char* name,
 									std::vector<IconImage>& images,
+									BStringList& visited) const;
+			bool				_Nearest(const char* name, int size,
+									BString& path, int& loadSize,
 									BStringList& visited) const;
 			bool				_Find(const char* name, int size,
 									BString& path, int& actualSize) const;

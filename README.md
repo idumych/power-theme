@@ -7,7 +7,8 @@ and Haiku. It switches the whole look of the desktop between themes, and
 back: window borders, controls, colours, fonts, wallpaper, the Deskbar's
 place and freedesktop icon themes. It reads the themes made for Theme
 Manager (and BeOS and ZETA before it) too. And it has a desktop shell of its
-own to use in place of the Deskbar: [the Photon shell](#the-photon-shell).
+own to use in place of the Deskbar, laid out as [QNX's Photon](#the-photon-shell)
+or as [Mac OS X Leopard](#the-leopard-shell).
 
 It comes with its own looks:
 
@@ -71,6 +72,28 @@ themes bring the Deskbar back. To use it with another theme, apply the theme and
 then check **Photon shell** in Power Theme's window, or run
 `powertheme --shell=photon`. launch_daemon starts it at login and again if it ends. It keeps windows clear of
 the taskbar and shelf. [More below](#whats-here).
+
+## The Leopard shell
+
+![The Leopard shell under the Leopard theme](docs/screenshots/leopard-shell.png)
+
+The same shell laid out as Mac OS X 10.5 Leopard, in place of the Deskbar:
+
+- **A menu bar** across the top of the screen with the menus of the window in
+  front: a system menu, the application's own menu under its name, then its
+  menus, copied from the window as they open, with the window's own menu bar
+  hidden. On the right are the Deskbar's tray items and a clock.
+- **A dock** along the bottom with launchers, the applications running, your
+  home folder and the Trash, standing on a glass shelf with their reflections.
+  Icons grow under the pointer, and a dot marks the ones running. Its icons are
+  the icon theme's, so they change with the theme.
+
+Under Renku's compositor both are glass that the desktop shows through; without
+it they're opaque and the dock doesn't grow. The Leopard themes turn it on,
+and other themes bring the Deskbar back. To use it with another theme, apply the
+theme and then check **Leopard shell** in Power Theme's window, or run
+`powertheme --shell=leopard`. Drawn from scratch after screenshots of Leopard;
+nothing of Apple's is used.
 
 ## Haiku Dark
 
@@ -184,7 +207,7 @@ Power Theme comes as a package for Haiku R1/beta6 and later, and Renku OS
 (x86_64), on the [releases page](https://github.com/idumych/power-theme/releases):
 
 ```sh
-pkgman install ./powertheme-1.2-1-x86_64.hpkg
+pkgman install ./powertheme-1.3-1-x86_64.hpkg
 ```
 
 Then open **Power Theme** (Deskbar → Applications). How its window borders
@@ -522,6 +545,8 @@ Rebuild the package when Hokku's decorator classes change; until then,
   (`shell = photon`), and other themes and **Revert** bring the Deskbar back;
   turn it on or off yourself with **Photon shell** in the window or
   `powertheme --shell=photon` or `--shell=deskbar`, after applying a theme.
+  The same program is the Leopard shell (`shell = leopard`, **Leopard shell**,
+  `--shell=leopard`): a menu bar with the front window's menus and a dock.
   With QNX's controls
   it is drawn as Photon's, pixel for pixel; with any other theme, in that
   theme's buttons, menu bars, progress bars and colours, and bigger where the
