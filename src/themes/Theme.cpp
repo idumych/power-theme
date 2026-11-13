@@ -2768,8 +2768,9 @@ apply_appearance(const Theme& theme, uint32 parts, BString& log)
 		if (shell >= 1) {
 			set_shell_layout(shell == 2 ? SHELL_LAYOUT_LEOPARD
 				: SHELL_LAYOUT_PHOTON);
-			if (!photon_shell())
-				set_photon_shell(true, log);
+			// also when it's on already: it may not be running, or its
+			// launch entry may name another copy of it
+			set_photon_shell(true, log);
 		}
 	}
 
