@@ -1141,7 +1141,7 @@ public:
 		list.fCount = std::min(window->tab_count,
 			(int32)ShimList<Decorator::Tab>::kMaxItems);
 		for (int32 i = 0; i < list.fCount; i++) {
-			decor_tab& styleTab = window->tabs[i];
+			decor_tab& styleTab = *window->tabs[i];
 			Decorator::Tab* tab = static_cast<Decorator::Tab*>(styleTab.cookie);
 			if (tab == NULL || fTabs.find(tab) == fTabs.end()) {
 				tab = decorator->_AllocateNewTab();
@@ -1194,7 +1194,7 @@ public:
 	{
 		std::set<Decorator::Tab*> used;
 		for (int32 i = 0; i < window->tab_count; i++)
-			used.insert(static_cast<Decorator::Tab*>(window->tabs[i].cookie));
+			used.insert(static_cast<Decorator::Tab*>(window->tabs[i]->cookie));
 		for (std::set<Decorator::Tab*>::iterator i = fTabs.begin();
 				i != fTabs.end();) {
 			if (used.find(*i) == used.end()) {
@@ -1220,7 +1220,7 @@ public:
 		const ShimList<Decorator::Tab>& list = decorator->fTabList;
 		for (int32 i = 0; i < list.CountItems(); i++) {
 			const Decorator::Tab* tab = list.ItemAt(i);
-			decor_tab& styleTab = window->tabs[i];
+			decor_tab& styleTab = *window->tabs[i];
 			styleTab.frame = to_decor_rect(tab->tabRect);
 			styleTab.buttons[DECOR_BUTTON_CLOSE] = to_decor_rect(tab->closeRect);
 			styleTab.buttons[DECOR_BUTTON_ZOOM] = to_decor_rect(tab->zoomRect);
@@ -1518,8 +1518,9 @@ static decor_style sStyle;
 extern "C" const decor_style*
 instantiate_decor_style(uint32 apiVersion)
 {
-	// version 1 engines run it too, without the rounded corners of 2
-	if (apiVersion < 1)
+	// Versions 1 and 2 were drafts with other structure layouts. Version 3
+	// engines run it too, without the rounded corners of 4.
+	if (apiVersion < 3)
 		return NULL;
 	const uint32 version = std::min(apiVersion,
 		(uint32)DECOR_STYLE_API_VERSION);
@@ -1532,7 +1533,7 @@ instantiate_decor_style(uint32 apiVersion)
 
 	memset(&sStyle, 0, sizeof(sStyle));
 	// an engine reads no further than its own version's fields
-	sStyle.size = version >= 2
+	sStyle.size = version >= 4
 		? sizeof(sStyle) : offsetof(decor_style, rounded_shape);
 	sStyle.api_version = version;
 	sStyle.name = SHIM_STYLE_NAME;
@@ -1551,7 +1552,7 @@ instantiate_decor_style(uint32 apiVersion)
 	sStyle.size_limits = &shim_size_limits;
 	sStyle.moved = &shim_moved;
 	sStyle.update_colors = &shim_update_colors;
-	if (version >= 2)
+	if (version >= 4)
 		sStyle.rounded_shape = &shim_rounded_shape;
 	return &sStyle;
 }

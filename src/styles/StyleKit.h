@@ -209,10 +209,10 @@ public:
 	decor_window* Get() const { return fWindow; }
 
 	int32 CountTabs() const { return fWindow->tab_count; }
-	decor_tab& TabAt(int32 index) const { return fWindow->tabs[index]; }
+	decor_tab& TabAt(int32 index) const { return *fWindow->tabs[index]; }
 	decor_tab& TopTab() const
 		{
-			return fWindow->tabs[fWindow->top_tab >= 0
+			return *fWindow->tabs[fWindow->top_tab >= 0
 				? fWindow->top_tab : 0];
 		}
 	window_look Look() const { return (window_look)TopTab().look; }

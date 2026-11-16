@@ -1,5 +1,5 @@
 /*
- * Copyright 2026, RenkuOS contributors.
+ * Copyright 2026, Ian Dumych, idumych@gmail.com.
  * SPDX-License-Identifier: MIT
  */
 #ifndef _DECOR_STYLE_H
@@ -15,12 +15,16 @@
 
 	Unlike a decorator add-on, which subclasses app_server's private classes
 	and so only fits the build it was compiled for, a style only sees the
-	plain structures and function
-	tables below. It keeps working on later versions of
-	app_server:
-	- each structure starts with its size, and new fields are only ever
-	  added at the end, so a style reads what it knows and checks \c size
-	  before reading anything newer;
+	plain structures and function tables below. It keeps working on later
+	versions of app_server:
+	- each structure with a \c size starts with it, and new fields are only
+	  ever added at the end, so a style reads what it knows and checks
+	  \c size before reading anything newer;
+	- a window's tabs are reached through pointers, never by indexing an
+	  array of decor_tab, so that decor_tab can grow;
+	- the arrays indexed by DECOR_BUTTON_* and DECOR_REGION_* have room for
+	  more than this version uses, so that new buttons and regions don't
+	  move the fields after them;
 	- a style names the version of this interface it was built for, and
 	  app_server refuses one newer than its own.
 
@@ -32,6 +36,23 @@
 	\c apiVersion is app_server's DECOR_STYLE_API_VERSION. Return NULL to
 	decline, and app_server uses its own decorator.
 
+	A style built for a later version than \c apiVersion is refused unless
+	it returns a table whose \c api_version is \c apiVersion or lower. To
+	run on an older app_server as well, check \c apiVersion, return a table
+	for it, and use only what that version has: the hooks it calls, and the
+	fields of the structures it passes, whose \c size says how far they go.
+
+	A style runs inside app_server, which exports its own classes. Link it
+	with -Wl,--no-undefined: a symbol the style lacks would otherwise bind
+	to app_server's private code when it loads, and tie the style to that
+	build after all.
+
+	The header is C so that its names aren't mangled, not so that any
+	compiler will do: the structures hold \c bool and some are passed by
+	value, as the architecture's C ABI has them. Build a style for each
+	architecture app_server runs on, with the compiler app_server is built
+	with there (gcc 2.95 on x86_gcc2h).
+
 	Coordinates are app_server's: screen pixels, with rectangles including
 	their right and bottom edges, as BRect.
 */
@@ -42,8 +63,12 @@
 #include <SupportDefs.h>
 
 
-#define DECOR_STYLE_API_VERSION		2
-	// 2: rounded corners on a composited desktop
+/*!	Versions 1 and 2 were drafts: styles were built against them, with other
+	structure layouts, before the interface settled. Version 3 is the first
+	final one, and app_server refuses anything older. Version 4 adds rounded
+	corners on a composited desktop.
+*/
+#define DECOR_STYLE_API_VERSION		4
 
 
 #ifdef __cplusplus
@@ -64,6 +89,18 @@ typedef struct decor_point {
 } decor_point;
 
 
+/*!	The room in the arrays indexed by DECOR_BUTTON_* and DECOR_REGION_*.
+	These never change; a later version may use more of them, up to these.
+*/
+#define DECOR_BUTTON_CAPACITY	8
+#define DECOR_REGION_CAPACITY	32
+
+
+/*!	A tab's buttons. DECOR_BUTTON_COUNT is how many this version has, and
+	may grow in a later one, up to DECOR_BUTTON_CAPACITY: a style lays out
+	and draws those it knows, and the engine treats one left invalid as
+	missing.
+*/
 enum {
 	DECOR_BUTTON_CLOSE = 0,
 	DECOR_BUTTON_ZOOM,
@@ -72,8 +109,10 @@ enum {
 	DECOR_BUTTON_COUNT
 };
 
-// What a point on the frame does; the values of app_server's
-// Decorator::Region.
+/*!	What a point on the frame does; the values of app_server's
+	Decorator::Region. DECOR_REGION_COUNT may grow in a later version, up to
+	DECOR_REGION_CAPACITY.
+*/
 enum {
 	DECOR_REGION_NONE = 0,
 	DECOR_REGION_TAB,
@@ -147,7 +186,8 @@ typedef struct decor_tab {
 	bool					button_focus;
 		// whether its buttons are drawn as active: a floating window's
 		// that avoids focus are, too
-	bool					pressed[DECOR_BUTTON_COUNT];
+	bool					pressed[DECOR_BUTTON_CAPACITY];
+		// by DECOR_BUTTON_*
 	bool					highlighted;
 		// whether the tab is highlighted, as when another window is
 		// dragged over it to stack
@@ -157,8 +197,8 @@ typedef struct decor_tab {
 	// out: layout()
 	decor_rect				frame;
 		// the whole tab, or title bar; invalid if it has none
-	decor_rect				buttons[DECOR_BUTTON_COUNT];
-		// invalid for those it hasn't
+	decor_rect				buttons[DECOR_BUTTON_CAPACITY];
+		// by DECOR_BUTTON_*; invalid for those it hasn't
 	float					text_offset;
 		// from the tab's left edge to where its title starts
 	float					title_room;
@@ -191,10 +231,15 @@ typedef struct decor_window {
 	decor_rect				frame;
 		// the window's content
 	int32					tab_count;
-	decor_tab*				tabs;
+	decor_tab**				tabs;
+		// tab_count pointers: use tabs[i]->title, never (*tabs)[i], since
+		// decor_tab can grow
 	int32					top_tab;
-		// the one in front, whose look and flags the frame follows
-	uint8					highlights[DECOR_REGION_COUNT];
+		// the one in front, whose look and flags the frame follows. There is
+		// always at least one tab, and top_tab is one of them, except in
+		// create_window(), delete_window() and update_colors(), which may
+		// be called with none.
+	uint8					highlights[DECOR_REGION_CAPACITY];
 		// DECOR_HIGHLIGHT_* for each region, by DECOR_REGION_*
 	bool					outline_resizing;
 	decor_rect				outline_frame;
@@ -219,7 +264,7 @@ typedef struct decor_window {
 	// the style's own: free to use from create_window() on
 	void*					cookie;
 
-	// in, from version 2
+	// in, from version 4
 	bool					corners_cut;
 		// the compositor cuts off the corners that rounded_shape() gives,
 		// and the border should follow them, as with canvas->stroke_corner()
@@ -247,6 +292,10 @@ enum {
 
 /*!	A gradient fill: linear, from \c start to \c end, through up to
 	\c DECOR_GRADIENT_STOPS colours at offsets from 0 to 255.
+
+	This structure is frozen: it has no \c size, and neither it nor
+	DECOR_GRADIENT_STOPS will ever change. A later version that needs more
+	adds a structure and a canvas call of its own.
 */
 #define DECOR_GRADIENT_STOPS	8
 
@@ -341,7 +390,7 @@ struct decor_canvas {
 	void					(*set_copy_to_front)(decor_canvas* canvas,
 								bool enabled);
 
-	// from version 2: the line of a border along a corner the compositor
+	// from version 4: the line of a border along a corner the compositor
 	// cuts off; \a left_top is the corner square's, \a corner a
 	// DECOR_CORNER_*
 	void					(*stroke_corner)(decor_canvas* canvas,
@@ -435,7 +484,7 @@ typedef struct decor_style {
 	void					(*update_colors)(decor_window* window,
 								decor_canvas* canvas);
 
-	// from version 2: rounds the corners of the frame's outline, given as
+	// from version 4: rounds the corners of the frame's outline, given as
 	// the frame (first) and its tabs, by setting their radii; NULL keeps
 	// them square
 	void					(*rounded_shape)(decor_window* window,

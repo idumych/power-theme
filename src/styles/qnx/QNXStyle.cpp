@@ -10,6 +10,7 @@
  */
 
 
+#include <algorithm>
 #include <unistd.h>
 
 #include <FindDirectory.h>
@@ -732,7 +733,8 @@ static decor_style sStyle;
 extern "C" const decor_style*
 instantiate_decor_style(uint32 apiVersion)
 {
-	if (apiVersion < 1)
+	// versions 1 and 2 were drafts with other structure layouts
+	if (apiVersion < 3)
 		return NULL;
 
 	BPath path;
@@ -742,7 +744,7 @@ instantiate_decor_style(uint32 apiVersion)
 
 	memset(&sStyle, 0, sizeof(sStyle));
 	sStyle.size = sizeof(sStyle);
-	sStyle.api_version = DECOR_STYLE_API_VERSION;
+	sStyle.api_version = std::min(apiVersion, (uint32)DECOR_STYLE_API_VERSION);
 	sStyle.name = "QNX";
 	sStyle.update_font = &qnx_update_font;
 	sStyle.layout = &qnx_layout;
