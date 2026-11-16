@@ -1157,7 +1157,9 @@ public:
 			tab->zoomPressed = styleTab.pressed[DECOR_BUTTON_ZOOM];
 			tab->minimizePressed = styleTab.pressed[DECOR_BUTTON_MINIMIZE];
 			tab->isHighlighted = styleTab.highlighted;
-			tab->tabLocation = styleTab.location;
+			// The location is set after the layout, by PlaceTab(): the engine
+			// gives it in pixels, and decorators keep a fraction of how far
+			// the tab can slide.
 			if (tab->title != styleTab.title)
 				tab->title = styleTab.title;
 			decorator->_SetFocus(tab);
@@ -1229,7 +1231,8 @@ public:
 			styleTab.text_offset = tab->textOffset;
 			styleTab.min_size = tab->minTabSize;
 			styleTab.max_size = tab->maxTabSize;
-			styleTab.location = tab->tabLocation;
+			// in pixels from the frame's left edge, as the engine has it
+			styleTab.location = (float)tab->tabOffset;
 			// the decorator shortens its titles itself
 			styleTab.title_room = 1e6f;
 			styleTab.truncate = DECOR_TRUNCATE_END;
@@ -1241,6 +1244,19 @@ public:
 		window->tabs_slide = list.CountItems() == 1
 			&& list.ItemAt(0)->tabRect.IsValid() && border.IsValid()
 			&& list.ItemAt(0)->tabRect.Width() < border.Width();
+	}
+
+	/*!	Puts a lone tab where the engine has it, through the decorator, which
+		knows how far its tab can slide.
+	*/
+	void PlaceTab(decor_window* window)
+	{
+		if (window->tab_count != 1 || fDecorator->CountTabs() != 1)
+			return;
+		const float location = window->tabs[0]->location;
+		if ((uint32)std::max(0.0f, floorf(location))
+				!= fDecorator->fTabList.ItemAt(0)->tabOffset)
+			fDecorator->SetTabLocation(0, location, false, NULL);
 	}
 
 	Decorator* Get() const { return fDecorator; }
@@ -1359,6 +1375,7 @@ shim_layout(decor_window* window, decor_canvas* canvas)
 	Decorator* decorator = shim->Get();
 	shim->SetFrame(to_rect(window->frame));
 	StyleShim::DoLayout(decorator);
+	shim->PlaceTab(window);
 	StyleShim::DoOutlineLayout(decorator);
 	shim->WriteLayout(window);
 }

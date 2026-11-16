@@ -181,6 +181,20 @@ offset_rect(BRect& rect, BPoint offset)
 static const char* kBeOSTabsSetting = "PowerTheme/beos tabs";
 
 
+/*!	Whether Power Theme's "BeOS-style tabs" is on. It's read for each
+	decorator, rather than once for the add-on: app_server can keep the add-on
+	loaded while the setting changes, and makes the decorators again then.
+*/
+static bool
+beos_tabs_wanted()
+{
+	BPath path;
+	return find_directory(B_USER_SETTINGS_DIRECTORY, &path) == B_OK
+		&& path.Append(kBeOSTabsSetting) == B_OK
+		&& access(path.Path(), F_OK) == 0;
+}
+
+
 //	#pragma mark - AmigaDecorAddOn
 
 
@@ -202,7 +216,7 @@ AmigaDecorAddOn::_AllocateDecorator(DesktopSettings& settings, BRect rect,
 	Desktop* desktop)
 {
 	return new (std::nothrow) AmigaDecorator(settings, rect, desktop,
-		fBeOSTabs);
+		beos_tabs_wanted());
 }
 
 

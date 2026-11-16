@@ -45,10 +45,14 @@ desktop_composited()
 		const char* leaf = strrchr(info.name, '/');
 		if (strcmp(leaf != NULL ? leaf + 1 : info.name, "libbe.so") != 0)
 			continue;
+		// RenkuOS has it as a C function; drafts of it had the C++ name
 		bool (*isComposited)();
-		if (get_image_symbol(info.id, "_Z21is_composited_desktopv",
-				B_SYMBOL_TYPE_TEXT, (void**)&isComposited) == B_OK)
+		if (get_image_symbol(info.id, "is_composited_desktop",
+				B_SYMBOL_TYPE_TEXT, (void**)&isComposited) == B_OK
+			|| get_image_symbol(info.id, "_Z21is_composited_desktopv",
+				B_SYMBOL_TYPE_TEXT, (void**)&isComposited) == B_OK) {
 			composited = isComposited() ? 1 : 0;
+		}
 		break;
 	}
 	return composited != 0;

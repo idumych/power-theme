@@ -104,8 +104,9 @@ rgb_color	make_rgba(uint8 red, uint8 green, uint8 blue, uint8 alpha = 255);
 // whether windows can be seen through: is_composited_desktop(), where the
 // system has it
 bool		desktop_composited();
-// B_TRANSPARENT_WINDOW, which older systems don't have
-static const uint32 kTransparentWindow = 0x01000000;
+// B_TRANSPARENT_WINDOW in RenkuOS's Window.h, which older systems and Haiku
+// don't have
+static const uint32 kTransparentWindow = 0x80000000;
 
 
 #endif	// POWER_CANVAS_H
