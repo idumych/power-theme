@@ -1564,6 +1564,11 @@ deskbar_ignores_tab_height(BDeskbar& deskbar)
 static void
 restart_deskbar()
 {
+	// The shell, if on, is in the Deskbar's place: it may be starting and not
+	// have stopped the Deskbar yet, and would find it started again here.
+	if (photon_shell())
+		return;
+
 	const team_id team = be_roster->TeamFor(kDeskbarSignature);
 	if (BMessenger(kDeskbarSignature).SendMessage(B_QUIT_REQUESTED) != B_OK)
 		return;
