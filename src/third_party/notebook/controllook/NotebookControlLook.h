@@ -3,10 +3,11 @@
  * Distributed under the terms of the MIT License.
  *
  * Control look after Hideaki Kamada's Notebook skin for WindowBlinds (1999),
- * drawn from its pictures (NotebookControlArt.h, from ../art): buttons outlined
- * in pencil, blue while pressed, check boxes ticked in red, radio buttons with a
- * blue dot, and a menu bar on paper ruled in navy. The rest is the default look
- * in the theme's colours.
+ * drawn from its pictures (NotebookControlArt.h, from ../art): everything is
+ * white paper outlined in pencil, as the skin's buttons are. Buttons are blue
+ * while pressed, check boxes are ticked in red and radio buttons have a blue
+ * dot; pop-up menus, fields, boxes, tabs, scroll bars, sliders and progress
+ * bars get the same pencil outline, and the menu bar a navy rule.
  */
 #ifndef NOTEBOOK_CONTROL_LOOK_H
 #define NOTEBOOK_CONTROL_LOOK_H
@@ -38,10 +39,50 @@ public:
 									uint32 borders = B_ALL_BORDERS,
 									orientation orientation = B_HORIZONTAL);
 
+	using ForwardingControlLook::DrawButtonWithPopUpBackground;
+	virtual	void				DrawButtonWithPopUpBackground(BView* view,
+									BRect& rect, const BRect& updateRect,
+									const rgb_color& base, uint32 flags = 0,
+									uint32 borders = B_ALL_BORDERS,
+									orientation orientation = B_HORIZONTAL);
+
 	virtual	void				DrawMenuBarBackground(BView* view, BRect& rect,
 									const BRect& updateRect,
 									const rgb_color& base, uint32 flags = 0,
 									uint32 borders = B_ALL_BORDERS);
+
+	using ForwardingControlLook::DrawMenuFieldFrame;
+	virtual	void				DrawMenuFieldFrame(BView* view, BRect& rect,
+									const BRect& updateRect,
+									const rgb_color& base,
+									const rgb_color& background,
+									uint32 flags = 0,
+									uint32 borders = B_ALL_BORDERS);
+
+	using ForwardingControlLook::DrawMenuFieldBackground;
+	virtual	void				DrawMenuFieldBackground(BView* view,
+									BRect& rect, const BRect& updateRect,
+									const rgb_color& base, bool popupIndicator,
+									uint32 flags = 0);
+	virtual	void				DrawMenuFieldBackground(BView* view,
+									BRect& rect, const BRect& updateRect,
+									const rgb_color& base, uint32 flags = 0,
+									uint32 borders = B_ALL_BORDERS);
+
+	virtual	void				DrawMenuBackground(BView* view, BRect& rect,
+									const BRect& updateRect,
+									const rgb_color& base, uint32 flags = 0,
+									uint32 borders = B_ALL_BORDERS);
+	virtual	void				DrawMenuItemBackground(BView* view,
+									BRect& rect, const BRect& updateRect,
+									const rgb_color& base, uint32 flags = 0,
+									uint32 borders = B_ALL_BORDERS);
+
+	virtual	void				DrawStatusBar(BView* view, BRect& rect,
+									const BRect& updateRect,
+									const rgb_color& base,
+									const rgb_color& barColor,
+									float progressPosition);
 
 	virtual	void				DrawCheckBox(BView* view, BRect& rect,
 									const BRect& updateRect,
@@ -49,6 +90,92 @@ public:
 	virtual	void				DrawRadioButton(BView* view, BRect& rect,
 									const BRect& updateRect,
 									const rgb_color& base, uint32 flags = 0);
+
+	virtual	void				DrawScrollBarBorder(BView* view,
+									BRect rect, const BRect& updateRect,
+									const rgb_color& base, uint32 flags,
+									orientation orientation);
+	virtual	void				DrawScrollBarButton(BView* view,
+									BRect rect, const BRect& updateRect,
+									const rgb_color& base,
+									const rgb_color& text, uint32 flags,
+									int32 direction, orientation orientation,
+									bool down = false);
+	virtual	void				DrawScrollBarBackground(BView* view,
+									BRect& rect1, BRect& rect2,
+									const BRect& updateRect,
+									const rgb_color& base, uint32 flags,
+									orientation orientation);
+	virtual	void				DrawScrollBarBackground(BView* view,
+									BRect& rect, const BRect& updateRect,
+									const rgb_color& base, uint32 flags,
+									orientation orientation);
+	virtual	void				DrawScrollBarThumb(BView* view,
+									BRect& rect, const BRect& updateRect,
+									const rgb_color& base, uint32 flags,
+									orientation orientation,
+									uint32 knobStyle = B_KNOB_NONE);
+	virtual	void				DrawScrollViewFrame(BView* view,
+									BRect& rect, const BRect& updateRect,
+									BRect verticalScrollBarFrame,
+									BRect horizontalScrollBarFrame,
+									const rgb_color& base,
+									border_style borderStyle,
+									uint32 flags = 0,
+									uint32 borders = B_ALL_BORDERS);
+
+	using ForwardingControlLook::DrawSliderBar;
+	virtual	void				DrawSliderBar(BView* view, BRect rect,
+									const BRect& updateRect,
+									const rgb_color& base,
+									rgb_color fillColor, uint32 flags,
+									orientation orientation);
+	virtual	void				DrawSliderThumb(BView* view, BRect& rect,
+									const BRect& updateRect,
+									const rgb_color& base, uint32 flags,
+									orientation orientation);
+	using ForwardingControlLook::DrawSliderTriangle;
+	virtual	void				DrawSliderTriangle(BView* view, BRect& rect,
+									const BRect& updateRect,
+									const rgb_color& base,
+									const rgb_color& fill, uint32 flags,
+									orientation orientation);
+
+	virtual	void				DrawTextControlBorder(BView* view, BRect& rect,
+									const BRect& updateRect,
+									const rgb_color& base, uint32 flags = 0,
+									uint32 borders = B_ALL_BORDERS);
+
+	virtual	void				DrawBorder(BView* view, BRect& rect,
+									const BRect& updateRect,
+									const rgb_color& base,
+									border_style borderStyle, uint32 flags = 0,
+									uint32 borders = B_ALL_BORDERS);
+	virtual	void				DrawGroupFrame(BView* view, BRect& rect,
+									const BRect& updateRect,
+									const rgb_color& base,
+									uint32 borders = B_ALL_BORDERS);
+
+	virtual	void				DrawTabFrame(BView* view, BRect& rect,
+									const BRect& updateRect,
+									const rgb_color& base, uint32 flags = 0,
+									uint32 borders = B_ALL_BORDERS,
+									border_style borderStyle = B_FANCY_BORDER,
+									uint32 side = B_TOP_BORDER);
+	virtual	void				DrawActiveTab(BView* view, BRect& rect,
+									const BRect& updateRect,
+									const rgb_color& base, uint32 flags = 0,
+									uint32 borders = B_ALL_BORDERS,
+									uint32 side = B_TOP_BORDER,
+									int32 index = 0, int32 selected = -1,
+									int32 first = 0, int32 last = 0);
+	virtual	void				DrawInactiveTab(BView* view, BRect& rect,
+									const BRect& updateRect,
+									const rgb_color& base, uint32 flags = 0,
+									uint32 borders = B_ALL_BORDERS,
+									uint32 side = B_TOP_BORDER,
+									int32 index = 0, int32 selected = -1,
+									int32 first = 0, int32 last = 0);
 };
 
 

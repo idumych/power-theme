@@ -196,7 +196,7 @@ theme.
 | ![AmigaOS 3](docs/screenshots/amigaos3.png) | ![QNX](docs/screenshots/qnx.png) |
 | **AmigaOS 3**: Workbench 3.x: blue title bars with the close, zoom and depth gadgets, bevelled grey buttons and fields, a dotted scroll bar track, Topaz and Workbench's drawers | **QNX**: QNX 6's Photon: shaded blue title bars with a window menu box and minimize, maximize and close boxes on a grey panel, grey ridged frames, shaded grey buttons, slanted tabs and a lavender silk desktop |
 | ![Notebook](docs/screenshots/notebook.png) | ![The Power Theme window](docs/screenshots/themes-window.png) |
-| **Notebook**: Hideaki Kamada's WindowBlinds skin: sheets of ruled paper with a spiral binding whose holes show the desktop, the pages' edge along the bottom, scribbles on an inactive title bar, pencilled buttons, red ticks and blue dots | **Power Theme** under Renku: the theme list with a preview, the icon theme, and the parts to apply |
+| **Notebook**: Hideaki Kamada's WindowBlinds skin: sheets of ruled paper with a spiral binding whose holes show the desktop, the pages' edge along the bottom, scribbles on an inactive title bar, and every control outlined in pencil, with red ticks and blue dots | **Power Theme** under Renku: the theme list with a preview, the icon theme, and the parts to apply |
 
 ![Build add-ons](docs/screenshots/build-add-ons.png)
 
@@ -547,16 +547,20 @@ Rebuild the package when Hokku's decorator classes change; until then,
   [Notebook skin](https://www.wincustomize.com/explore/windowblinds/72/) for
   WindowBlinds (1999), drawn from its own pictures, which are kept in
   `src/third_party/notebook/art`, and laid out as its notebook.uis says. A window
-  is a sheet of ruled paper: a title bar with the close box at its left, minimize
-  and zoom at its right and the title in navy in the middle, a spiral binding down
-  the left whose punched holes show what's behind, a rounded right edge, and the
-  pages' edge along the bottom, which with the right edge resizes the window. An
+  is a sheet of ruled paper: a spiral binding down the whole left side whose
+  punched holes show what's behind, a rounded edge down the whole right side, and
+  between them a title bar with the close box at its left, minimize and zoom at
+  its right and the title in navy in the middle, and the pages' edge along the
+  bottom, which with the right edge resizes the window. An
   inactive window's title bar is scribbled on, as in the skin. Windows such as the
   Deskbar's, with a border but no title, get a pencil line. The controls are the
   skin's: buttons outlined in pencil, blue while pressed and darker when default,
   check boxes ticked in red, radio buttons with a blue dot, and a navy rule under
-  the menu bar; the rest is the default look in white and navy, on a slate blue
-  desktop. `tools/make-notebook-art.py` turns the pictures into the add-ons'
+  the menu bar. The skin has no pictures for other controls, so pop-up menus,
+  text fields, boxes, tabs, scroll bars, sliders and progress bars get the
+  buttons' pencil outline on white paper, with pencilled arrowheads, on a slate
+  blue desktop. Windows' insides are plain white: the skin's paper grain can't be
+  a panel colour. `tools/make-notebook-art.py` turns the pictures into the add-ons'
   headers.
 - **The Photon shell** (`apps/PowerShelf`): a desktop shell laid out as
   Photon's, in place of the Deskbar. The QNX theme turns it on

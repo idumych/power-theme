@@ -218,11 +218,12 @@ controls demo with a Tracker window behind it and the Deskbar showing.
 PASS when: {p}-notebook.txt says "window borders: Notebook" and "new application
 loads control look: Notebook". The screenshots show windows as ruled paper: a white
 title bar with a blue rule, the close box at its left, minimize and zoom at its
-right and the title in navy; a spiral binding down the left with the desktop
-showing through its holes; a rounded right edge and the pages' edge along the
-bottom; an inactive window's title bar scribbled on; the Deskbar with a thin grey
+right and the title in navy; a spiral binding down the whole left side with the
+desktop showing through its holes; a rounded edge down the whole right side and
+the pages' edge between them along the bottom; an inactive window's title bar scribbled on; the Deskbar with a thin grey
 line, not a binding; pencilled buttons, red ticks, blue radio dots and a navy rule
-under each menu bar.
+under each menu bar; pop-up menus, fields, boxes, tabs and scroll bars outlined in
+pencil on white, with no grey gradients.
 
 ### photon-shell
 Steps: `powertheme --apply=QNX`, `--status`, `roster`; open StyledEdit and a

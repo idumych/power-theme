@@ -3,7 +3,7 @@
 # skin's own pictures; the colours follow them.
 
 name = Notebook
-description = Hideaki Kamada's Notebook skin for WindowBlinds: windows as sheets of ruled paper with a spiral binding, pencilled buttons, red ticks and blue dots, and a navy rule under the menu bar.
+description = Hideaki Kamada's Notebook skin for WindowBlinds: windows as sheets of ruled paper with a spiral binding, every control outlined in pencil, red ticks and blue dots, and a navy rule under the menu bar.
 decorator = Notebook
 control look = Notebook
 wallpaper = none

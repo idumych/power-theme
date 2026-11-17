@@ -28,9 +28,10 @@
 #include "NotebookWindowArt.h"
 
 
-// From notebook.uis. The title bar: its height, its left end and right end
-// drawn as they are and the part between repeated, and its buttons, the close
-// box from the left and the others from the right.
+// From notebook.uis. The title bar, between the binding and the right edge:
+// its height, its left end and right end drawn as they are and the part
+// between repeated, and its buttons, measured from the window's outer edges:
+// the close box from the left and the others from the right.
 static const float kTitleHeight = 28;
 static const float kTitleLeftEnd = 20;
 static const float kTitleRightEnd = 40;
@@ -41,12 +42,12 @@ static const float kButtonTop = 7;
 static const float kButtonSize = 13;
 // the title, in the middle, two pixels higher than the bar's
 static const float kTitleShift = 2;
-// the binding down the left: its top and bottom drawn as they are, the holes
-// between repeated
+// the binding down the whole left side, past the title bar and the bottom: its
+// top and bottom drawn as they are, the holes between repeated
 static const float kLeftWidth = 20;
 static const float kLeftTop = 18;
 static const float kLeftBottom = 25;
-// the rounded edge on the right
+// the rounded edge down the whole right side
 static const float kRightWidth = 7;
 static const float kRightTop = 8;
 static const float kRightBottom = 10;
@@ -210,20 +211,19 @@ NotebookDecorator::_DoLayout()
 			fFrame.right + 1, fFrame.bottom + 1);
 		fBorderRect = fFrame.InsetByCopy(-1, -1);
 	} else if (fBorderWidth > 0) {
-		const float top = _HasTitle() ? 0 : kPlainTop;
-		fLeftBorder.Set(fFrame.left - kLeftWidth, fFrame.top,
-			fFrame.left - 1, fFrame.bottom);
-		fRightBorder.Set(fFrame.right + 1, fFrame.top,
-			fFrame.right + kRightWidth, fFrame.bottom);
-		if (top > 0) {
-			fTopBorder.Set(fFrame.left - kLeftWidth, fFrame.top - top,
-				fFrame.right + kRightWidth, fFrame.top - 1);
-		} else
+		// the sides run from the bar's top to the bottom's, as WindowBlinds
+		// draws them, and the bar and the bottom go between
+		const float top = fFrame.top - (_HasTitle() ? kTitleHeight : kPlainTop);
+		const float bottom = fFrame.bottom + kBottomHeight;
+		fLeftBorder.Set(fFrame.left - kLeftWidth, top, fFrame.left - 1, bottom);
+		fRightBorder.Set(fFrame.right + 1, top, fFrame.right + kRightWidth,
+			bottom);
+		if (!_HasTitle())
+			fTopBorder.Set(fFrame.left, top, fFrame.right, fFrame.top - 1);
+		else
 			fTopBorder.Set(0, 0, -1, -1);
-		fBottomBorder.Set(fFrame.left - kLeftWidth, fFrame.bottom + 1,
-			fFrame.right + kRightWidth, fFrame.bottom + kBottomHeight);
-		fBorderRect.Set(fLeftBorder.left, fFrame.top - top, fRightBorder.right,
-			fBottomBorder.bottom);
+		fBottomBorder.Set(fFrame.left, fFrame.bottom + 1, fFrame.right, bottom);
+		fBorderRect.Set(fLeftBorder.left, top, fRightBorder.right, bottom);
 	} else {
 		fLeftBorder.Set(0, 0, -1, -1);
 		fRightBorder.Set(0, 0, -1, -1);
@@ -605,8 +605,8 @@ NotebookDecorator::_HasTitle() const
 }
 
 
-/*!	Lays the tabs out side by side across the bar, which spans the window from
-	the binding to the right edge, each with its own buttons where the skin has
+/*!	Lays the tabs out side by side across the bar, which spans the window
+	between the binding and the right edge, each with its own buttons where the skin has
 	them and its title in its middle.
 */
 void
@@ -619,12 +619,16 @@ NotebookDecorator::_LayoutTabs()
 	}
 
 	const ServerFont& font = fDrawState.Font();
-	const float left = fBorderRect.left;
-	const float width = fBorderRect.Width() + 1;
+	const float left = fFrame.left;
+	const float width = fFrame.Width() + 1;
 	const float bottom = fFrame.top - 1;
 	const float top = bottom - kTitleHeight + 1;
+	// the buttons, from the bar's ends
+	const float closeLeft = kCloseLeft - kLeftWidth;
+	const float minimizeRight = kMinimizeRight - kRightWidth;
+	const float zoomRight = kZoomRight - kRightWidth;
 	// the title is kept as far from both ends, so that it stays in the middle
-	const float reserved = kMinimizeRight + 4;
+	const float reserved = minimizeRight + 4;
 	const float minTitle = 32;
 
 	float minimum = 0;
@@ -637,18 +641,18 @@ NotebookDecorator::_LayoutTabs()
 		const float buttonTop = top + kButtonTop;
 		const float buttonBottom = buttonTop + kButtonSize - 1;
 		if ((tab->flags & B_NOT_CLOSABLE) == 0) {
-			tab->closeRect.Set(tabLeft + kCloseLeft, buttonTop,
-				tabLeft + kCloseLeft + kButtonSize - 1, buttonBottom);
+			tab->closeRect.Set(tabLeft + closeLeft, buttonTop,
+				tabLeft + closeLeft + kButtonSize - 1, buttonBottom);
 		} else
 			tab->closeRect.Set(0, 0, -1, -1);
 		if ((tab->flags & B_NOT_MINIMIZABLE) == 0) {
-			tab->minimizeRect.Set(tabRight + 1 - kMinimizeRight, buttonTop,
-				tabRight - kMinimizeRight + kButtonSize, buttonBottom);
+			tab->minimizeRect.Set(tabRight + 1 - minimizeRight, buttonTop,
+				tabRight - minimizeRight + kButtonSize, buttonBottom);
 		} else
 			tab->minimizeRect.Set(0, 0, -1, -1);
 		if ((tab->flags & B_NOT_ZOOMABLE) == 0) {
-			tab->zoomRect.Set(tabRight + 1 - kZoomRight, buttonTop,
-				tabRight - kZoomRight + kButtonSize, buttonBottom);
+			tab->zoomRect.Set(tabRight + 1 - zoomRight, buttonTop,
+				tabRight - zoomRight + kButtonSize, buttonBottom);
 		} else
 			tab->zoomRect.Set(0, 0, -1, -1);
 
@@ -674,9 +678,9 @@ NotebookDecorator::_LayoutTabs()
 }
 
 
-/*!	The frame's pieces: the binding between the bar and the bottom, the right
-	edge as far down, the pages' edge across the bottom, and for a window
-	without a bar the top of the bar's picture.
+/*!	The frame's pieces: the binding and the right edge from top to bottom, the
+	pages' edge between them along the bottom, and for a window without a bar
+	the top of the bar's picture.
 */
 void
 NotebookDecorator::_FramePieces(std::vector<Piece>& pieces, bool focus) const
