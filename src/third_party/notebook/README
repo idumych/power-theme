@@ -1,0 +1,14 @@
+The Notebook theme's window decorator and control look, from "Notebook", a skin
+for Stardock's WindowBlinds by Hideaki Kamada (1999), downloaded from
+WinCustomize (https://www.wincustomize.com/explore/windowblinds/72/, the file
+notebook.wba). Its notebook.uis names FrogBoy as the author: that is left over
+from the template it was made from.
+
+art/ holds the skin's files as they were in notebook.wba. The skin came with no
+licence beyond being a free download; its art is Hideaki Kamada's.
+
+tools/make-notebook-art.py turns the pictures into decorator/NotebookWindowArt.h
+and controllook/NotebookControlArt.h: the frame, the title bar's buttons, push
+buttons, check boxes and radio buttons, with the skin's magenta transparent.
+The decorator places them as notebook.uis lays them out. The add-ons' own code
+is under the MIT licence, like the rest of Power Theme.

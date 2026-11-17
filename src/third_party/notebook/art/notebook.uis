@@ -1,0 +1,147 @@
+; Windows 95 / 98 / NT4 Personality
+;
+; This is a .UIS Version 2 file
+;
+; For use ONLY with WindowBlinds or WindowFX by Stardock Systems, Inc
+; Documentation:
+; Alignemt: 0=left, 1=center 2=right
+;
+
+[TitlebarSkin]
+SkinName = notebook
+SkinAuthor = FrogBoy
+
+;How many buttons do we want to have?
+[Personality]
+buttonCount = 3
+
+;How do we want to align the titlebar text? 0=left, 1=center, 2=right.
+TextAlignment = 1
+
+;How many pixels do we want it to be shifted over from the above position?
+TextShift = 0
+
+;How much do we want to move it up in pixels?
+TextShiftVert = 2
+
+;I have no idea what this is.
+TextRightClip = 0
+
+
+;RGB value of the menubar when you click on an entry.
+MenuR = 232
+MenuG = 232
+MenuB = 232
+
+ActiveTextR = 0
+ActiveTextG = 0 
+ActiveTextB = 64
+
+InactiveTextR = 64 
+InactiveTextG = 64 
+InactiveTextB = 64 
+
+MenuTextR = 0  
+MenuTextG = 0 
+MenuTextB = 0 
+
+
+
+;not sure what this is.
+TripleImages = 1
+
+;The "skin" for the title bar
+menubar = notebook\menu.bmp
+
+; We also want the four images for the edges
+Top = notebook\top.bmp
+Left = notebook\left.bmp
+Right = notebook\right.bmp
+Bottom = notebook\bottom.bmp
+
+; Plus to support animation we want the time delay
+AniRate = 0
+
+; And per edge we want the number of frames stored
+
+; How many states do we want it to have (2 is for active/inactive)
+TopFrame = 2
+LeftFrame = 2
+RightFrame = 2
+BottomFrame = 2
+
+; And last of all we want the respective heights of the bits
+TopTopHeight = 20
+TopBotHeight = 40
+
+LeftTopHeight = 18
+LeftBotHeight = 25
+
+RightTopHeight = 8
+RightBotHeight = 10
+
+BottomTopHeight = 0
+BottomBotHeight = 0
+
+; Use stretching on this image?
+TopStretch = 0
+LeftStretch = 0
+RightStretch = 0
+BottomStretch = 0
+
+
+
+DialogBmp = notebook\dialog.bmp
+
+;align: 0=left, 1=right.
+[Button0]
+XCoord = 47
+YCoord = 7
+Align = 1
+Action = 2
+ButtonImage = notebook\min.bmp
+Command = 
+InSound = 
+OutSound = 
+
+[Button1]
+XCoord = 32
+YCoord = 7
+Align = 1
+Action = 1
+ButtonImage = notebook\max.bmp
+Command = 
+InSound = 
+OutSound = 
+
+[Button2]
+XCoord = 27
+YCoord = 7
+Align = 0
+Action = 0
+ButtonImage = notebook\close.bmp
+Command = 
+InSound = 
+OutSound =
+
+
+
+[Buttons]
+CheckButton = notebook\checkbox.bmp
+TopHeight = 1
+BottomHeight = 1
+LeftWidth = 1
+RightWidth = 1
+
+RadioButton = notebook\radio.bmp
+TopHeight = 1
+BottomHeight = 1
+LeftWidth = 1
+RightWidth = 1
+
+Bitmap = notebook\button.bmp
+TopHeight = 1
+BottomHeight = 1
+LeftWidth = 1
+RightWidth = 1
+

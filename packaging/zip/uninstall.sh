@@ -18,7 +18,7 @@ for app in "$apps/PowerTheme" "$apps/Themes"; do
 		break
 	fi
 done
-if setdecor -l 2>/dev/null | grep -q -E '^\*(Reactionary|FlatDecorator|Smoke|Tidy|TidySquare|Expose|Platinum|Leopard|Gershwix|NeXT|System7|Amiga|AmigaOS3|QNX)'; then
+if setdecor -l 2>/dev/null | grep -q -E '^\*(Reactionary|FlatDecorator|Smoke|Tidy|TidySquare|Expose|Platinum|Leopard|Gershwix|NeXT|System7|Amiga|AmigaOS3|QNX|Notebook)'; then
 	setdecor Default >/dev/null
 fi
 
@@ -37,6 +37,7 @@ rm -f "$addons/decorators/Reactionary" "$addons/control_look/Reactionary" \
 	"$addons/decorators/QNX" "$addons/control_look/QNX" \
 	"$addons/decorators/Amiga" "$addons/control_look/Amiga" \
 	"$addons/decorators/AmigaOS3" "$addons/control_look/AmigaOS3" \
+	"$addons/decorators/Notebook" "$addons/control_look/Notebook" \
 	"$data/fonts/ttfonts/HOTDOGTopaz.ttf" "$data/fonts/ttfonts/HOTDOGTopaz-Bold.ttf" \
 	"$apps/PowerTheme" "$apps/PowerShelf" "$bin/powertheme" \
 	"$settings/launch/powertheme-shelf" "$settings/launch/powertheme-after-update" \
@@ -60,7 +61,7 @@ rm -rf "$data/themes/Reactionary ME" "$data/themes/Haiku" "$data/themes/Gonx" \
 	"$data/themes/Gershwix Plum" "$data/themes/Gershwix Sunny" \
 	"$data/themes/Gershwix Silver" "$data/themes/NeXT" \
 	"$data/themes/System 7" "$data/themes/Amiga" "$data/icons/Workbench" \
-	"$data/themes/AmigaOS 3" "$data/themes/QNX" \
+	"$data/themes/AmigaOS 3" "$data/themes/QNX" "$data/themes/Notebook" \
 	"$data/PowerTheme" "$settings/PowerTheme" "$data/Themes" "$settings/Themes"
 
 echo "Power Theme is removed. Restart running applications to get your"

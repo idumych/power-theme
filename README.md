@@ -40,6 +40,8 @@ It comes with its own looks:
 - **AmigaOS 3**, the Amiga's Workbench 3.x, from public domain xfwm4 and GTK
   themes;
 - **QNX**, QNX 6's Photon microGUI;
+- **Notebook**, Hideaki Kamada's Notebook skin for WindowBlinds, from its own
+  pictures;
 - and the Haiku, Gonx and four Flat themes.
 
 The Reactionary ME look is an independent, unofficial port. It is not
@@ -190,11 +192,11 @@ theme.
 | ![Gershwix French Blue](docs/screenshots/gershwix.png) | ![NeXT](docs/screenshots/next.png) |
 | **Gershwix French Blue**: a striped grey title bar with square boxes, light bevelled buttons, a ridged scroll thumb and slider knob and a tube-shaded progress bar in French blue, and NineIcons Redux; six other colours share the rest | **NeXT**: NeXTSTEP's black title bar with bevelled grey boxes, square grey buttons, stippled scroll bars with dimpled thumbs, a black progress bar and a slate desktop, with its leather folders |
 | ![System 7](docs/screenshots/system7.png) | ![Amiga](docs/screenshots/amiga.png) |
+| **System 7**: Mac OS 7.5's striped title bar with a close box and a zoom box, black frames with a drop shadow, white rounded buttons, a lavender scroll thumb and the dotted grey desktop | **Amiga**: Workbench 1.3 after HOTDOG: white title bars with blue stripes and gadgets, blue windows, orange and blue buttons, the Topaz pixel font and Workbench's drawers |
 | ![AmigaOS 3](docs/screenshots/amigaos3.png) | ![QNX](docs/screenshots/qnx.png) |
 | **AmigaOS 3**: Workbench 3.x: blue title bars with the close, zoom and depth gadgets, bevelled grey buttons and fields, a dotted scroll bar track, Topaz and Workbench's drawers | **QNX**: QNX 6's Photon: shaded blue title bars with a window menu box and minimize, maximize and close boxes on a grey panel, grey ridged frames, shaded grey buttons, slanted tabs and a lavender silk desktop |
-| **System 7**: Mac OS 7.5's striped title bar with a close box and a zoom box, black frames with a drop shadow, white rounded buttons, a lavender scroll thumb and the dotted grey desktop | **Amiga**: Workbench 1.3 after HOTDOG: white title bars with blue stripes and gadgets, blue windows, orange and blue buttons, the Topaz pixel font and Workbench's drawers |
-| ![The Power Theme window](docs/screenshots/themes-window.png) | |
-| **Power Theme** under Renku: the theme list with a preview, the icon theme, and the parts to apply | |
+| ![Notebook](docs/screenshots/notebook.png) | ![The Power Theme window](docs/screenshots/themes-window.png) |
+| **Notebook**: Hideaki Kamada's WindowBlinds skin: sheets of ruled paper with a spiral binding whose holes show the desktop, the pages' edge along the bottom, scribbles on an inactive title bar, pencilled buttons, red ticks and blue dots | **Power Theme** under Renku: the theme list with a preview, the icon theme, and the parts to apply |
 
 ![Build add-ons](docs/screenshots/build-add-ons.png)
 
@@ -540,6 +542,22 @@ Rebuild the package when Hokku's decorator classes change; until then,
   is a lavender silk with a fine diagonal grain after Photon's, drawn by
   `tools/make-qnx-wallpaper.py` (without its logos). In place of the Deskbar it
   starts the Photon shell (below).
+- **Notebook** (`add-ons/decorators/Notebook`, `add-ons/control_look/Notebook`
+  and `data/themes/Notebook`): Hideaki Kamada's
+  [Notebook skin](https://www.wincustomize.com/explore/windowblinds/72/) for
+  WindowBlinds (1999), drawn from its own pictures, which are kept in
+  `src/third_party/notebook/art`, and laid out as its notebook.uis says. A window
+  is a sheet of ruled paper: a title bar with the close box at its left, minimize
+  and zoom at its right and the title in navy in the middle, a spiral binding down
+  the left whose punched holes show what's behind, a rounded right edge, and the
+  pages' edge along the bottom, which with the right edge resizes the window. An
+  inactive window's title bar is scribbled on, as in the skin. Windows such as the
+  Deskbar's, with a border but no title, get a pencil line. The controls are the
+  skin's: buttons outlined in pencil, blue while pressed and darker when default,
+  check boxes ticked in red, radio buttons with a blue dot, and a navy rule under
+  the menu bar; the rest is the default look in white and navy, on a slate blue
+  desktop. `tools/make-notebook-art.py` turns the pictures into the add-ons'
+  headers.
 - **The Photon shell** (`apps/PowerShelf`): a desktop shell laid out as
   Photon's, in place of the Deskbar. The QNX theme turns it on
   (`shell = photon`), and other themes and **Revert** bring the Deskbar back;
@@ -866,6 +884,10 @@ should run on (Haiku R1/beta6), against that system's own headers.
   [toastytech.com](http://toastytech.com/guis/qnx621.html) and QNX 6.2.1 itself;
   nothing of QNX's is included. QNX Software Systems (now BlackBerry) isn't
   affiliated with this project.
+- Notebook's window borders and controls are Hideaki Kamada's Notebook skin for
+  WindowBlinds (1999, from WinCustomize), in `src/third_party/notebook/art`. It
+  came as a free download with no licence; the art is its author's. Stardock and
+  the skin's author aren't affiliated with this project.
 - [nanosvg](https://github.com/memononen/nanosvg) by Mikko Mononen (zlib
   licence), in `src/themes/third_party`.
 - Gonx's window decorator and control look (`src/third_party/gonx`), MIT
@@ -874,7 +896,7 @@ should run on (Haiku R1/beta6), against that system's own headers.
   [Gonx](https://github.com/idumych/gonx).
 
 Power Theme's own code is under the MIT licence (see `LICENSE`), Leopard's,
-Gershwix's, NeXT's and System 7's add-ons included, apart from Expose's and Platinum's add-ons, which are under the
+Gershwix's, NeXT's, System 7's and Notebook's add-ons' code included, apart from Expose's and Platinum's add-ons, which are under the
 GNU GPL (`src/third_party/expose/LICENSE`, `src/third_party/platinum/LICENSE`), as
 are the elementary icons (`data/icons/elementary/COPYING`) and Amiga's add-ons,
 Workbench icons and Topaz fonts (`src/third_party/amiga/LICENSE`).

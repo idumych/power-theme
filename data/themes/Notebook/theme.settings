@@ -1,0 +1,45 @@
+# "Notebook", from Hideaki Kamada's Notebook skin for WindowBlinds (1999): its
+# window borders, buttons, check boxes and radio buttons are drawn from the
+# skin's own pictures; the colours follow them.
+
+name = Notebook
+description = Hideaki Kamada's Notebook skin for WindowBlinds: windows as sheets of ruled paper with a spiral binding, pencilled buttons, red ticks and blue dots, and a navy rule under the menu bar.
+decorator = Notebook
+control look = Notebook
+wallpaper = none
+desktop color = #5A7896
+deskbar = top, expanded
+
+color B_DESKTOP_COLOR = #5A7896
+color B_PANEL_BACKGROUND_COLOR = #FFFFFF
+color B_PANEL_TEXT_COLOR = #000000
+color B_DOCUMENT_BACKGROUND_COLOR = #FFFFFF
+color B_DOCUMENT_TEXT_COLOR = #000000
+color B_CONTROL_BACKGROUND_COLOR = #FFFFFF
+color B_CONTROL_TEXT_COLOR = #000000
+color B_CONTROL_BORDER_COLOR = #737373
+color B_CONTROL_HIGHLIGHT_COLOR = #9C9CCE
+color B_CONTROL_MARK_COLOR = #0018C0
+color B_KEYBOARD_NAVIGATION_COLOR = #6464FF
+color B_NAVIGATION_PULSE_COLOR = #9191FF
+color B_SHINE_COLOR = #FFFFFF
+color B_SHADOW_COLOR = #000000
+color B_MENU_BACKGROUND_COLOR = #FFFFFF
+color B_MENU_SELECTED_BACKGROUND_COLOR = #E8E8E8
+color B_MENU_ITEM_TEXT_COLOR = #000000
+color B_MENU_SELECTED_ITEM_TEXT_COLOR = #000040
+color B_MENU_SELECTED_BORDER_COLOR = #9C9CCE
+color B_LIST_BACKGROUND_COLOR = #FFFFFF
+color B_LIST_ITEM_TEXT_COLOR = #000000
+color B_LIST_SELECTED_BACKGROUND_COLOR = #D6D6F0
+color B_LIST_SELECTED_ITEM_TEXT_COLOR = #000040
+color B_SCROLL_BAR_THUMB_COLOR = #EFEFEF
+color B_STATUS_BAR_COLOR = #9C9CCE
+color B_TOOLTIP_BACKGROUND_COLOR = #FFFFFF
+color B_TOOLTIP_TEXT_COLOR = #000040
+color B_WINDOW_TAB_COLOR = #FFFFFF
+color B_WINDOW_TEXT_COLOR = #000040
+color B_WINDOW_INACTIVE_TAB_COLOR = #FFFFFF
+color B_WINDOW_INACTIVE_TEXT_COLOR = #404040
+color B_WINDOW_BORDER_COLOR = #737373
+color B_WINDOW_INACTIVE_BORDER_COLOR = #8C8C8C

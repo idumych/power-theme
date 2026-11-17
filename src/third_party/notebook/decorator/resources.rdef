@@ -1,0 +1,10 @@
+resource("be:decor:info") message('deco') {
+	"name"				= "Notebook",
+	"authors"			= "idumych, art by Hideaki Kamada",
+	"short_descr"		= "A sheet of ruled notebook paper",
+	"long_descr"		= "Hideaki Kamada's Notebook skin for WindowBlinds: a ruled title bar, a spiral binding with punched holes, a rounded right edge and the pages' edge along the bottom",
+	"lic_url"			= "",
+	"lic_name"			= "MIT (code); the art is Hideaki Kamada's",
+	"support_url"		= "https://github.com/idumych/power-theme",
+	float "version"		= 0.1
+};

@@ -101,6 +101,9 @@ AMIGA := src/third_party/amiga
 AMIGAOS3_DECOR := $(BUILD)/AmigaOS3
 AMIGAOS3_LOOK := $(BUILD)/control_look/AmigaOS3
 AMIGAOS3 := src/third_party/amigaos3
+NOTEBOOK_DECOR := $(BUILD)/Notebook
+NOTEBOOK_LOOK := $(BUILD)/control_look/Notebook
+NOTEBOOK := src/third_party/notebook
 
 # What Power Theme needs to build the add-ons (decorators, control looks) on a
 # user's system, laid
@@ -114,6 +117,7 @@ all: $(DECOR) $(LOOK) $(THEMES) $(SHELF) $(FLAT_DECOR) $(FLAT_LOOK) $(SMOKE_DECO
 	$(LEOPARD_DECOR) $(LEOPARD_LOOK) $(GERSHWIX_DECOR) $(GERSHWIX_LOOK) \
 	$(NEXT_DECOR) $(NEXT_LOOK) $(SYSTEM7_DECOR) $(SYSTEM7_LOOK) $(QNX_DECOR) $(QNX_LOOK) \
 	$(AMIGA_DECOR) $(AMIGA_LOOK) $(AMIGAOS3_DECOR) $(AMIGAOS3_LOOK) \
+	$(NOTEBOOK_DECOR) $(NOTEBOOK_LOOK) \
 	decorator-source
 
 decorator-source:
@@ -131,6 +135,7 @@ decorator-source:
 		$(DECOR_SOURCE)/source/decorators/QNX \
 		$(DECOR_SOURCE)/source/decorators/Amiga \
 		$(DECOR_SOURCE)/source/decorators/AmigaOS3 \
+		$(DECOR_SOURCE)/source/decorators/Notebook \
 		$(DECOR_SOURCE)/source/decorators/Gonx \
 		$(DECOR_SOURCE)/source/decorators/FlatDecorator \
 		$(DECOR_SOURCE)/source/control_looks/Reactionary \
@@ -146,6 +151,7 @@ decorator-source:
 		$(DECOR_SOURCE)/source/control_looks/QNX \
 		$(DECOR_SOURCE)/source/control_looks/Amiga \
 		$(DECOR_SOURCE)/source/control_looks/AmigaOS3 \
+		$(DECOR_SOURCE)/source/control_looks/Notebook \
 		$(DECOR_SOURCE)/source/control_looks/Gonx \
 		$(DECOR_SOURCE)/source/control_looks/FlatControlLook
 	cp src/themes/build-decorators.sh $(DECOR_SOURCE)/
@@ -201,6 +207,10 @@ decorator-source:
 		$(DECOR_SOURCE)/source/decorators/AmigaOS3/
 	cp $(AMIGAOS3)/controllook/* $(AMIGAOS3)/LICENSE $(AMIGAOS3)/README \
 		$(DECOR_SOURCE)/source/control_looks/AmigaOS3/
+	cp $(NOTEBOOK)/decorator/* $(NOTEBOOK)/README \
+		$(DECOR_SOURCE)/source/decorators/Notebook/
+	cp $(NOTEBOOK)/controllook/* $(NOTEBOOK)/README \
+		$(DECOR_SOURCE)/source/control_looks/Notebook/
 	cp $(GONX)/controllook/* $(GONX)/LICENSE \
 		$(DECOR_SOURCE)/source/control_looks/Gonx/
 	cp $(FLAT)/controllook/* $(DECOR_SOURCE)/source/control_looks/FlatControlLook/
@@ -510,6 +520,30 @@ $(AMIGAOS3_LOOK): $(BUILD)/AmigaOS3ControlLook.o $(BUILD)/AmigaOS3ControlLook.rs
 	$(CXX) $(SYSROOT_FLAGS) -shared -s -o $@ $(BUILD)/AmigaOS3ControlLook.o \
 		-lbe -lstdc++
 	$(XRES) -o $@ $(BUILD)/AmigaOS3ControlLook.rsrc
+
+# Notebook, from Hideaki Kamada's Notebook skin for WindowBlinds.
+$(BUILD)/NotebookDecorator.o: $(NOTEBOOK)/decorator/NotebookDecorator.cpp $(NOTEBOOK)/decorator/NotebookDecorator.h $(NOTEBOOK)/decorator/NotebookWindowArt.h
+	@mkdir -p $(BUILD)
+	$(CXX) $(CXXFLAGS) $(DECOR_INCLUDES) -c $< -o $@
+
+$(BUILD)/NotebookDecorator.rsrc: $(NOTEBOOK)/decorator/resources.rdef
+
+$(NOTEBOOK_DECOR): $(BUILD)/NotebookDecorator.o $(BUILD)/NotebookDecorator.rsrc
+	$(CXX) $(SYSROOT_FLAGS) -shared -s -o $@ $(BUILD)/NotebookDecorator.o \
+		-lbe $(APP_SERVER) -lstdc++
+	$(XRES) -o $@ $(BUILD)/NotebookDecorator.rsrc
+
+$(BUILD)/NotebookControlLook.o: $(NOTEBOOK)/controllook/NotebookControlLook.cpp $(NOTEBOOK)/controllook/NotebookControlLook.h $(NOTEBOOK)/controllook/NotebookControlArt.h
+	@mkdir -p $(BUILD)
+	$(CXX) $(CXXFLAGS) -std=gnu++17 -I$(PRIVATE)/interface -c $< -o $@
+
+$(BUILD)/NotebookControlLook.rsrc: $(NOTEBOOK)/controllook/NotebookControlLook.rdef
+
+$(NOTEBOOK_LOOK): $(BUILD)/NotebookControlLook.o $(BUILD)/NotebookControlLook.rsrc
+	@mkdir -p $(dir $@)
+	$(CXX) $(SYSROOT_FLAGS) -shared -s -o $@ $(BUILD)/NotebookControlLook.o \
+		-lbe -lstdc++
+	$(XRES) -o $@ $(BUILD)/NotebookControlLook.rsrc
 
 # Haiku's Flat decorator and control look, for the Flat themes (Renku's
 # repositories don't have the haiku_extras package they come in).
