@@ -1589,6 +1589,12 @@ restart_deskbar()
 		snooze(100000);
 	if (!be_roster->IsRunning(kDeskbarSignature))
 		be_roster->Launch(kDeskbarSignature);
+#else
+	// Hokku: the session started the Deskbar once, and nothing starts it
+	// again
+	if (!be_roster->IsRunning(kDeskbarSignature)
+		&& be_roster->Launch(kDeskbarSignature) != B_OK)
+		system("Deskbar >/dev/null 2>&1 &");
 #endif
 }
 

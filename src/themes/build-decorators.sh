@@ -137,6 +137,8 @@ if $hokku; then
 		|| fail "Hokku isn't installed (no finddir)"
 	libDir=$(dirname "$addonsDir")
 	prefix=$(dirname "$libDir")
+	# Debian's multiarch library folder, /usr/lib/x86_64-linux-gnu
+	case $libDir in */lib/*-linux-gnu*) prefix=$(dirname "$prefix") ;; esac
 	include=$prefix/include
 	missing=""
 	command -v g++ >/dev/null 2>&1 || missing="$missing g++"
@@ -164,7 +166,10 @@ if $hokku; then
 	done
 	common="-O2 -Wall -Wno-multichar -fPIC -std=gnu++17 -DAPP_COSMOE"
 	flags="$common -I$include/private/app_server -I$include $kits"
-	lookFlags="$common -Wno-unused-variable -I$include $kits"
+	# the base every control look shares (ForwardingControlLook.h)
+	lookKit=$source/controllook-kit
+	[ -d "$lookKit" ] || lookKit=$source/src/controllook-kit
+	lookFlags="$common -Wno-unused-variable -I$include $kits -I$lookKit"
 	decorLink="-Wl,--no-undefined -L$libDir -ldecorator -lbe"
 	lookLink="-Wl,--no-undefined -L$libDir -lbe"
 	rc=$prefix/bin/rc
