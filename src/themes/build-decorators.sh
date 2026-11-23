@@ -135,6 +135,11 @@ if $hokku; then
 	say 6 "Finding Hokku"
 	addonsDir=$(finddir B_SYSTEM_ADDONS_DIRECTORY 2>/dev/null) \
 		|| fail "Hokku isn't installed (no finddir)"
+	# On a merged /usr, Hokku may find itself through /lib (Ubuntu 22.04):
+	# the same folder as /usr/lib, where its headers' /usr is
+	case $addonsDir in
+	/lib/* | /lib64/*) [ -d "/usr$addonsDir" ] && addonsDir=/usr$addonsDir ;;
+	esac
 	libDir=$(dirname "$addonsDir")
 	prefix=$(dirname "$libDir")
 	# Debian's multiarch library folder, /usr/lib/x86_64-linux-gnu
