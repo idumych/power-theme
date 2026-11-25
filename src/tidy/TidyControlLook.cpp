@@ -187,6 +187,28 @@ _StrokeFarEdge(BView* view, const BRect& rect, orientation orientation)
 }
 
 
+/*!	The groove of a scroll bar with nothing to scroll: the same channel as an
+	active one's, only fainter, so the bar still reads as a scroll bar instead of
+	a blank strip beside the list. Straight, as the track can come in several
+	parts (the background on either side of a thumb that fills it).
+*/
+static void
+_DrawIdleGroove(BView* view, const BRect& rect, orientation orientation)
+{
+	BRect groove(_ThumbRect(rect, orientation));
+	if (orientation == B_VERTICAL)
+		groove.right++;
+	else
+		groove.bottom++;
+	const rgb_color background = _ScrollBarColor(orientation);
+	view->SetHighColor(_GrooveColor(background, 0.035f));
+	view->FillRect(groove);
+	view->SetHighColor(_GrooveColor(background, 0.02f));
+	view->FillRect(orientation == B_VERTICAL
+		? groove.InsetByCopy(1, 0) : groove.InsetByCopy(0, 1));
+}
+
+
 static void
 _FillHeader(BView* view, BRect rect, float bottom)
 {
@@ -706,17 +728,20 @@ TidyControlLook::DrawScrollBarButton(BView* view, BRect rect,
 
 	_StrokeFarEdge(view, rect, orientation);
 
-	// no bezel, and nothing at all when there's nothing to scroll
-	if ((flags & B_DISABLED) == 0) {
+	// no bezel; when there's nothing to scroll, a faint arrow, so the bar
+	// still reads as one
+	const bool dark = is_dark(background);
+	rgb_color fill, line;
+	if ((flags & B_DISABLED) != 0) {
+		fill = contrast(background, dark ? 0.1f : 0.03f);
+		line = dark ? fill : contrast(background, 0.13f);
+	} else {
 		// on dark, a solid shape rather than an outlined one
-		const bool dark = is_dark(background);
-		const rgb_color fill = dark
-			? contrast(background, down ? 0.4f : 0.22f)
+		fill = dark ? contrast(background, down ? 0.4f : 0.22f)
 			: contrast(background, down ? 0.2f : 0.07f);
-		const rgb_color line = dark ? fill
-			: contrast(background, down ? 0.5f : 0.3f);
-		_DrawArrow(view, rect, direction, line, fill);
+		line = dark ? fill : contrast(background, down ? 0.5f : 0.3f);
 	}
+	_DrawArrow(view, rect, direction, line, fill);
 
 	view->PopState();
 }
@@ -790,6 +815,8 @@ TidyControlLook::DrawScrollBarBackground(BView* view, BRect& rect,
 	view->SetDrawingMode(B_OP_COPY);
 	view->SetHighColor(_ScrollBarColor(orientation));
 	view->FillRect(rect);
+	if ((flags & B_DISABLED) != 0)
+		_DrawIdleGroove(view, rect, orientation);
 	_StrokeFarEdge(view, rect, orientation);
 	view->PopState();
 }
@@ -810,6 +837,8 @@ TidyControlLook::DrawScrollBarThumb(BView* view, BRect& rect,
 	view->SetHighColor(background);
 	view->FillRect(rect);
 
+	if ((flags & B_DISABLED) != 0)
+		_DrawIdleGroove(view, rect, orientation);
 	_StrokeFarEdge(view, rect, orientation);
 
 	if ((flags & B_DISABLED) == 0) {
