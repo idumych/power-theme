@@ -1,0 +1,53 @@
+# "Expose Air Dark", after Expose Air Dark by Mark Whittaker: its KDE window
+# decoration (store.kde.org/p/2357318), Kvantum theme (store.kde.org/p/2357405),
+# colour scheme (store.kde.org/p/2357430) and wallpaper (store.kde.org/p/2357317),
+# GNU GPL. The window borders are glass on a composited desktop.
+
+name = Expose Air Dark
+mode = dark
+description = A smoked glass frame that shows what is behind the window, blurred, with dark glass controls and slate selections, after Expose Air Dark for KDE.
+decorator = ExposeAirDark
+control look = Expose
+wallpaper = wallpaper.jpg
+wallpaper mode = scaled
+desktop color = #232323
+font plain = Noto Sans, Regular, 12
+font bold = Noto Sans, Bold, 12
+font fixed = Noto Sans Mono, Regular, 12
+font menu = Noto Sans, Regular, 12
+# Coloured subpixel edges would show on glass, over whatever is behind it.
+font smoothing = grey
+icons = haiku
+
+color B_DESKTOP_COLOR = #232323
+color B_PANEL_BACKGROUND_COLOR = #2D2E2C
+color B_PANEL_TEXT_COLOR = #D0D1CE
+color B_DOCUMENT_BACKGROUND_COLOR = #1E1F1C
+color B_DOCUMENT_TEXT_COLOR = #D0D1CE
+color B_CONTROL_BACKGROUND_COLOR = #3A3B39
+color B_CONTROL_TEXT_COLOR = #EFF0EC
+color B_CONTROL_BORDER_COLOR = #1B1B1B
+color B_CONTROL_HIGHLIGHT_COLOR = #646B76
+color B_CONTROL_MARK_COLOR = #98A0A8
+color B_KEYBOARD_NAVIGATION_COLOR = #98A0A8
+color B_NAVIGATION_PULSE_COLOR = #98A0A8
+color B_SHINE_COLOR = #5D5E5D
+color B_SHADOW_COLOR = #000000
+color B_MENU_BACKGROUND_COLOR = #2D2E2C
+color B_MENU_SELECTED_BACKGROUND_COLOR = #6E7682
+color B_MENU_ITEM_TEXT_COLOR = #D0D1CE
+color B_MENU_SELECTED_ITEM_TEXT_COLOR = #EFF0EC
+color B_MENU_SELECTED_BORDER_COLOR = #50514F
+color B_LIST_BACKGROUND_COLOR = #1E1F1C
+color B_LIST_ITEM_TEXT_COLOR = #D0D1CE
+color B_LIST_SELECTED_BACKGROUND_COLOR = #6E7682
+color B_LIST_SELECTED_ITEM_TEXT_COLOR = #EFF0EC
+color B_SCROLL_BAR_THUMB_COLOR = #535353
+color B_STATUS_BAR_COLOR = #6E7682
+color B_TOOLTIP_BACKGROUND_COLOR = #F1F5FB
+color B_TOOLTIP_TEXT_COLOR = #000000
+color B_WINDOW_TAB_COLOR = #202120
+color B_WINDOW_TEXT_COLOR = #D0D1CE
+color B_WINDOW_INACTIVE_TAB_COLOR = #1D1F1C
+color B_WINDOW_INACTIVE_TEXT_COLOR = #BBBCB9
+color B_WINDOW_BORDER_COLOR = #050605

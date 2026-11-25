@@ -1,5 +1,5 @@
-Expose, after two themes by Mark Whittaker (phob1an), GNU General Public
-License (LICENSE):
+Expose and Expose Air Dark, after themes by Mark Whittaker (phob1an), GNU
+General Public License (LICENSE):
 
   Expose Dark, a KDE Plasma window decoration, version 1.1
   https://store.kde.org/p/2347990
@@ -10,10 +10,15 @@ License (LICENSE):
   Expose Air Dark, a Kvantum theme, version 2605a
   https://store.kde.org/p/2357405
 
+  Expose Air Dark, a KDE Plasma window decoration (Aurorae), version 2.1
+  https://store.kde.org/p/2357318
+
 art/ holds their artwork and settings as they were published. The window
 decorator and control look here are written for Renku and Haiku, with colours
 and sizes measured from that artwork, and the buttons and check marks taken from
-it by tools/make-expose-art.py.
+it by tools/make-expose-art.py. The Expose Air Dark window borders (style/) are
+a decorator style, drawn with the decoration's own pictures, which
+tools/make-expose-air-art.py cuts from art/air.
 
 These add-ons are under the GNU GPL, version 3 or later, unlike the rest of Power
 Theme, which is under the MIT licence. Power Theme doesn't link them: app_server
@@ -24,7 +29,9 @@ from Expose Air Dark instead.
 
 Not ported: the decoration's soft shadow, which a decorator can't blend with
 what's behind a window, and the rounded corners' anti-aliasing, for the same
-reason; the window buttons' hover state, which decorators don't get; the Kvantum
+reason; the window buttons' hover state, which decorators don't get (Expose Air
+Dark's buttons light up where app_server says which one the mouse is over, as
+version 5 of the decorator style interface does); the Kvantum
 themes' tabs anywhere but along the top, which are Haiku's; and Expose Dark's wider
 scroll bars, because Haiku's windows lay themselves out around its usual width.
 

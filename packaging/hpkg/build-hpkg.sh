@@ -17,7 +17,7 @@ set -eu
 
 build=${1:?usage: build-hpkg.sh <build-dir> <icons-dir> [<version>]}
 icons=${2:?usage: build-hpkg.sh <build-dir> <icons-dir> [<version>]}
-version=${3:-1.3.2}
+version=${3:-1.3.3}
 here=$(cd "$(dirname "$0")" && pwd)
 root=$(cd "$here/../.." && pwd)
 
@@ -78,7 +78,7 @@ description		"Power Theme switches the desktop between themes, and back: window 
 borders, controls, colours, fonts, wallpaper, the Deskbar's place and \
 freedesktop icon themes. It reads Theme Manager themes too. It comes with \
 the Reactionary ME (Windows ME), Smoke (in the style of ZETA), Renku, \
-Gonx, Haiku, Dano, Tidy, Expose, Platinum (in the style of Mac OS 9), Leopard \
+Gonx, Haiku, Dano, Tidy, Expose, Expose Air Dark, Platinum (in the style of Mac OS 9), Leopard \
 (in the style of Mac OS X 10.5), Gershwix (after Mintar's Platinum theme for \
 Mac OS X, in seven colours), NeXT (after Swizcore Studio's NeXTSTEP theme \
 for Mac OS X), System 7 (in the style of Mac OS 7.5), Amiga (Workbench 1.3, after \

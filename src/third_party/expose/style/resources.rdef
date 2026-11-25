@@ -1,0 +1,10 @@
+resource("be:decor:info") message('deco') {
+	"name"				= "Expose Air Dark",
+	"authors"			= "Ian Dumych, after Mark Whittaker's Expose Air Dark",
+	"short_descr"		= "After Expose Air Dark, a KDE window decoration",
+	"long_descr"		= "A smoked glass frame with the window's title on the left and boxed buttons on the right; what is behind the window shows through it, blurred, on a composited desktop",
+	"lic_url"			= "https://www.gnu.org/licenses/gpl-3.0.html",
+	"lic_name"			= "GPL-3.0-or-later",
+	"support_url"		= "https://github.com/idumych/power-theme",
+	float "version"		= 0.1
+};

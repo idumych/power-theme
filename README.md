@@ -26,7 +26,8 @@ It comes with its own looks:
   and **Tidy Square Dark**, with square corners for a compositor to round, and
   **Tidy Renku** and **Tidy Renku Light**, in Renku OS's colours, also square as
   **Tidy Renku Square** and **Tidy Renku Square Light**;
-- **Expose** and **Expose Dark**, after Mark Whittaker's KDE themes;
+- **Expose** and **Expose Dark**, after Mark Whittaker's KDE themes, and
+  **Expose Air Dark**, a smoked glass frame for Renku OS;
 - **Platinum**, in the style of Mac OS 9, after Niels's KDE theme;
 - **Leopard** and **Leopard Graphite**, in the style of Mac OS X 10.5, with
   elementary's icons;
@@ -138,7 +139,7 @@ scratch after screenshots of Leopard; nothing of Apple's is included.
 Window borders that can draw one can have a BeOS-style tab instead of a title bar
 across the window, whatever the theme. It's as wide as the title, with close on the
 left and zoom on the right, and shift-dragging it slides it along the window. That's
-Reactionary's, Expose's, Platinum's, Leopard's, Gershwix's, NeXT's, System 7's, Amiga's, AmigaOS 3's and QNX's borders; turn it on with **BeOS-style tabs** in the window, or
+Reactionary's, Expose's, Expose Air Dark's, Platinum's, Leopard's, Gershwix's, NeXT's, System 7's, Amiga's, AmigaOS 3's and QNX's borders; turn it on with **BeOS-style tabs** in the window, or
 `powertheme --beos-tabs=on`. Run **Build add-ons…** after updating to get it.
 
 ## What needs Renku OS changes
@@ -393,6 +394,14 @@ Rebuild the package when Hokku's decorator classes change; until then,
   rounded corners aren't anti-aliased. Expose Dark's Kvantum theme has no dark
   palette, hence Expose Air Dark's controls in the dark theme. Its add-ons are under
   the GNU GPL, unlike the rest of Power Theme.
+- **Expose Air Dark** (`add-ons/decorators/ExposeAirDark`, `data/themes/Expose Air Dark`),
+  Renku OS only: after [Expose Air Dark](https://store.kde.org/p/2357318), Mark
+  Whittaker's KDE window decoration, drawn with its own pictures, with Expose Dark's
+  controls in Expose Air Dark's colours. On a composited desktop whose app_server has
+  glass frames, its smoked glass frame shows what is behind the window, blurred; elsewhere
+  the same frame is laid over dark grey. Where app_server says which window button the
+  mouse is over, it lights up as on KDE, the close button red. It is a decorator style
+  only, built once for Renku OS, so on Haiku the theme shows as not installed.
 - **Platinum** (`add-ons/decorators/Platinum`, `add-ons/control_look/Platinum`,
   `data/themes/Platinum`): Mac OS 9's look, after
   [Platinum Retro OS9](https://store.kde.org/p/2361987) by Niels, with the
@@ -682,7 +691,7 @@ Rebuild the package when Hokku's decorator classes change; until then,
   --beos-tabs=on`, gives window borders that can draw one a tab as wide as the
   title on top of the frame, with close on the left and zoom on the right, instead
   of a title bar across the window, and shift-dragging a tab slides it. It's for any theme using those borders, and so
-  far that's Reactionary's, Expose's, Platinum's, Leopard's, Gershwix's, NeXT's, System 7's, Amiga's, AmigaOS 3's and QNX's. It stays on through a change of mode.
+  far that's Reactionary's, Expose's, Expose Air Dark's, Platinum's, Leopard's, Gershwix's, NeXT's, System 7's, Amiga's, AmigaOS 3's and QNX's. It stays on through a change of mode.
 - **Theme Manager themes**: themes made for
   [Theme Manager](https://github.com/HaikuArchives/HaikuThemeManager)
   (and BeOS and ZETA before it), such as the
@@ -821,7 +830,9 @@ should run on (Haiku R1/beta6), against that system's own headers.
   version 3 or later, follow [Expose Dark](https://store.kde.org/p/2347990), its
   [Kvantum theme](https://store.kde.org/p/2348069) and
   [Expose Air Dark](https://store.kde.org/p/2357405) by Mark Whittaker (GPL), whose
-  artwork is included and whose buttons and check marks they use. Mark Whittaker
+  artwork is included and whose buttons and check marks they use. Expose Air Dark's
+  window borders (`src/third_party/expose/style`) use the pictures of his
+  [Expose Air Dark window decoration](https://store.kde.org/p/2357318). Mark Whittaker
   isn't affiliated with this project.
 - Platinum's window decorator and control look (`src/third_party/platinum`), GNU
   GPL version 3 or later, follow

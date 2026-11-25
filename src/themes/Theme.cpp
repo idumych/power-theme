@@ -2268,7 +2268,7 @@ draws_beos_tabs(const BString& decorator)
 	BPath path(decorator.String());
 	static const char* const kNames[] = { "Reactionary", "Expose", "Platinum",
 		"Leopard", "Gershwix", "NeXT",
-		"System7", "Amiga", "AmigaOS3", "QNX" };
+		"System7", "Amiga", "AmigaOS3", "QNX", "ExposeAirDark" };
 	for (size_t i = 0; i < sizeof(kNames) / sizeof(kNames[0]); i++) {
 		if (path.Leaf() != NULL && strcmp(path.Leaf(), kNames[i]) == 0)
 			return true;
